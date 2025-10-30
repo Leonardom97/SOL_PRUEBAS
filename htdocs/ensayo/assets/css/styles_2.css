@@ -1,0 +1,53 @@
+/* Tabla */
+.table th, .table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table thead th {
+  font-weight: 600;
+}
+
+.table-light th {
+  background-color: #98badd !important; 
+  color: #000 !important;
+}
+
+.bootstrap-table .page-list {
+  display: none !important;
+}
+ 
+/* Estilo select */
+#toolbar .form-select {
+  min-width: 180px;
+}
+
+/* Botón Limpiar Filtros */
+#clearFilters {
+  height: 32px;
+  padding: 0 12px;
+}
+
+#clearFilters:disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Fuente y fondo general */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #faf8f8;
+}
+
+/* Título */
+h2 {
+  font-weight: 600;
+  color: #000000;
+}
+
+/* Footer */
+footer {
+  border-top: 1px solid #dee2e6;
+  font-size: 0.9rem;
+  color: #000000;
+}

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="es-419">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+  <title>Edición Formularios — Capacitaciones</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="assets/fonts/fontawesome-all.min.css" />
+  <link rel="stylesheet" href="assets/css/bs-theme-overrides.css" />
+</head>
+
+<body id="page-top" data-role="Administrador">
+  <script src="assets/js/auth_guard.js"></script>
+
+  <div id="wrapper">
+    <div id="sidebar"></div> 
+    <div class="d-flex flex-column" id="content-wrapper">
+      <div id="content">
+        <div id="navbar"></div> 
+
+        <div class="container-fluid">
+          <h3 class="text-dark mb-4">Edición Formularios - Capacitaciones</h3>
+
+          <!-- Pestañas -->
+          <ul class="nav nav-tabs mb-3" id="sessionTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button"
+                role="tab" aria-controls="active" aria-selected="true">
+                <i class="fa-solid fa-layer-group me-1"></i> Tema
+              </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="attempts-tab" data-bs-toggle="tab" data-bs-target="#attempts" type="button"
+                role="tab" aria-controls="attempts" aria-selected="false">
+                <i class="fa-solid fa-sitemap me-1"></i> Proceso
+              </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button"
+                role="tab" aria-controls="history" aria-selected="false">
+                <i class="fa-solid fa-map-marker-alt me-1"></i> Lugar
+              </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="t_actividad-tab" data-bs-toggle="tab" data-bs-target="#t_actividad" type="button"
+                role="tab" aria-controls="t_actividad" aria-selected="false">
+                <i class="fa-solid fa-briefcase me-1"></i> Tipo Actividad
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="sessionTabContent">
+            <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="active-tab">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 fw-bold text-primary">Temas nuevos</h6>
+                </div>
+
+                <div class="card-body">
+                  <div class="mb-3 row g-2 align-items-end">
+                    <div class="col">
+                      <label class="form-label small text-muted mb-1">Nuevo tema</label>
+                      <input id="newTemaInput" class="form-control" type="text" placeholder="Escriba nuevo tema" />
+                    </div>
+                    <div class="col-auto">
+                      <button id="refreshActiveBtn" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Agregar tema
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="card mt-2" style="border-radius:6px;">
+                    <div class="card-header py-2" style="background: transparent; border-bottom: none;">
+                      <p class="text-primary m-0 fw-bold text-center">Lista Temas (<span id="temasCount">0</span>)</p>
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="table-responsive" style="max-height:320px; overflow:auto;">
+                        <table class="table table-hover mb-0" id="temasTable">
+                          <thead>
+                            <tr style="background: var(--bs-primary-bg-subtle);">
+                              <th style="width:80px">Id</th>
+                              <th>Nombre</th>
+                              <th style="width:120px">Opciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                              <!-- Filas dinámicas -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PROCESO -->
+            <div class="tab-pane fade" id="attempts" role="tabpanel" aria-labelledby="attempts-tab">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 fw-bold text-primary">Proceso</h6>
+                </div>
+
+                <div class="card-body">
+                  <div class="mb-3 row g-2 align-items-end">
+                    <div class="col">
+                      <label class="form-label small text-muted mb-1">Nuevo proceso</label>
+                      <input id="newProcesoInput" class="form-control" type="text" placeholder="Escriba nuevo proceso" />
+                    </div>
+                    <div class="col-auto">
+                      <button id="refreshAttemptsBtnAdd" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Agregar Proceso
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="card mt-2" style="border-radius:6px;">
+                    <div class="card-header py-2" style="background: transparent; border-bottom: none;">
+                      <p class="text-primary m-0 fw-bold text-center">Lista Proceso (<span id="procesoCount">0</span>)</p>
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="table-responsive" style="max-height:320px; overflow:auto;">
+                        <table class="table table-hover mb-0" id="procesoTable">
+                          <thead>
+                            <tr style="background: var(--bs-primary-bg-subtle);">
+                              <th style="width:80px">Id</th>
+                              <th>Nombre</th>
+                              <th style="width:120px">Opciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <!-- Filas dinámicas -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- LUGAR -->
+            <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 fw-bold text-primary">Lugar</h6>
+                </div>
+
+                <div class="card-body">
+                  <div class="mb-3 row g-2 align-items-end">
+                    <div class="col">
+                      <label class="form-label small text-muted mb-1">Nuevo lugar</label>
+                      <input id="newLugarInput" class="form-control" type="text" placeholder="Escriba nuevo lugar" />
+                    </div>
+                    <div class="col-auto">
+                      <button id="refreshHistoryBtnAdd" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Agregar Lugar
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="card mt-2" style="border-radius:6px;">
+                    <div class="card-header py-2" style="background: transparent; border-bottom: none;">
+                      <p class="text-primary m-0 fw-bold text-center">Lista Lugar (<span id="lugarCount">0</span>)</p>
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="table-responsive" style="max-height:320px; overflow:auto;">
+                        <table class="table table-hover mb-0" id="lugarTable">
+                          <thead>
+                            <tr style="background: var(--bs-primary-bg-subtle);">
+                              <th style="width:80px">Id</th>
+                              <th>Nombre</th>
+                              <th style="width:120px">Opciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <!-- Filas dinámicas -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TIPO ACTIVIDAD -->
+            <div class="tab-pane fade" id="t_actividad" role="tabpanel" aria-labelledby="t_actividad-tab">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 fw-bold text-primary">Tipo Actividad</h6>
+                </div>
+
+                <div class="card-body">
+                  <div class="mb-3 row g-2 align-items-end">
+                    <div class="col">
+                      <label class="form-label small text-muted mb-1">Nuevo tipo actividad</label>
+                      <input id="newTActividadInput" class="form-control" type="text" placeholder="Escriba nuevo tipo actividad" />
+                    </div>
+                    <div class="col-auto">
+                      <button id="refreshTActividadBtnAdd" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Agregar Tipo actividad
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="card mt-2" style="border-radius:6px;">
+                    <div class="card-header py-2" style="background: transparent; border-bottom: none;">
+                      <p class="text-primary m-0 fw-bold text-center">Lista Tipo Actividad (<span id="tactividadCount">0</span>)</p>
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="table-responsive" style="max-height:320px; overflow:auto;">
+                        <table class="table table-hover mb-0" id="tactividadTable">
+                          <thead>
+                            <tr style="background: var(--bs-primary-bg-subtle);">
+                              <th style="width:80px">Id</th>
+                              <th>Nombre</th>
+                              <th style="width:120px">Opciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <!-- Filas dinámicas -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> <!-- .tab-content -->
+
+        </div> <!-- .container -->
+        <footer class="bg-white sticky-footer mt-4">
+          <div class="container my-auto">
+            <div class="text-center my-auto copyright"><span>© OSM 2025</span></div>
+          </div>
+        </footer>
+      </div> 
+    </div> 
+  </div> 
+
+  <!-- Modal de edición (reutilizable para todas las entidades) -->
+  <div class="modal fade" id="editItemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editItemId">
+          <input type="hidden" id="editItemType">
+          <div class="mb-2">
+            <label class="form-label small mb-1">Nombre</label>
+            <input id="editItemInput" class="form-control" type="text" />
+          </div>
+          <div class="text-end">
+            <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+            <button id="saveEditBtn" class="btn btn-primary btn-sm">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de desconexión (compatibilidad con tu código existente) -->
+  <div class="modal fade" id="disconnectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar Desconexión</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Está seguro que desea desconectar al usuario <strong id="disconnectUserName"></strong>?</p>
+          <p class="text-muted">El usuario será notificado que su sesión fue cerrada por un administrador.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDisconnect">Desconectar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container (feedback) -->
+  <div class="toast-container-top">
+    <div id="notificationToast" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive"
+      aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="notificationToastBody">Mensaje</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts (al final para rendimiento) -->
+  <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/sidebar.js"></script>
+  <script src="assets/js/items_formularios.js"></script>
+  <script src="assets/js/navbar.js"></script>
+</body>
+
+</html>

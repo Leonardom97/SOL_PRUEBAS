@@ -1,0 +1,169 @@
+/* =======================
+   PALETA Y VARIABLES
+======================= */
+:root,
+[data-bs-theme=light] {
+  --bs-primary: #772e22;
+  --bs-primary-rgb: 119, 46, 34;
+  --bs-link-color: #772e22;
+  --bs-link-hover-color: #772e22;
+  --bs-focus-ring-color: rgba(119, 46, 34, 0.25);
+}
+
+/* =======================
+   ESTILOS GLOBALES
+======================= */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f8f9fa;
+}
+
+
+/* =======================
+   ENCABEZADOS
+======================= */
+h2 {
+  font-weight: 900;
+  color: #000;
+}
+
+h2.fw-bold {
+  font-size: 1.8rem;
+  background: linear-gradient(90deg, #e8f3fc, #fff);
+  border-bottom: 2px solid #dee2e6;
+  border-radius: 0 0 10px 10px;
+}
+
+/* =======================
+   CONTENEDORES
+======================= */
+.container-fluid {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-fullscreen {
+  flex-grow: 1;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+}
+
+/* =======================
+   TABLAS
+======================= */
+.table {
+  width: 100%;
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table thead th {
+  background-color: #a8dbff !important;
+  color: #212529;
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: capitalize;
+  vertical-align: middle;
+}
+
+.table-hover tbody tr {
+  transition: background-color 0.3s ease;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f9ff;
+}
+
+.table-primary th {
+  background-color: #5197e1 !important;
+  color: #ffffff !important;
+}
+
+/* =======================
+   MODALES
+======================= */
+.modal-dialog.modal-fullscreen {
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+}
+
+.modal-content {
+  height: 100%;
+  border-radius: 1rem;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  background-color: #d3e8f7;
+  border-bottom: 1px solid #cdddf0;
+}
+
+.modal-title {
+  font-weight: 600;
+  color: #1d3557;
+}
+
+.modal-body {
+  overflow-y: auto;
+}
+
+.modal-backdrop {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+/* =======================
+   BOTONES DE ACCIÓN
+======================= */
+.btn-editar {
+  background-color: #f7e6d5;
+  color: #5c4033;
+  border: 1px solid #d6c2b0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-editar:hover {
+  background-color: #e2d1bd;
+  color: #3e2a1f;
+}
+
+/* =======================
+   BÚSQUEDA / FORMULARIOS
+======================= */
+.search input.form-control {
+  border-radius: 0.5rem 0 0 0.5rem !important;
+  border: 1px solid #ced4da !important;
+}
+
+.search .btn {
+  background-color: #f7e6d5 !important;
+  border: 1px solid #ced4da;
+  border-left: 0;
+  border-radius: 0 0.5rem 0.5rem 0 !important;
+  color: #333;
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
