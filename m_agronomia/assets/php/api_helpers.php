@@ -6,7 +6,12 @@
  * Fixes common issues: duplicate saves, approve/reject/inactivate not working
  */
 
-if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
+// Prevent direct access - must be included by another file
+if (!defined('API_HELPERS_LOADED')) {
+    define('API_HELPERS_LOADED', true);
+}
+
+if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'] ?? '')) {
     http_response_code(403);
     exit('Acceso prohibido');
 }
@@ -392,7 +397,7 @@ function handle_aprobar(string $table, string $idCol, array $allowedColumns, arr
         // 3) Upsert into main database
         $sql = "INSERT INTO $table (" . implode(',', $insertCols) . ") VALUES (" . implode(',', $insertPlaceholders) . ")";
         if (!empty($updatePairs)) {
-            $sql .= " ON CONFLICT ($idCol) DO UPDATE SET " . implode(', ', $updatePairs);
+            $sql .= " ON CONFLICT (\"$idCol\") DO UPDATE SET " . implode(', ', $updatePairs);
         }
         
         $stInsert = $pgMain->prepare($sql);
