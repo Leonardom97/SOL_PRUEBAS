@@ -89,13 +89,14 @@
                                             <th>Frecuencia (meses)</th>
                                             <th>Rol Capacitador</th>
                                             <th>Próxima Capacitación</th>
+                                            <th>Notificación Previa</th>
                                             <th>Pendientes</th>
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td colspan="9" class="text-center">
+                                            <td colspan="10" class="text-center">
                                                 <div class="spinner-border" role="status">
                                                     <span class="visually-hidden">Cargando...</span>
                                                 </div>
@@ -119,7 +120,7 @@
 
     <!-- Modal for Create/Edit -->
     <div class="modal fade" id="modalProgramacion" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle">Nueva Programación</h5>
@@ -162,6 +163,12 @@
                                 <option value="">Seleccione...</option>
                             </select>
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fecha Próxima Capacitación <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="inputFechaProxima" required>
+                            <small class="form-text text-muted">Fecha programada para la próxima capacitación de este cargo/sub-área/tema.</small>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -174,7 +181,7 @@
 
     <!-- Modal for Excel Import -->
     <div class="modal fade" id="modalImport" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Importar desde Excel</h5>
@@ -182,14 +189,20 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info">
-                        <h6>Formato del archivo Excel:</h6>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="mb-0">Formato del archivo Excel:</h6>
+                            <button type="button" class="btn btn-sm btn-success" id="btnDownloadTemplate">
+                                <i class="fas fa-download"></i> Descargar Plantilla
+                            </button>
+                        </div>
                         <ul>
                             <li>Columna A: ID Cargo (ej: 117)</li>
-                            <li>Columna B: Sub Área (opcional)</li>
+                            <li>Columna B: ID Sub Área (ej: 003 para Mantenimiento Industrial) <strong>requerido</strong></li>
                             <li>Columna C: ID Tema (número)</li>
                             <li>Columna D: Frecuencia en meses (número)</li>
                             <li>Columna E: Nombre del Rol Capacitador</li>
                         </ul>
+                        <p class="mb-0"><strong>Nota:</strong> Use IDs de sub-área de la tabla adm_área (ej: 003, 011, 012). Consulte README_IMPORTACION.md para más detalles.</p>
                     </div>
 
                     <div class="mb-3">
@@ -233,10 +246,12 @@
     <script src="../assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="../assets/js/sidebar.js"></script>
     <script src="../assets/js/navbar.js"></script>
+    <script src="assets/js/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" 
             integrity="sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfG2zINSN8vR3RBDCZGnE7kTUJuoGq8N+XCjbYgLqOOJ9w==" 
             crossorigin="anonymous" 
             referrerpolicy="no-referrer"></script>
+    <script src="assets/js/date-utils.js"></script>
     <script src="assets/js/programacion.js"></script>
     <script src="../assets/js/web_config.js"></script>
 </body>

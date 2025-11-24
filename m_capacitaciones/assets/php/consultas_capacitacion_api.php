@@ -3,6 +3,13 @@ header('Content-Type: application/json');
 session_start();
 require_once(__DIR__ . '/../../../php/db_postgres.php');
 
+// Validar que existe una sesión activa
+if (!isset($_SESSION['usuario_id'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Sesión no iniciada. Por favor inicie sesión.']);
+    exit;
+}
+
 $sql = "
 SELECT
   f.id,
@@ -24,21 +31,21 @@ SELECT
   TRIM(COALESCE(creador.nombre1, '') || ' ' || COALESCE(creador.apellido1, '')) AS creado_por_nombre,
   -- Editor information
   TRIM(COALESCE(editor.nombre1, '') || ' ' || COALESCE(editor.apellido1, '')) AS editado_por_nombre,
-  -- Aprobados (estado_aprovacion ilike '%aprobo%' Y NO contiene 'no')
+  -- Aprobados (estado_aprobacion ilike '%aprobo%' Y NO contiene 'no')
   COALESCE((
     SELECT string_agg(
       TRIM(a.nombre) || ';' || a.cedula, E'\n'
     )
     FROM cap_formulario_asistente a
-    WHERE a.id_formulario = f.id AND lower(a.estado_aprovacion) LIKE '%aprobo%' AND lower(a.estado_aprovacion) NOT LIKE '%no aprobo%'
+    WHERE a.id_formulario = f.id AND lower(a.estado_aprobacion) LIKE '%aprobo%' AND lower(a.estado_aprobacion) NOT LIKE '%no aprobo%'
   ), '') AS aprobados,
-  -- No aprobados (estado_aprovacion ilike '%no aprobo%')
+  -- No aprobados (estado_aprobacion ilike '%no aprobo%')
   COALESCE((
     SELECT string_agg(
       TRIM(a.nombre) || ';' || a.cedula, E'\n'
     )
     FROM cap_formulario_asistente a
-    WHERE a.id_formulario = f.id AND lower(a.estado_aprovacion) LIKE '%no aprobo%'
+    WHERE a.id_formulario = f.id AND lower(a.estado_aprobacion) LIKE '%no aprobo%'
   ), '') AS no_aprobados,
   -- Sumatoria de asistentes
   (

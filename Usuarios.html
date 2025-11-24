@@ -9,8 +9,82 @@
 	<link rel="stylesheet" href="assets/css/bs-theme-overrides.css">
 	<style>
 		body { visibility: hidden; }
-				
 		
+		/* Training modal table styling */
+		#allTrainingsTable {
+			font-size: 0.85rem;
+		}
+		
+		#allTrainingsTable thead th {
+			font-size: 0.8rem;
+			font-weight: 600;
+			white-space: nowrap;
+			vertical-align: middle;
+			text-align: center;
+			padding: 0.5rem 0.3rem;
+			background-color: #f8f9fa;
+			position: sticky;
+			top: 0;
+			z-index: 10;
+		}
+		
+		#allTrainingsTable tbody td {
+			vertical-align: middle;
+			padding: 0.4rem 0.3rem;
+			text-align: center;
+		}
+		
+		#allTrainingsTable .sortable {
+			cursor: pointer;
+			user-select: none;
+		}
+		
+		#allTrainingsTable .sortable:hover {
+			background-color: #e9ecef;
+		}
+		
+		#allTrainingsTable .sortable i {
+			margin-left: 4px;
+			font-size: 0.7rem;
+		}
+		
+		/* Session modal table styling */
+		#allSessionsTable {
+			font-size: 0.85rem;
+		}
+		
+		#allSessionsTable thead th {
+			font-size: 0.8rem;
+			font-weight: 600;
+			white-space: nowrap;
+			vertical-align: middle;
+			text-align: center;
+			padding: 0.5rem 0.3rem;
+			background-color: #f8f9fa;
+			position: sticky;
+			top: 0;
+			z-index: 10;
+		}
+		
+		#allSessionsTable tbody td {
+			vertical-align: middle;
+			padding: 0.4rem 0.3rem;
+			text-align: center;
+		}
+		
+		#allSessionsTable .sortable-session {
+			cursor: pointer;
+			user-select: none;
+		}
+		
+		#allSessionsTable .sortable-session:hover {
+			background-color: #e9ecef;
+		}
+		
+		#allSessionsTable .sortable-session i {
+			margin-left: 4px;
+			font-size: 0.7rem;
+		}
 	</style>
 </head>
 <body id="page-top">
@@ -302,7 +376,7 @@
 
 	<!-- Modal for All Trainings History -->
 	<div class="modal fade" id="modalAllTrainings" tabindex="-1" aria-labelledby="modalAllTrainingsLabel" aria-hidden="true">
-		<div class="modal-dialog modal-xl">
+		<div class="modal-dialog modal-fullscreen">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="modalAllTrainingsLabel">
@@ -354,7 +428,7 @@
 									<th class="sortable" data-column="hora_fin">
 										Hora Fin <i class="fas fa-sort"></i>
 									</th>
-									<th class="sortable" data-column="estado_aprovacion">
+									<th class="sortable" data-column="estado_aprobacion">
 										Estado Aprobación <i class="fas fa-sort"></i>
 									</th>
 									<th class="sortable" data-column="empresa">

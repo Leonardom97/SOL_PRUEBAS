@@ -4,6 +4,14 @@ require '../../../php/db_postgres.php';
 
 header('Content-Type: application/json');
 
+// Define role constants for consistency
+define('ADMIN_ROLES', ['Administrador', 'Capacitador', 'Aux_Capacitador']);
+define('TRAINER_ROLES', [
+    'Capacitador_SIE', 'Capacitador_GH', 'Capacitador_TI', 
+    'Capacitador_MT', 'Capacitador_ADM', 'Capacitador_IND', 
+    'Capacitador_AGR'
+]);
+
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 function jsonResponse($data) {
@@ -19,25 +27,31 @@ if (!isset($_SESSION['usuario_id'])) {
 try {
     switch ($action) {
         case 'list':
-            // List all training schedules with next training date
-            $stmt = $pg->query("
+            // List training schedules with role-based filtering
+            // Get user's role from session
+            $user_rol = $_SESSION['rol'] ?? '';
+            
+            // Build WHERE clause for role filtering
+            $roleFilter = '';
+            $params = [];
+            
+            // If user is a specific trainer, filter by their role
+            // Admins and general coordinators see all
+            if (!in_array($user_rol, ADMIN_ROLES)) {
+                // User is a specific trainer role, filter programaciones
+                $roleFilter = ' AND r.nombre = ?';
+                $params[] = $user_rol;
+            }
+            
+            $sql = "
                 SELECT 
                     p.*,
                     t.nombre AS tema_nombre,
                     c.cargo AS cargo_nombre,
                     r.nombre AS rol_capacitador_nombre,
-                    (
-                        SELECT MIN(n.fecha_proxima)
-                        FROM cap_notificaciones n
-                        WHERE n.id_programacion = p.id
-                        AND n.estado IN ('pendiente', 'proximo_vencer', 'vencida')
-                    ) AS proxima_capacitacion,
-                    (
-                        SELECT MIN(n.dias_para_vencimiento)
-                        FROM cap_notificaciones n
-                        WHERE n.id_programacion = p.id
-                        AND n.estado IN ('pendiente', 'proximo_vencer', 'vencida')
-                    ) AS dias_para_proxima,
+                    a.sub_area AS sub_area_nombre,
+                    p.fecha_proxima_capacitacion,
+                    p.fecha_notificacion_previa,
                     (
                         SELECT COUNT(DISTINCT n.id_colaborador)
                         FROM cap_notificaciones n
@@ -48,9 +62,18 @@ try {
                 INNER JOIN cap_tema t ON p.id_tema = t.id
                 INNER JOIN adm_cargos c ON p.id_cargo = c.id_cargo
                 INNER JOIN adm_roles r ON p.id_rol_capacitador = r.id
-                WHERE p.activo = true
-                ORDER BY c.cargo, t.nombre
-            ");
+                LEFT JOIN adm_área a ON p.sub_area = a.id_area
+                WHERE p.activo = true" . $roleFilter . "
+                ORDER BY p.fecha_proxima_capacitacion NULLS LAST, c.cargo, t.nombre
+            ";
+            
+            if (!empty($params)) {
+                $stmt = $pg->prepare($sql);
+                $stmt->execute($params);
+            } else {
+                $stmt = $pg->query($sql);
+            }
+            
             $programaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
             jsonResponse(['success' => true, 'data' => $programaciones]);
             break;
@@ -63,11 +86,13 @@ try {
                     p.*,
                     t.nombre AS tema_nombre,
                     c.cargo AS cargo_nombre,
-                    r.nombre AS rol_capacitador_nombre
+                    r.nombre AS rol_capacitador_nombre,
+                    a.sub_area AS sub_area_nombre
                 FROM cap_programacion p
                 INNER JOIN cap_tema t ON p.id_tema = t.id
                 INNER JOIN adm_cargos c ON p.id_cargo = c.id_cargo
                 INNER JOIN adm_roles r ON p.id_rol_capacitador = r.id
+                LEFT JOIN adm_área a ON p.sub_area = a.id_area
                 WHERE p.id = ?
             ");
             $stmt->execute([$id]);
@@ -79,17 +104,22 @@ try {
             // Create new training schedule
             $data = json_decode(file_get_contents('php://input'), true);
             
-            $required = ['id_tema', 'id_cargo', 'sub_area', 'frecuencia_meses', 'id_rol_capacitador'];
+            $required = ['id_tema', 'id_cargo', 'sub_area', 'frecuencia_meses', 'id_rol_capacitador', 'fecha_proxima_capacitacion'];
             foreach ($required as $field) {
                 if (!isset($data[$field]) || $data[$field] === '' || (is_string($data[$field]) && trim($data[$field]) === '')) {
                     jsonResponse(['success' => false, 'error' => "Campo requerido: $field"]);
                 }
             }
 
+            // Use provided fecha_proxima_capacitacion
+            $fecha_proxima = $data['fecha_proxima_capacitacion'];
+            $fecha_notificacion = date('Y-m-d', strtotime("$fecha_proxima -1 month"));
+
             $stmt = $pg->prepare("
                 INSERT INTO cap_programacion 
-                (id_tema, id_cargo, sub_area, frecuencia_meses, id_rol_capacitador, activo)
-                VALUES (?, ?, ?, ?, ?, true)
+                (id_tema, id_cargo, sub_area, frecuencia_meses, id_rol_capacitador, 
+                 fecha_proxima_capacitacion, fecha_notificacion_previa, activo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, true)
                 RETURNING id
             ");
             
@@ -97,8 +127,10 @@ try {
                 $data['id_tema'],
                 $data['id_cargo'],
                 trim($data['sub_area']),
-                $data['frecuencia_meses'],
-                $data['id_rol_capacitador']
+                intval($data['frecuencia_meses']),
+                $data['id_rol_capacitador'],
+                $fecha_proxima,
+                $fecha_notificacion
             ]);
             
             $id = $stmt->fetchColumn();
@@ -118,21 +150,30 @@ try {
                 jsonResponse(['success' => false, 'error' => 'ID requerido']);
             }
             
-            // Validate required fields including sub_area
-            $required = ['id_tema', 'id_cargo', 'sub_area', 'frecuencia_meses', 'id_rol_capacitador'];
+            // Validate required fields including sub_area and fecha_proxima_capacitacion
+            $required = ['id_tema', 'id_cargo', 'sub_area', 'frecuencia_meses', 'id_rol_capacitador', 'fecha_proxima_capacitacion'];
             foreach ($required as $field) {
                 if (!isset($data[$field]) || $data[$field] === '' || (is_string($data[$field]) && trim($data[$field]) === '')) {
                     jsonResponse(['success' => false, 'error' => "Campo requerido: $field"]);
                 }
             }
 
+            // Get fecha_proxima_capacitacion (now required)
+            $fecha_proxima = $data['fecha_proxima_capacitacion'];
+            $frecuencia = intval($data['frecuencia_meses']);
+            
+            // Recalculate notification date (fecha_proxima is now required)
+            $fecha_notificacion = date('Y-m-d', strtotime("$fecha_proxima -1 month"));
+            
             $stmt = $pg->prepare("
                 UPDATE cap_programacion 
                 SET id_tema = ?, 
                     id_cargo = ?, 
                     sub_area = ?, 
                     frecuencia_meses = ?, 
-                    id_rol_capacitador = ?
+                    id_rol_capacitador = ?,
+                    fecha_proxima_capacitacion = ?,
+                    fecha_notificacion_previa = ?
                 WHERE id = ?
             ");
             
@@ -140,8 +181,10 @@ try {
                 $data['id_tema'],
                 $data['id_cargo'],
                 trim($data['sub_area']),
-                $data['frecuencia_meses'],
+                $frecuencia,
                 $data['id_rol_capacitador'],
+                $fecha_proxima,
+                $fecha_notificacion,
                 $id
             ]);
             
@@ -180,24 +223,22 @@ try {
 
             foreach ($items as $index => $item) {
                 try {
-                    // Validate required fields
-                    if (empty($item['id_cargo']) || empty($item['id_tema']) || empty($item['id_rol_capacitador'])) {
+                    // Validate required fields including sub_area
+                    if (empty($item['id_cargo']) || empty($item['id_tema']) || empty($item['id_rol_capacitador']) || empty($item['sub_area'])) {
                         $errors[] = "Fila " . ($index + 1) . ": Campos requeridos faltantes";
                         continue;
                     }
 
-                    // Check if already exists
+                    // Check if already exists (sub_area is required, so no NULL check needed)
                     $checkStmt = $pg->prepare("
                         SELECT COUNT(*) FROM cap_programacion 
-                        WHERE id_cargo = ? AND id_tema = ? 
-                        AND (sub_area = ? OR (sub_area IS NULL AND ? IS NULL))
+                        WHERE id_cargo = ? AND id_tema = ? AND sub_area = ?
                         AND activo = true
                     ");
                     $checkStmt->execute([
                         $item['id_cargo'],
                         $item['id_tema'],
-                        $item['sub_area'] ?? null,
-                        $item['sub_area'] ?? null
+                        $item['sub_area']
                     ]);
                     
                     if ($checkStmt->fetchColumn() > 0) {
@@ -205,19 +246,27 @@ try {
                         continue;
                     }
 
+                    // Calculate initial dates
+                    $frecuencia = intval($item['frecuencia_meses'] ?? 12);
+                    $fecha_proxima = date('Y-m-d', strtotime("+{$frecuencia} months"));
+                    $fecha_notificacion = date('Y-m-d', strtotime("+{$frecuencia} months -1 month"));
+
                     // Insert
                     $stmt = $pg->prepare("
                         INSERT INTO cap_programacion 
-                        (id_tema, id_cargo, sub_area, frecuencia_meses, id_rol_capacitador, activo)
-                        VALUES (?, ?, ?, ?, ?, true)
+                        (id_tema, id_cargo, sub_area, frecuencia_meses, id_rol_capacitador, 
+                         fecha_proxima_capacitacion, fecha_notificacion_previa, activo)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, true)
                     ");
                     
                     $stmt->execute([
                         $item['id_tema'],
                         $item['id_cargo'],
-                        $item['sub_area'] ?? null,
-                        $item['frecuencia_meses'] ?? 12,
-                        $item['id_rol_capacitador']
+                        $item['sub_area'],  // sub_area is required, no null fallback
+                        $frecuencia,
+                        $item['id_rol_capacitador'],
+                        $fecha_proxima,
+                        $fecha_notificacion
                     ]);
                     
                     $inserted++;
@@ -289,10 +338,10 @@ try {
             break;
 
         case 'get_sub_areas':
-            // Get all unique sub areas from adm_área table
-            // No cargo filter needed - return all available sub areas
+            // Get all unique sub areas from adm_área table with IDs
+            // Return id_area and sub_area name for proper ID-based storage
             $stmt = $pg->query("
-                SELECT DISTINCT sub_area
+                SELECT DISTINCT id_area, sub_area
                 FROM adm_área
                 WHERE sub_area IS NOT NULL
                   AND sub_area != ''

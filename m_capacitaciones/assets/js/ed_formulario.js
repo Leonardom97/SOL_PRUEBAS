@@ -168,7 +168,7 @@ function cargarModal(id) {
                         <td>${a.nombre}</td>
                         <td>${a.cedula}</td>
                         <td>${a.empresa}</td>
-                        <td>${formatEstado(a.estado_aprovacion)}</td>
+                        <td>${formatEstado(a.estado_aprobacion)}</td>
                         <td>
                             <button class="btn btn-danger bt_eliminar_asistente" type="button" data-id="${a.id}">
                                 <i class="far fa-trash-alt"></i>
@@ -220,8 +220,8 @@ document.addEventListener('click', function(e) {
         const parts = modalTitle.trim().split(/\s+/);
         const id_formulario = parts[parts.length-1]; // último elemento debería ser el id
         const cedula = document.getElementById('ced-cap-erc').value;
-        const estado_aprovacion = document.getElementById('s-aprobacion-erc').value;
-        if (!estado_aprovacion) {
+        const estado_aprobacion = document.getElementById('s-aprobacion-erc').value;
+        if (!estado_aprobacion) {
             alert('Debes seleccionar estado de aprobación');
             return;
         }
@@ -231,7 +231,7 @@ document.addEventListener('click', function(e) {
                 action: "agregar_asistente",
                 id_formulario,
                 cedula,
-                estado_aprovacion
+                estado_aprobacion
             })
         }).then(r => r.json()).then(data => {
             if (data.error) {

@@ -16,12 +16,12 @@ if (empty($cedula) || empty($clave)) {
     exit;
 }
 
-// Initialize session manager
+// Inicializar gestor de sesiones
 $sessionManager = new SessionManager($pg);
 
-// Get client information for logging
-$ip_address = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
-$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
+// Obtener información del cliente para registro
+$ip_address = $_SERVER['REMOTE_ADDR'] ?? 'Desconocida';
+$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Desconocido';
 $host_name = gethostbyaddr($ip_address);
 
 try {
@@ -38,7 +38,7 @@ try {
     $usuario = $stmt->fetch();
 
     if (!$usuario) {
-        // Log failed attempt
+        // Registrar intento fallido
         $stmt = $pg->prepare("
             INSERT INTO adm_intentos_login 
             (usuario_identificador, tipo_usuario, exitoso, ip_address, user_agent, host_name, mensaje_error)
@@ -56,9 +56,9 @@ try {
     }
 
     // Validar contraseña directamente (en texto plano, como lo tienes por ahora)
-    // SECURITY NOTE: Consider using password_hash() and password_verify() in the future
+    // NOTA DE SEGURIDAD: Considerar usar password_hash() y password_verify() en el futuro
     if ($usuario['ac_contraseña'] !== $clave) {
-        // Log failed attempt
+        // Registrar intento fallido
         $stmt = $pg->prepare("
             INSERT INTO adm_intentos_login 
             (usuario_identificador, tipo_usuario, exitoso, ip_address, user_agent, host_name, mensaje_error)
@@ -75,17 +75,17 @@ try {
         exit;
     }
 
-    // Check for existing active session
+    // Verificar sesiones activas existentes
     if ($force_login) {
-        // Force login by closing existing sessions
+        // Forzar inicio de sesión cerrando sesiones existentes
         $sessionResult = $sessionManager->forceLogin($usuario['ac_id'], 'colaborador', $cedula);
     } else {
-        // Try to register login normally
+        // Intentar registrar inicio de sesión normalmente
         $sessionResult = $sessionManager->registerLogin($usuario['ac_id'], 'colaborador', $cedula);
     }
     
     if (!$sessionResult['success']) {
-        // Existing session found
+        // Sesión existente encontrada
         $existingSession = $sessionResult['existing_session'] ?? null;
         echo json_encode([
             'success' => false,
@@ -103,7 +103,7 @@ try {
     // Guardar sesión
     $_SESSION['usuario_id'] = $usuario['ac_id'];
     $_SESSION['usuario'] = $usuario['ac_cedula'];
-    $_SESSION['cedula'] = $usuario['ac_cedula'];  // Also store cedula explicitly
+    $_SESSION['cedula'] = $usuario['ac_cedula'];  // También almacenar cédula explícitamente
     $_SESSION['nombre'] = $usuario['ac_nombre1'] . ' ' . $usuario['ac_apellido1'];
     $_SESSION['rol'] = 'usuario';
     $_SESSION['rol_id'] = 2;

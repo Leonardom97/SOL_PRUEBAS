@@ -36,6 +36,9 @@
             
             await loadData();
             setupEventListeners();
+            
+            // Check for URL parameters to auto-open modal with pre-selected values
+            checkUrlParameters();
         } catch (error) {
             console.error('Error initializing page:', error);
             showAlert('Error al cargar la página', 'danger');
@@ -117,13 +120,13 @@
         }
         
         // Determine alert color based on most urgent alert
-        const mostUrgent = Math.min(...alerts.map(a => parseInt(a.dias_para_vencimiento) || 0));
-        const alertClass = mostUrgent < 0 ? 'alert-danger' : mostUrgent <= 3 ? 'alert-warning' : 'alert-info';
+        const mostUrgent = Math.min(...alerts.map(a => parseInt(a.dias_para_proxima) || 0));
+        const alertClass = mostUrgent < 0 ? 'alert-danger' : mostUrgent <= 7 ? 'alert-warning' : 'alert-info';
         
         alertsBox.className = `alert alert-dismissible fade show ${alertClass}`;
         
         alertsList.innerHTML = '<ul class="mb-0">' + alerts.map(alert => {
-            const dias = parseInt(alert.dias_para_vencimiento) || 0;
+            const dias = parseInt(alert.dias_para_proxima) || 0;
             const statusText = dias < 0 
                 ? `<strong class="text-danger">Vencida hace ${Math.abs(dias)} días</strong>`
                 : dias === 0
@@ -132,12 +135,16 @@
             
             const colaboradoresCount = parseInt(alert.colaboradores_pendientes) || 0;
             
+            const fechaProxima = alert.fecha_proxima_capacitacion 
+                ? parseLocalDate(alert.fecha_proxima_capacitacion).toLocaleDateString('es-CO')
+                : '-';
+            
             return `
                 <li class="mb-2">
                     <strong>${alert.tema_nombre}</strong> - ${alert.cargo_nombre} 
-                    ${alert.sub_area ? `(${alert.sub_area})` : ''}
+                    ${alert.sub_area_nombre ? `(${alert.sub_area_nombre})` : ''}
                     <br>
-                    ${statusText} - ${colaboradoresCount} colaborador(es) pendiente(s)
+                    ${statusText} (${fechaProxima}) - ${colaboradoresCount} colaborador(es) pendiente(s)
                     <br>
                     <small class="text-muted">Rol: ${alert.rol_capacitador_nombre}</small>
                 </li>
@@ -166,13 +173,13 @@
             inputCargo.appendChild(option);
         });
 
-        // Populate sub area select
+        // Populate sub area select with ID as value
         if (inputSubArea) {
             inputSubArea.innerHTML = '<option value="">Seleccione...</option>';
             subAreas.forEach(sa => {
                 const option = document.createElement('option');
-                option.value = sa.sub_area;
-                option.textContent = sa.sub_area;
+                option.value = sa.id_area;  // Store ID, not name
+                option.textContent = sa.sub_area;  // Display name
                 inputSubArea.appendChild(option);
             });
         }
@@ -199,25 +206,40 @@
         const data = filterData || programaciones;
 
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center">No hay programaciones registradas</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center">No hay programaciones registradas</td></tr>';
             return;
         }
 
         tbody.innerHTML = data.map(prog => {
-            const proximaFecha = prog.proxima_capacitacion ? new Date(prog.proxima_capacitacion).toLocaleDateString('es-CO') : '-';
-            const diasPara = prog.dias_para_proxima !== null ? parseInt(prog.dias_para_proxima) : null;
+            // Format dates
+            const fechaProxima = prog.fecha_proxima_capacitacion 
+                ? parseLocalDate(prog.fecha_proxima_capacitacion).toLocaleDateString('es-CO') 
+                : '-';
+            const fechaNotificacion = prog.fecha_notificacion_previa 
+                ? parseLocalDate(prog.fecha_notificacion_previa).toLocaleDateString('es-CO') 
+                : '-';
+            
+            // Calculate days until next training
+            let diasPara = null;
+            if (prog.fecha_proxima_capacitacion) {
+                const hoy = getTodayAtMidnight();
+                const proxima = parseLocalDate(prog.fecha_proxima_capacitacion);
+                diasPara = Math.floor((proxima - hoy) / (1000 * 60 * 60 * 24));
+            }
+            
             const pendientes = prog.colaboradores_pendientes || 0;
             
-            let fechaBadge = '-';
-            if (proximaFecha !== '-') {
+            // Format next training date with badge
+            let fechaProximaBadge = '-';
+            if (fechaProxima !== '-') {
                 if (diasPara < 0) {
-                    fechaBadge = `<span class="badge bg-danger">${proximaFecha}<br><small>Vencida</small></span>`;
+                    fechaProximaBadge = `<span class="badge bg-danger">${fechaProxima}<br><small>Vencida (${Math.abs(diasPara)} días)</small></span>`;
                 } else if (diasPara <= 7) {
-                    fechaBadge = `<span class="badge bg-warning text-dark">${proximaFecha}<br><small>En ${diasPara} días</small></span>`;
+                    fechaProximaBadge = `<span class="badge bg-warning text-dark">${fechaProxima}<br><small>En ${diasPara} días</small></span>`;
                 } else if (diasPara <= 30) {
-                    fechaBadge = `<span class="badge bg-info">${proximaFecha}<br><small>En ${diasPara} días</small></span>`;
+                    fechaProximaBadge = `<span class="badge bg-info">${fechaProxima}<br><small>En ${diasPara} días</small></span>`;
                 } else {
-                    fechaBadge = `<span class="badge bg-secondary">${proximaFecha}<br><small>En ${diasPara} días</small></span>`;
+                    fechaProximaBadge = `<span class="badge bg-secondary">${fechaProxima}<br><small>En ${diasPara} días</small></span>`;
                 }
             }
             
@@ -229,11 +251,12 @@
             <tr>
                 <td>${prog.id}</td>
                 <td>${prog.cargo_nombre}</td>
-                <td>${prog.sub_area || '-'}</td>
+                <td>${prog.sub_area_nombre || '-'}</td>
                 <td>${prog.tema_nombre}</td>
                 <td>${prog.frecuencia_meses}</td>
                 <td><span class="badge bg-info">${prog.rol_capacitador_nombre}</span></td>
-                <td class="text-center">${fechaBadge}</td>
+                <td class="text-center">${fechaProximaBadge}</td>
+                <td class="text-center">${fechaNotificacion}</td>
                 <td class="text-center">${pendientesBadge}</td>
                 <td>
                     <button class="btn btn-sm btn-primary" onclick="window.editProgramacion(${prog.id})">
@@ -246,6 +269,86 @@
             </tr>
         `;
         }).join('');
+    }
+
+    function checkUrlParameters() {
+        // Check if there are URL parameters for auto-opening the modal
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const subAreaParam = urlParams.get('sub_area');
+            const cargoParam = urlParams.get('cargo');
+            
+            if (subAreaParam || cargoParam) {
+                // Reset modal state
+                editingId = null;
+                const modalTitle = document.getElementById('modalTitle');
+                const form = document.getElementById('formProgramacion');
+                const programacionId = document.getElementById('programacionId');
+                
+                if (!modalTitle || !form || !programacionId) {
+                    console.error('Modal elements not found');
+                    return;
+                }
+                
+                modalTitle.textContent = 'Nueva Programación';
+                form.reset();
+                programacionId.value = '';
+                
+                // Set sub_area if provided
+                if (subAreaParam) {
+                    const subAreaSelect = document.getElementById('inputSubArea');
+                    if (subAreaSelect) {
+                        const decodedSubArea = decodeURIComponent(subAreaParam);
+                        ensureOptionExists(subAreaSelect, decodedSubArea);
+                        subAreaSelect.value = decodedSubArea;
+                    }
+                }
+                
+                // Set cargo if provided (note: cargo uses ID, not name)
+                if (cargoParam) {
+                    const cargoSelect = document.getElementById('inputCargo');
+                    if (cargoSelect) {
+                        cargoSelect.value = cargoParam;
+                    }
+                }
+                
+                // Show the modal
+                const modalElement = document.getElementById('modalProgramacion');
+                if (modalElement) {
+                    new bootstrap.Modal(modalElement).show();
+                }
+                
+                // Clean the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        } catch (error) {
+            console.error('Error processing URL parameters:', error);
+        }
+    }
+
+    function ensureOptionExists(selectElement, value) {
+        // Helper function to ensure a value exists in a select dropdown
+        // Adds the option if it doesn't exist
+        if (!selectElement || !value) return false;
+        
+        // Check if the value exists in the options
+        let optionExists = false;
+        for (let i = 0; i < selectElement.options.length; i++) {
+            if (selectElement.options[i].value === value) {
+                optionExists = true;
+                break;
+            }
+        }
+        
+        // If the option doesn't exist, add it
+        if (!optionExists) {
+            const newOption = document.createElement('option');
+            newOption.value = value;
+            newOption.textContent = value;
+            selectElement.appendChild(newOption);
+        }
+        
+        return true;
     }
 
     function setupEventListeners() {
@@ -286,6 +389,9 @@
             document.getElementById('btnImportar').disabled = true;
             new bootstrap.Modal(document.getElementById('modalImport')).show();
         });
+
+        // Download template button
+        document.getElementById('btnDownloadTemplate').addEventListener('click', downloadTemplate);
 
         // Excel file input
         document.getElementById('inputExcel').addEventListener('change', handleExcelFile);
@@ -340,6 +446,15 @@
             id_rol_capacitador: document.getElementById('inputRolCapacitador').value
         };
 
+        // Include fecha_proxima_capacitacion (required)
+        const fechaProxima = document.getElementById('inputFechaProxima').value;
+        if (!fechaProxima) {
+            alert('La fecha próxima de capacitación es obligatoria');
+            document.getElementById('inputFechaProxima').focus();
+            return;
+        }
+        data.fecha_proxima_capacitacion = fechaProxima;
+
         if (editingId) {
             data.id = editingId;
         }
@@ -379,10 +494,21 @@
                 document.getElementById('modalTitle').textContent = 'Editar Programación';
                 document.getElementById('programacionId').value = id;
                 document.getElementById('inputCargo').value = prog.id_cargo;
-                document.getElementById('inputSubArea').value = prog.sub_area || '';
                 document.getElementById('inputTema').value = prog.id_tema;
                 document.getElementById('inputFrecuencia').value = prog.frecuencia_meses;
                 document.getElementById('inputRolCapacitador').value = prog.id_rol_capacitador;
+                
+                // Set fecha_proxima_capacitacion if available
+                document.getElementById('inputFechaProxima').value = prog.fecha_proxima_capacitacion || '';
+                
+                // Set sub_area - ensure the value exists in the dropdown first
+                const subAreaSelect = document.getElementById('inputSubArea');
+                const currentSubArea = prog.sub_area || '';
+                
+                if (subAreaSelect && currentSubArea) {
+                    ensureOptionExists(subAreaSelect, currentSubArea);
+                    subAreaSelect.value = currentSubArea;
+                }
 
                 new bootstrap.Modal(document.getElementById('modalProgramacion')).show();
             }
@@ -420,18 +546,30 @@
         const file = e.target.files[0];
         if (!file) return;
 
+        // Check if XLSX library is loaded
+        if (typeof XLSX === 'undefined') {
+            showAlert('Error: La librería XLSX no está cargada. Por favor, recargue la página.', 'danger');
+            console.error('XLSX library is not loaded');
+            return;
+        }
+
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function(event) {
             try {
-                const data = new Uint8Array(e.target.result);
+                const data = new Uint8Array(event.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
+                
+                if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+                    throw new Error('El archivo no contiene hojas válidas');
+                }
+                
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
                 processExcelData(jsonData);
             } catch (error) {
                 console.error('Error reading Excel:', error);
-                showAlert('Error al leer el archivo Excel', 'danger');
+                showAlert('Error al leer el archivo Excel: ' + error.message, 'danger');
             }
         };
         reader.readAsArrayBuffer(file);
@@ -443,11 +581,45 @@
         const preview = document.getElementById('importPreviewBody');
         preview.innerHTML = '';
 
+        // Validate data
+        if (!data || data.length === 0) {
+            showAlert('El archivo Excel está vacío o no tiene datos válidos', 'warning');
+            document.getElementById('btnImportar').disabled = true;
+            return;
+        }
+
+        if (data.length === 1) {
+            showAlert('El archivo solo contiene la fila de encabezado. Por favor agregue datos.', 'warning');
+            document.getElementById('btnImportar').disabled = true;
+            return;
+        }
+
+        // Helper function to check if a value is empty (handles 0 as valid value)
+        function isEmpty(value) {
+            return !value && value !== 0;
+        }
+
+        // Helper function to escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // Skip header row
         for (let i = 1; i < data.length; i++) {
             const row = data[i];
             
-            if (!row || row.length < 5) continue;
+            // Skip completely empty rows
+            if (!row || row.every(cell => cell === null || cell === undefined || cell === '')) {
+                continue;
+            }
+            
+            // Validate minimum number of columns
+            if (row.length < 5) {
+                errors.push(`Fila ${i + 1}: Faltan columnas (se esperan al menos 5 columnas)`);
+                continue;
+            }
 
             const cargo_id = row[0];
             const sub_area = row[1];
@@ -455,33 +627,72 @@
             const frecuencia = row[3];
             const rol_nombre = row[4];
 
-            // Find rol ID by name
-            const rol = roles.find(r => r.nombre.toLowerCase() === String(rol_nombre).toLowerCase());
+            // Validate required fields
+            if (isEmpty(cargo_id)) {
+                errors.push(`Fila ${i + 1}: Cargo ID es obligatorio`);
+                continue;
+            }
             
-            if (!rol) {
-                errors.push(`Fila ${i + 1}: Rol "${rol_nombre}" no encontrado`);
+            if (isEmpty(sub_area)) {
+                errors.push(`Fila ${i + 1}: Sub Área ID es obligatorio`);
+                continue;
+            }
+            
+            if (isEmpty(tema_id)) {
+                errors.push(`Fila ${i + 1}: Tema ID es obligatorio`);
+                continue;
+            }
+            
+            if (!rol_nombre) {
+                errors.push(`Fila ${i + 1}: Rol Capacitador es obligatorio`);
                 continue;
             }
 
+            // Convert and validate tema_id
+            const temaIdNum = parseInt(tema_id);
+            if (isNaN(temaIdNum)) {
+                errors.push(`Fila ${i + 1}: Tema ID debe ser un número válido`);
+                continue;
+            }
+
+            // Convert and validate frecuencia
+            const frecuenciaNum = parseInt(frecuencia);
+            if (isNaN(frecuenciaNum) || frecuenciaNum < 1) {
+                errors.push(`Fila ${i + 1}: Frecuencia debe ser un número válido mayor a 0`);
+                continue;
+            }
+
+            // Find rol ID by name
+            const rol = roles.find(r => r.nombre.toLowerCase() === String(rol_nombre).trim().toLowerCase());
+            
+            if (!rol) {
+                errors.push(`Fila ${i + 1}: Rol "${escapeHtml(String(rol_nombre))}" no encontrado en la base de datos`);
+                continue;
+            }
+
+            // Convert sub_area to string for consistent comparison
+            const subAreaStr = String(sub_area).trim();
+            
             const item = {
-                id_cargo: String(cargo_id),
-                sub_area: sub_area || null,
-                id_tema: parseInt(tema_id),
-                frecuencia_meses: parseInt(frecuencia) || 12,
+                id_cargo: String(cargo_id).trim(),
+                sub_area: subAreaStr,
+                id_tema: temaIdNum,
+                frecuencia_meses: frecuenciaNum,
                 id_rol_capacitador: rol.id
             };
 
             // Find names for preview
             const cargo = cargos.find(c => c.id === item.id_cargo);
             const tema = temas.find(t => t.id === item.id_tema);
+            const subArea = subAreas.find(sa => String(sa.id_area) === item.sub_area);
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${cargo ? cargo.cargo : cargo_id}</td>
-                <td>${item.sub_area || '-'}</td>
-                <td>${tema ? tema.nombre : tema_id}</td>
+                <td>${cargo ? escapeHtml(cargo.cargo) : `<span class="text-warning">${escapeHtml(String(cargo_id))} (no encontrado)</span>`}</td>
+                <td>${subArea ? escapeHtml(subArea.sub_area) : `<span class="text-warning">${escapeHtml(item.sub_area)} (no encontrado)</span>`}</td>
+                <td>${tema ? escapeHtml(tema.nombre) : `<span class="text-warning">${escapeHtml(String(tema_id))} (no encontrado)</span>`}</td>
                 <td>${item.frecuencia_meses}</td>
-                <td>${rol.nombre}</td>
+                <td>${escapeHtml(rol.nombre)}</td>
             `;
             preview.appendChild(tr);
 
@@ -527,6 +738,59 @@
         } catch (error) {
             console.error('Error importing:', error);
             showAlert('Error al importar datos', 'danger');
+        }
+    }
+
+    function downloadTemplate() {
+        // Check if XLSX library is loaded
+        if (typeof XLSX === 'undefined') {
+            showAlert('Error: La librería XLSX no está cargada. Por favor, recargue la página.', 'danger');
+            console.error('XLSX library is not loaded');
+            return;
+        }
+
+        try {
+            // Create a new workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Create template data with headers and example rows
+            // Note: These are example values for reference only
+            // Users should replace with actual IDs from their database
+            const templateData = [
+                ['Cargo ID', 'Sub Área ID', 'Tema ID', 'Frecuencia', 'Rol Capacitador'],
+                ['117', '003', 49, 12, 'Capacitador SIE'],
+                ['043', '016', 23, 12, 'Capacitador IND'],
+                ['068', '001', 47, 6, 'Capacitador SIE']
+            ];
+            
+            // Create worksheet from data
+            const ws = XLSX.utils.aoa_to_sheet(templateData);
+            
+            // Set column widths for better readability
+            ws['!cols'] = [
+                { wch: 12 },  // Cargo ID
+                { wch: 15 },  // Sub Área ID
+                { wch: 10 },  // Tema ID
+                { wch: 12 },  // Frecuencia
+                { wch: 20 }   // Rol Capacitador
+            ];
+            
+            // Add the worksheet to the workbook
+            // Sheet name matches the expected format for import
+            XLSX.utils.book_append_sheet(wb, ws, 'programacion');
+            
+            // Generate filename with current date
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+            const filename = `plantilla_programacion_${dateStr}.xlsx`;
+            
+            // Write the file
+            XLSX.writeFile(wb, filename);
+            
+            showAlert('Plantilla descargada exitosamente', 'success');
+        } catch (error) {
+            console.error('Error generating template:', error);
+            showAlert('Error al generar la plantilla: ' + error.message, 'danger');
         }
     }
 

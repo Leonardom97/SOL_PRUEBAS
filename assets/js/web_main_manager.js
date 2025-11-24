@@ -29,7 +29,6 @@
         // Then initialize the rest
         initializeEventListeners();
         loadCurrentConfig();
-        loadAllThemes();
     });
     
     /**
@@ -38,18 +37,6 @@
     function initializeEventListeners() {
         // Form submit
         document.getElementById('configForm').addEventListener('submit', handleFormSubmit);
-        
-        // Color picker sync
-        document.getElementById('primaryColor').addEventListener('input', function(e) {
-            document.getElementById('primaryColorHex').value = e.target.value.toUpperCase();
-        });
-        
-        document.getElementById('primaryColorHex').addEventListener('input', function(e) {
-            const value = e.target.value;
-            if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
-                document.getElementById('primaryColor').value = value;
-            }
-        });
         
         // File uploads
         document.getElementById('uploadFavicon').addEventListener('click', function() {
@@ -73,9 +60,6 @@
         document.getElementById('resetForm').addEventListener('click', function() {
             loadCurrentConfig();
         });
-        
-        // Save as new theme
-        document.getElementById('saveAsNewTheme').addEventListener('click', handleSaveAsNewTheme);
     }
     
     /**
@@ -105,8 +89,8 @@
         document.getElementById('configId').value = config.id || '';
         document.getElementById('siteTitle').value = config.site_title || 'OSM';
         document.getElementById('footerText').value = config.footer_text || '© OSM 2025';
+        // Keep color values in hidden fields to preserve them
         document.getElementById('primaryColor').value = config.primary_color || '#772e22';
-        document.getElementById('primaryColorHex').value = config.primary_color || '#772e22';
         document.getElementById('themeName').value = config.theme_name || '';
         document.getElementById('faviconPath').value = config.favicon_path || '';
         document.getElementById('loginImagePath').value = config.login_image_path || '';
@@ -130,6 +114,7 @@
             id: document.getElementById('configId').value,
             site_title: document.getElementById('siteTitle').value,
             footer_text: document.getElementById('footerText').value,
+            // Keep existing color and theme name values (not editable by user)
             primary_color: document.getElementById('primaryColor').value,
             theme_name: document.getElementById('themeName').value || 'Default',
             favicon_path: document.getElementById('faviconPath').value,
@@ -151,9 +136,8 @@
             if (result.success) {
                 showAlert('Configuración guardada exitosamente', 'success');
                 
-                // Reload configuration and apply changes
+                // Reload configuration
                 await loadCurrentConfig();
-                await loadAllThemes();
                 
                 // Apply changes immediately
                 if (window.WebConfig) {

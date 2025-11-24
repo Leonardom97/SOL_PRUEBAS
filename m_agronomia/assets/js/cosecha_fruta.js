@@ -1,471 +1,222 @@
-(function () {
-  // Definición de las columnas de la tabla cosecha_fruta
-  const columnas = [
+(function(){
+  const DOM={
+    tbody:'tbody-cosecha-fruta',
+    table:'tabla-capacitaciones',
+    pagination:'pagination-capacitaciones',
+    exportBtn:'exportBtnCosecha',
+    clearBtn:'clearFiltersBtn1',
+    limitSelect:'limitSelect1',
+    selectAll:'selectAll1',
+    form:'form-editar',
+    modal:'modal-editar'
+  };
+  const COLUMNAS=[
     'cosecha_fruta_id','fecha_actividad','responsable','plantacion','finca','siembra','lote','parcela',
-    'labor_especifica','tipo_corte','equipo','cod_colaborador_contratista','n_grupo_dia','hora_entrada',
-    'hora_salida','linea_entrada','linea_salida','total_personas','unidad','cantidad','peso_promedio_lonas',
-    'total_persona_dia','colaborador','nuevo_operador','error_registro','supervision'
+    'labor_especifica','tipo_corte','equipo','cod_colaborador_contratista','n_grupo_dia',
+    'hora_entrada','hora_salida','linea_entrada','linea_salida','total_personas','unidad','cantidad',
+    'peso_promedio_lonas','total_persona_dia','colaborador','nuevo_operador','error_registro','supervision'
   ];
+  const API='assets/php/cosecha_fruta_api.php';
+  const ID_KEY='cosecha_fruta_id';
+  const DATE_COL='fecha_actividad';
+  const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivate',reject:'rechazar'};
 
-  // Variables globales para manejo de datos y estado de la tabla
-  let allData = [], currentPage = 1, pageSize = 25, filtros = {}, ordenColumna = null, ordenAsc = true, total = 0;
+  let data=[],page=1,pageSize=25,total=0,filters={},sortCol=null,sortAsc=true;
 
-  // Función asíncrona para obtener datos desde el backend usando filtros, paginación y orden
-  async function fetchData(page = 1, pageSize = 25, filtros = {}, ordenCol = null, ordenAsc = true) {
-    const params = new URLSearchParams({ page, pageSize });
-    if (ordenCol) { params.append('ordenColumna', ordenCol); params.append('ordenAsc', ordenAsc ? '1' : '0'); }
-    for (const key in filtros) { if (filtros[key]) params.append(`filtro_${key}`, filtros[key]); }
-    const endpoint = `assets/php/conexion_cosecha_fruta.php?${params}`;
-    const resp = await fetch(endpoint);
-    if (!resp.ok) throw new Error('Error al cargar cosecha_fruta');
-    return await resp.json();
+  function estado(r){
+    if(+r?.check===1||r?.supervision==='aprobado')return'aprobado';
+    if((r?.supervision||'')==='pendiente')return'pendiente';
+    return'edicion';
+  }
+  function icono(e){
+    if(e==='aprobado')return'<i class="fas fa-check" style="color:#27ff1b"></i>';
+    if(e==='pendiente')return'<i class="fas fa-edit" style="color:#fbc02d"></i>';
+    return'<i class="fas fa-ban" style="color:#bdbdbd"></i>';
   }
 
-  // Determina el estado de la celda de supervisión según los datos de la fila
-  function calcularEstadoSupervision(row, pendientesSet) {
-    const check = row.check !== undefined && row.check !== null ? Number(row.check) : 0;
-    if (check === 1) {
-      return 'aprobado';
+  async function fetchData(){
+    let last='';
+    for(const act of ACTIONS.listFallback){
+      try{
+        const qs=new URLSearchParams({action:act,page,pageSize});
+        if(sortCol){qs.append('ordenColumna',sortCol);qs.append('ordenAsc',sortAsc?'1':'0');}
+        for(const k in filters)if(filters[k])qs.append('filtro_'+k,filters[k]);
+        const r=await fetch(`${API}?${qs}`,{cache:'no-store'});
+        if(!r.ok){last=`${act}: HTTP ${r.status}`;continue;}
+        const txt=await r.text();let j;try{j=JSON.parse(txt);}catch{last=`${act}: JSON`;continue;}
+        if(Array.isArray(j))return{datos:j,total:j.length};
+        if(j.datos)return{datos:j.datos,total:j.total||j.datos.length};
+        if(j.data)return{datos:j.data,total:j.total||j.data.length};
+        const arr=Object.values(j).find(v=>Array.isArray(v));
+        if(arr)return{datos:arr,total:arr.length};
+        last=`${act}: sin datos`;
+      }catch(e){last=`${act}: ${e.message}`;}
     }
-    if (row.supervision === 'pendiente' || pendientesSet.has(String(row.cosecha_fruta_id))) {
-      return 'pendiente';
-    }
-    return 'edicion';
+    throw new Error('Error fetch '+ID_KEY+' => '+last);
   }
 
-  // Renderiza la tabla con los datos y genera las filas, celdas y acciones
-  function renderTabla(datos) {
-    const fechaCorte = localStorage.getItem("fecha_corte");
-    const tbody = document.getElementById('tbody-cosecha-fruta');
-    if (!tbody) return;
-    // Obtiene IDs pendientes para destacar registros en estado 'pendiente'
-    const pendientesSet = (window.PENDING_IDS && window.PENDING_IDS.cosecha_fruta) ? window.PENDING_IDS.cosecha_fruta : new Set();
-    tbody.innerHTML = '';
-    datos.forEach((row, idx) => {
-      const estadoSupervision = calcularEstadoSupervision(row, pendientesSet);
-      const tr = document.createElement('tr');
-      // Checkbox para selección de filas
-      tr.innerHTML = `<td><input type="checkbox" class="fila-cosecha-chk md-checkbox" data-row="${idx}"></td>`;
-      columnas.forEach(col => {
-        const td = document.createElement('td');
-        // Renderizado especial para columna de supervisión
-        if (col === 'supervision') {
-          td.innerHTML = '';
-          td.classList.add('supervision-cell');
-          td.setAttribute('data-col','supervision');
-          td.setAttribute('data-estado', estadoSupervision);
-          // Íconos según el estado de supervisión
-          if (estadoSupervision === 'aprobado') {
-            td.innerHTML = `<i class="fas fa-check" style="color: #27ff1bff; font-size: 1.3em"></i>`;
-          } else if (estadoSupervision === 'pendiente') {
-            td.innerHTML = `<i class="fas fa-edit" style="color: #fbc02d; font-size: 1.3em"></i>`;
-          } else {
-            td.innerHTML = `<i class="fas fa-ban" style="color: #bdbdbd; font-size: 1.3em"></i>`;
-          }
-        } else if (col === 'error_registro') {
-          // Renderizado especial para columna error_registro
-          if (row.error_registro === 'inactivo') {
-            td.innerHTML = '<span class="badge bg-secondary">Inactivo</span>';
-          } else {
-            td.innerHTML = `
-              <button class="md-btn md-btn-icon btn-inactivar"
-                      title="Inactivar"
-                      data-id="${row.cosecha_fruta_id}">
-                <i class="fas fa-ban"></i>
-              </button>`;
-          }
-          td.classList.add('error-cell');
-          td.setAttribute('data-col','error_registro');
-        } else {
-          // Celdas normales
-          td.textContent = row[col] || '';
+  function render(){
+    const tbody=document.getElementById(DOM.tbody); if(!tbody)return;
+    tbody.innerHTML='';
+    const corte=localStorage.getItem('fecha_corte')||'';
+    data.forEach((row,i)=>{
+      const est=estado(row),tr=document.createElement('tr');
+      tr.innerHTML=`<td><input type="checkbox" class="row-check" data-index="${i}"></td>`;
+      COLUMNAS.forEach(col=>{
+        const td=document.createElement('td');
+        if(col==='supervision'){
+          td.dataset.estado=est; td.innerHTML=icono(est);
+        }else if(col==='error_registro'){
+          const inact=(row.error_registro||'').toLowerCase()==='inactivo';
+          td.innerHTML=inact?'<span class="badge bg-secondary">Inactivo</span>':
+            `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
+        }else{
+          td.textContent=row[col]??'';
         }
         tr.appendChild(td);
       });
-      // Determina botones de acción según estado de la fila
-      const fechaFila = row['fecha_actividad'] || "";
-      let btnEditar = "", btnEstado = "";
-      if (row.error_registro === 'inactivo') {
-        btnEstado = `<button class="md-btn md-btn-icon" title="Inactivo" disabled><i class="fa fa-lock"></i></button>`;
-      } else if (fechaCorte && fechaFila) {
-        if (fechaFila < fechaCorte) {
-          btnEstado = `<button class="md-btn md-btn-icon" title="Fuera de fecha de corte" disabled><i class="fa fa-lock"></i></button>`;
-        } else {
-          btnEditar = `<button class="md-btn md-btn-icon btn-editar" title="Editar" data-id="${row.cosecha_fruta_id}"><i class="fa fa-pen"></i></button>`;
-        }
-      } else {
-        btnEditar = `<button class="md-btn md-btn-icon btn-editar" title="Editar" data-id="${row.cosecha_fruta_id}"><i class="fa fa-pen"></i></button>`;
-        btnEstado = `<button class="md-btn md-btn-icon" title="Sin fecha de corte" disabled><i class="fa fa-question-circle"></i></button>`;
+      const fecha=row[DATE_COL]||'',inactivo=(row.error_registro||'').toLowerCase()==='inactivo';
+      let edit='',lock='';
+      if(inactivo)lock='<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>';
+      else if(corte&&fecha){
+        if(fecha<corte)lock='<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>';
+        else edit=`<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`;
+      }else{
+        edit=`<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`;
+        lock='<button class="md-btn md-btn-icon" disabled title="Sin fecha corte"><i class="fa fa-question-circle"></i></button>';
       }
-      // Botones para editar, visualizar y estado
-      const acciones = `
-        ${btnEditar}
-        <button class="md-btn md-btn-icon btn-visualizar" title="Visualizar" data-id="${row.cosecha_fruta_id}"><i class="fa fa-eye"></i></button>
-        ${btnEstado}
-      `;
-      const tdAcciones = document.createElement('td');
-      tdAcciones.style = 'display:inline-flex; align-items:center;';
-      tdAcciones.innerHTML = acciones;
-      tr.appendChild(tdAcciones);
-      tbody.appendChild(tr);
+      const tdAcc=document.createElement('td'); tdAcc.style.display='inline-flex';
+      tdAcc.innerHTML=edit+`<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>`+lock;
+      tr.appendChild(tdAcc); tbody.appendChild(tr);
     });
-    // Asigna eventos a botones de edición, visualización e inactivación
-    tbody.querySelectorAll('.btn-editar').forEach(btn => {
-      btn.onclick = function () {
-        const id = this.getAttribute("data-id");
-        const registro = allData.find(row => row.cosecha_fruta_id == id);
-        if (registro) abrirModal(registro, false);
-      };
-    });
-    tbody.querySelectorAll('.btn-visualizar').forEach(btn => {
-      btn.onclick = function () {
-        const id = this.getAttribute("data-id");
-        const registro = allData.find(row => row.cosecha_fruta_id == id);
-        if (registro) abrirModal(registro, true);
-      };
-    });
-    tbody.querySelectorAll('.btn-inactivar').forEach(btn => {
-      btn.onclick = async function () {
-        const id = this.getAttribute("data-id");
-        if (!confirm("¿Seguro que quieres inactivar este registro? Esta acción no se puede deshacer.")) return;
-        try {
-          const resp = await fetch('assets/php/inactivar_cosecha_fruta.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cosecha_fruta_id: id })
-          });
-          const result = await resp.json();
-          if (result.success) {
-            alert("Registro inactivado.");
-            renderPagina();
-          } else {
-            alert(result.error || "No se pudo inactivar.");
-          }
-        } catch (e) {
-          alert("Error al inactivar.");
-        }
-      };
-    });
-    renderPaginacion();
+    bindRowEvents(); renderPagination();
   }
 
-  // Renderiza la paginación dependiendo del total de registros
-  function renderPaginacion() {
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const pagNav = document.getElementById('pagination-capacitaciones');
-    if (!pagNav) return;
-    const ul = pagNav.querySelector('.md-pagination-list');
-    if (!ul) return;
-    ul.innerHTML = '';
-    // Función auxiliar para crear cada elemento de página
-    function pageItem(text, page, active = false, disabled = false) {
-      const li = document.createElement('li');
-      li.className = disabled ? 'disabled' : (active ? 'active' : '');
-      const btn = document.createElement('button');
-      btn.className = 'page-link';
-      btn.innerText = text;
-      btn.disabled = disabled;
-      btn.onclick = function () {
-        if (!disabled && page !== currentPage) {
-          currentPage = page;
-          renderPagina();
-        }
-      };
-      li.appendChild(btn);
-      return li;
-    }
-    // Elementos de navegación
-    ul.appendChild(pageItem('«', Math.max(1, currentPage - 1), false, currentPage === 1));
-    let start = Math.max(1, currentPage - 1);
-    let end = Math.min(totalPages, start + 3);
-    if (end - start < 3) start = Math.max(1, end - 3);
-    for (let i = start; i <= end; i++) {
-      ul.appendChild(pageItem(i, i, i === currentPage));
-    }
-    ul.appendChild(pageItem('»', Math.min(totalPages, currentPage + 1), false, currentPage === totalPages));
+  function bindRowEvents(){
+    const t=document.getElementById(DOM.tbody);
+    t.querySelectorAll('.btn-editar').forEach(b=>b.onclick=()=>openModal(b.dataset.id,false));
+    t.querySelectorAll('.btn-ver').forEach(b=>b.onclick=()=>openModal(b.dataset.id,true));
+    t.querySelectorAll('.btn-inactivar').forEach(b=>b.onclick=()=>inactivar(b.dataset.id));
   }
 
-  // Verifica si el registro está aprobado para mostrar el botón de revertir aprobación
-  function isSupervisionCheckAprobado(row) {
-    const check = row.check !== undefined && row.check !== null ? Number(row.check) : 0;
-    return check === 1 || row.supervision === 'aprobado';
+  async function inactivar(id){
+    if(!confirm('¿Inactivar registro?'))return;
+    try{
+      const r=await fetch(`${API}?action=${ACTIONS.inactivate}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({[ID_KEY]:id})});
+      const j=await r.json(); if(j.success){alert('Inactivado');load();}else alert(j.error||'Fallo inactivar');
+    }catch{alert('Error inactivar');}
   }
 
-  // Abre el modal de edición o visualización, rellenando los campos con los datos del registro
-  function abrirModal(rowData, soloLectura = false) {
-    const campos = columnas
-      .filter(col => col !== 'error_registro' && col !== 'supervision')
-      .map(col => {
-        const readonly = (col === 'cosecha_fruta_id' || soloLectura) ? "readonly" : "";
-        return `
-          <div class="col-md-6 mb-3">
-            <label class="form-label">${col.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</label>
-            <input type="text" class="form-control" name="${col}" value="${rowData[col] || ''}" ${readonly}>
-          </div>
-        `;
-      }).join('');
-    const contCampos = document.getElementById('campos-formulario');
-    if (contCampos) contCampos.innerHTML = campos;
-
-    // Agrega el icono de revertir aprobación en el modal si corresponde
-    const modalFooter = document.querySelector('#modal-editar .modal-footer');
-    if (modalFooter) {
-      // Remueve un icono anterior (si existía)
-      const oldIcon = modalFooter.querySelector('.icon-repeat-supervision');
-      if (oldIcon) oldIcon.remove();
-
-      // Si el registro está aprobado, muestra el botón de revertir
-      if (isSupervisionCheckAprobado(rowData)) {
-        const repeatBtn = document.createElement('button');
-        repeatBtn.type = "button";
-        repeatBtn.className = 'btn btn-link icon-repeat-supervision';
-        repeatBtn.title = "Revertir aprobación y restaurar datos originales";
-        repeatBtn.innerHTML = `<i class="fa-solid fa-repeat" style="font-size:1.8em;color:#198754;vertical-align:middle;"></i>`;
-        repeatBtn.style.marginRight = "18px";
-
-        // Lógica para revertir la aprobación
-        repeatBtn.onclick = async function () {
-          if (!rowData.cosecha_fruta_id) return;
-          if (!confirm("¿Deseas revertir la aprobación y restaurar los datos originales?")) return;
-          try {
-            // Llama endpoint para quitar la aprobación
-            const resp1 = await fetch('assets/php/rechazar_cosecha_fruta.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ cosecha_fruta_id: rowData.cosecha_fruta_id })
-            });
-            const res1 = await resp1.json();
-            if (!res1 || !res1.success) {
-              alert("No se pudo revertir la aprobación: " + (res1 && res1.error ? res1.error : ""));
-              return;
-            }
-
-            // Obtiene datos actualizados desde la base de datos
-            const resp2 = await fetch(`assets/php/conexion_cosecha_fruta.php?page=1&pageSize=1&filtro_cosecha_fruta_id=${encodeURIComponent(rowData.cosecha_fruta_id)}`);
-            const res2 = await resp2.json();
-            const original = res2 && res2.datos && res2.datos[0];
-            if (!original) {
-              alert("No se pudo obtener los datos originales.");
-              return;
-            }
-
-            // Actualiza la tabla en memoria y re-renderiza
-            const idx = allData.findIndex(r => r.cosecha_fruta_id == original.cosecha_fruta_id);
-            if (idx !== -1) {
-              allData[idx] = original;
-            }
-            renderTabla(allData);
-
-            // Reabre el modal con los datos originales actualizados
-            abrirModal(original, false);
-          } catch (e) {
-            alert("Error al restaurar datos originales: " + (e.message || e));
-          }
-        };
-
-        modalFooter.insertBefore(repeatBtn, modalFooter.firstChild);
+  function openModal(id,readonly){
+    const row=data.find(r=>r[ID_KEY]==id); if(!row)return;
+    const cont=document.getElementById('campos-formulario');
+    cont.innerHTML=COLUMNAS.filter(c=>!['supervision','error_registro'].includes(c))
+      .map(c=>`<div class="col-md-6 mb-3">
+        <label class="form-label">${c.replace(/_/g,' ')}</label>
+        <input class="form-control" name="${c}" value="${row[c]??''}" ${(c===ID_KEY||readonly)?'readonly':''}>
+      </div>`).join('');
+    const footer=document.querySelector('#modal-editar .modal-footer');
+    if(footer){
+      footer.querySelectorAll('.icon-repeat-supervision').forEach(x=>x.remove());
+      if(row.supervision==='aprobado'||row.check==1){
+        const btn=document.createElement('button');
+        btn.type='button'; btn.className='btn btn-link icon-repeat-supervision';
+        btn.title='Revertir aprobación';
+        btn.innerHTML='<i class="fa-solid fa-repeat" style="font-size:1.6em;color:#198754;"></i>';
+        btn.onclick=()=>revertir(id); footer.insertBefore(btn,footer.firstChild);
       }
-
-      const btnSubmit = modalFooter.querySelector('button[type="submit"]');
-      if (btnSubmit) btnSubmit.style.display = soloLectura ? 'none' : '';
+      const sb=footer.querySelector('button[type="submit"]'); if(sb) sb.style.display=readonly?'none':'';
     }
-    // Muestra el modal
-    const modalEl = document.getElementById('modal-editar');
-    if (modalEl) {
-      const modal = new bootstrap.Modal(modalEl);
-      modal.show();
-    }
+    new bootstrap.Modal(document.getElementById(DOM.modal)).show();
   }
 
-  // Evento submit para guardar edición de registro
-  const formEditar = document.getElementById('form-editar');
-  if (formEditar) {
-    formEditar.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const formData = new FormData(this);
-      const datosEditados = {};
-      columnas.forEach(col => {
-        datosEditados[col] = formData.get(col);
-      });
-      // Rol para definir si la edición requiere pasar a estado pendiente
-      const rol = (document.body.getAttribute('data-role') || "").toLowerCase();
-      if (rol !== 'administrador' && rol !== 'aux_agronomico') {
-        datosEditados.supervision = 'pendiente';
-      }
-      try {
-        const resp = await fetch('assets/php/actualizar_cosecha_fruta.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datosEditados)
-        });
-        const result = await resp.json();
-        if(result.success) {
-          renderPagina();
-          setTimeout(() => {
-            document.activeElement.blur();
-            bootstrap.Modal.getInstance(document.getElementById('modal-editar'))?.hide();
-          }, 100);
-          alert("¡Guardado exitosamente!");
-        }
-      } catch(e) {
-        // NO alert de error aquí
-      }
+  async function revertir(id){
+    if(!confirm('¿Revertir aprobación?'))return;
+    try{
+      const r=await fetch(`${API}?action=${ACTIONS.reject}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({[ID_KEY]:id})});
+      const j=await r.json(); if(!j.success){alert(j.error||'No revertido');return;}
+      await load(); openModal(id,false);
+    }catch{alert('Error revertir');}
+  }
+
+  async function save(e){
+    e.preventDefault();
+    const fd=new FormData(e.target),obj={};
+    COLUMNAS.forEach(c=>obj[c]=fd.get(c));
+    const rol=(document.body.getAttribute('data-role')||'').toLowerCase();
+    if(!/administrador|aux_agronomico/.test(rol))obj.supervision='pendiente';
+    try{
+      const r=await fetch(`${API}?action=${ACTIONS.save}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)});
+      const j=await r.json();
+      if(j.success){alert('Guardado'); load(); setTimeout(()=>bootstrap.Modal.getInstance(document.getElementById(DOM.modal))?.hide(),150);}
+      else alert(j.error||'Error guardando');
+    }catch{alert('Error guardando');}
+  }
+
+  function buildXLSX(rows,name){
+    const cols=COLUMNAS.filter(c=>!['error_registro','supervision'].includes(c));
+    const head=cols.map(c=>c.toUpperCase());
+    const body=rows.map(r=>cols.map(c=>r[c]??''));
+    const ws=XLSX.utils.aoa_to_sheet([head,...body]); const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Hoja1'); XLSX.writeFile(wb,`${name}.xlsx`);
+  }
+  function exportar(tipo){
+    if(tipo==='todo'){
+      const qs=new URLSearchParams({action:ACTIONS.listFallback[0],page:1,pageSize:100000});
+      fetch(`${API}?${qs}`).then(r=>r.json()).then(j=>buildXLSX((j.datos||j.data||[]),'cosecha_fruta_todo'));
+      return;
+    }
+    let rows=data;
+    if(tipo==='seleccion'){
+      rows=[]; document.querySelectorAll(`#${DOM.tbody} .row-check`).forEach(ch=>{if(ch.checked)rows.push(data[+ch.dataset.index]);});
+    }
+    buildXLSX(rows,'cosecha_fruta_'+tipo);
+  }
+  function showExportMenu(){
+    const btn=document.getElementById(DOM.exportBtn); if(!btn)return;
+    const id='exportMenuCosecha'; document.getElementById(id)?.remove();
+    const menu=document.createElement('div'); menu.id=id;
+    Object.assign(menu.style,{position:'absolute',top:'40px',right:'0',background:'#fff',boxShadow:'0 4px 16px rgba(0,0,0,.15)',borderRadius:'12px',padding:'8px',zIndex:1000});
+    menu.innerHTML=['todo','filtrado','seleccion'].map(t=>`<button class="exp" data-t="${t}">${t.toUpperCase()} (.xlsx)</button>`).join('');
+    btn.parentNode.style.position='relative'; btn.parentNode.appendChild(menu);
+    menu.querySelectorAll('.exp').forEach(b=>b.onclick=()=>{exportar(b.dataset.t);menu.remove();});
+    setTimeout(()=>document.addEventListener('mousedown',function out(ev){
+      if(!menu.contains(ev.target)&&ev.target!==btn){menu.remove();document.removeEventListener('mousedown',out);}
+    }),50);
+  }
+  function renderPagination(){
+    const nav=document.getElementById(DOM.pagination); if(!nav)return;
+    const ul=nav.querySelector('.md-pagination-list'); if(!ul)return; ul.innerHTML='';
+    const pages=Math.max(1,Math.ceil(total/pageSize));
+    function item(t,p,dis,act){
+      const li=document.createElement('li'); li.className=dis?'disabled':(act?'active':'');
+      const b=document.createElement('button'); b.className='page-link'; b.textContent=t; b.disabled=dis;
+      b.onclick=()=>{if(!dis&&p!==page){page=p;load();}}; li.appendChild(b); return li;
+    }
+    ul.appendChild(item('«',Math.max(1,page-1),page===1,false));
+    let start=Math.max(1,page-1),end=Math.min(pages,start+3); if(end-start<3)start=Math.max(1,end-3);
+    for(let i=start;i<=end;i++) ul.appendChild(item(String(i),i,false,i===page));
+    ul.appendChild(item('»',Math.min(pages,page+1),page===pages,false));
+  }
+  async function load(){
+    try{const res=await fetchData(); data=res.datos||[]; total=res.total||data.length; render();}
+    catch(e){alert(e.message||'Error cargando cosecha_fruta');}
+  }
+  function init(){
+    document.getElementById(DOM.form)?.addEventListener('submit',save);
+    document.getElementById(DOM.clearBtn)?.addEventListener('click',()=>{filters={};page=1;document.querySelectorAll(`#${DOM.table} thead input[data-col]`).forEach(i=>i.value='');load();});
+    document.getElementById(DOM.limitSelect)?.addEventListener('change',e=>{pageSize=parseInt(e.target.value,10)||25;page=1;load();});
+    document.getElementById(DOM.selectAll)?.addEventListener('change',e=>{
+      document.querySelectorAll(`#${DOM.tbody} .row-check`).forEach(ch=>ch.checked=e.target.checked);
     });
-  }
-
-  // ------------------ EXPORTAR A EXCEL ------------------
-  // Exporta los datos recibidos a un archivo Excel usando la librería XLSX
-  function exportarAExcelDesdeDatos(datos, columnas, nombre) {
-    const cabeceras = columnas.map(c => c.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
-    const data = datos.map(row => columnas.map(col => row[col]));
-    const ws = XLSX.utils.aoa_to_sheet([cabeceras, ...data]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Hoja1");
-    XLSX.writeFile(wb, nombre + ".xlsx");
-  }
-  // Exportar todos los registros
-  function exportarTodo() {
-    const params = new URLSearchParams();
-    params.append('exportTodo', '1');
-    fetch('assets/php/conexion_cosecha_fruta.php?' + params.toString())
-      .then(r => r.json())
-      .then(json => {
-        exportarAExcelDesdeDatos(json.datos || [], columnas, 'cosecha_fruta_todo');
-      });
-  }
-  // Exportar registros filtrados (los que están en allData)
-  function exportarFiltrado() {
-    exportarAExcelDesdeDatos(allData, columnas, 'cosecha_fruta_filtrado');
-  }
-  // Exportar solo filas seleccionadas por el usuario
-  function exportarSeleccion() {
-    const tbody = document.getElementById('tbody-cosecha-fruta');
-    const seleccion = [];
-    tbody.querySelectorAll('tr').forEach((tr, idx) => {
-      const chk = tr.querySelector('input[type="checkbox"]');
-      if (chk && chk.checked) seleccion.push(allData[idx]);
+    document.querySelectorAll(`#${DOM.table} thead input[data-col]`).forEach(inp=>{
+      inp.addEventListener('input',()=>{filters[inp.dataset.col]=inp.value;page=1;load();});
     });
-    exportarAExcelDesdeDatos(seleccion, columnas, 'cosecha_fruta_seleccion');
-  }
-  // Crea el menú desplegable para exportación
-  function crearMenuExportar() {
-    if (document.getElementById('exportMenuCosecha')) return;
-    const btnExport = document.getElementById('exportBtnCosecha');
-    if (!btnExport) return;
-    const menu = document.createElement('div');
-    menu.id = 'exportMenuCosecha';
-    menu.className = 'md-export-menu';
-    menu.style.position = 'absolute';
-    menu.style.top = '40px';
-    menu.style.right = '0';
-    menu.style.background = '#fff';
-    menu.style.boxShadow = '0 2px 16px rgba(0,0,0,0.15)';
-    menu.style.padding = '8px 0';
-    menu.style.borderRadius = '16px';
-    menu.style.zIndex = 1000;
-    menu.style.minWidth = '190px';
-    menu.innerHTML = `
-      <button class="md-export-menu-item" style="width:100%;text-align:left;padding:12px 24px;border:none;background:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;gap:10px">
-        <i class="fas fa-table"></i> <b>Todo (.xlsx)</b>
-      </button>
-      <button class="md-export-menu-item" style="width:100%;text-align:left;padding:12px 24px;border:none;background:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;gap:10px">
-        <i class="fas fa-filter"></i> Filtrado (.xlsx)
-      </button>
-      <button class="md-export-menu-item" style="width:100%;text-align:left;padding:12px 24px;border:none;background:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;gap:10px">
-        <i class="fas fa-check-square"></i> Selección (.xlsx)
-      </button>
-    `;
-    btnExport.parentNode.style.position = 'relative';
-    btnExport.parentNode.appendChild(menu);
-    const items = menu.querySelectorAll('.md-export-menu-item');
-    items[0].onclick = function(){ exportarTodo(); menu.remove(); };
-    items[1].onclick = function(){ exportarFiltrado(); menu.remove(); };
-    items[2].onclick = function(){ exportarSeleccion(); menu.remove(); };
-    setTimeout(()=>{
-      function clickFuera(e){
-        if (!menu.contains(e.target) && e.target !== btnExport) {
-          menu.remove();
-          document.removeEventListener('mousedown', clickFuera);
-        }
-      }
-      document.addEventListener('mousedown', clickFuera);
-    }, 100);
-  }
-  // ------------------------------------------------------
-
-  // Renderiza la página (obtiene datos y llama renderTabla)
-  async function renderPagina() {
-    const data = await fetchData(currentPage, pageSize, filtros, ordenColumna, ordenAsc);
-    allData = data.datos || [];
-    total = data.total || 0;
-    renderTabla(allData);
-  }
-  // Inicialización y asignación de eventos al cargar el DOM
-  document.addEventListener('DOMContentLoaded', () => {
-    const filtrosInputs = document.querySelectorAll('#tabla-capacitaciones thead input[data-col]');
-    const btnClear = document.getElementById('clearFiltersBtn1');
-    filtrosInputs.forEach(input => {
-      input.addEventListener('input', function () {
-        filtros[this.dataset.col] = this.value;
-        currentPage = 1;
-        renderPagina();
-      });
+    document.querySelectorAll(`#${DOM.table} thead .icon-sort`).forEach(icon=>{
+      icon.addEventListener('click',()=>{if(sortCol===icon.dataset.col)sortAsc=!sortAsc;else{sortCol=icon.dataset.col;sortAsc=true;}page=1;load();});
     });
-    if (btnClear) {
-      btnClear.addEventListener('click', () => {
-        filtrosInputs.forEach(input => input.value = '');
-        filtros = {};
-        currentPage = 1;
-        renderPagina();
-      });
-    }
-
-    const select = document.getElementById('limitSelect1');
-    if (select) {
-      select.addEventListener('change', function () {
-        pageSize = parseInt(this.value, 10);
-        currentPage = 1;
-        renderPagina();
-      });
-    }
-    const selectAll = document.getElementById('selectAll1');
-    if (selectAll) {
-      selectAll.addEventListener('change', function() {
-        document.querySelectorAll('.fila-cosecha-chk').forEach(chk => chk.checked = this.checked);
-      });
-    }
-    document.querySelectorAll('#tabla-capacitaciones thead .icon-sort').forEach(flecha => {
-      flecha.addEventListener('click', function() {
-        if (ordenColumna === this.dataset.col) {
-          ordenAsc = !ordenAsc;
-        } else {
-          ordenColumna = this.dataset.col;
-          ordenAsc = true;
-        }
-        document.querySelectorAll('#tabla-capacitaciones thead .icon-sort').forEach(f=>f.classList.remove('active'));
-        this.classList.add('active');
-        renderPagina();
-      });
-    });
-
-    // EXPORTACIÓN
-    const btnExport = document.getElementById('exportBtnCosecha');
-    if (btnExport) {
-      btnExport.addEventListener('click', function(e) {
-        e.stopPropagation();
-        crearMenuExportar();
-      });
-    }
-    // Agrega estilos para el menú de exportación
-    const estilos = `
-    .md-export-menu { animation: fadein .2s; }
-    .md-export-menu-item:hover { background: #f5f5f5; }
-    @keyframes fadein { from{opacity:0;transform:translateY(-8px);} to{opacity:1;transform:translateY(0);} }
-    `;
-    const styleTag = document.createElement('style');
-    styleTag.textContent = estilos;
-    document.head.appendChild(styleTag);
-
-    renderPagina();
-  });
+    document.getElementById(DOM.exportBtn)?.addEventListener('click',e=>{e.stopPropagation();showExportMenu();});
+    load();
+  }
+  document.addEventListener('DOMContentLoaded',init);
 })();

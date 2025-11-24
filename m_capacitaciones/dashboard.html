@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="es-419">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Dashboard de Capacitaciones - OSM</title>
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="../assets/css/bs-theme-overrides.css">
+    <style>
+        body { visibility: hidden; }
+        .stat-card { transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body id="page-top" data-role="Administrador,Capacitador,Aux_Capacitador,Capacitador_SIE,Capacitador_GH,Capacitador_TI,Capacitador_MT,Capacitador_ADM,Capacitador_IND,Capacitador_AGR">
+    <script src="../assets/js/auth_guard.js"></script>
+
+    <div id="wrapper">
+        <div id="sidebar"></div>
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div id="navbar"></div>
+
+                <div class="container-fluid">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="text-dark mb-0">Dashboard de Capacitaciones</h3>
+                        <div>
+                            <button class="btn btn-success btn-sm" id="btnExportDetailedExcel">
+                                <i class="fas fa-file-excel"></i> Exportar Detallado
+                            </button>
+                            <button class="btn btn-primary btn-sm" id="btnExportSummaryExcel">
+                                <i class="fas fa-table"></i> Exportar Resumen
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Summary Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2 stat-card">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Total Personas (Activas)
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statTotalColaboradores">-</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-user-friends fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2 stat-card">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Total Capacitaciones (Al Día)
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statCapacitados">-</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-graduation-cap fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2 stat-card">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Pendientes ó Próximos a Vencer
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statPendientes">-</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-hourglass-half fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-danger shadow h-100 py-2 stat-card">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                                Capacitaciones (Vencidas)
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statVencidas">-</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="text-primary m-0 fw-bold">Filtros de Búsqueda</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-2">
+                                    <label class="form-label">Estado</label>
+                                    <select class="form-select" id="filterEstado">
+                                        <option value="">Todos</option>
+                                        <option value="al_dia">Al Día</option>
+                                        <option value="proximo_vencer">Próximo a Vencer</option>
+                                        <option value="pendiente">Pendiente</option>
+                                        <option value="vencida">Vencida</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Situación</label>
+                                    <select class="form-select" id="filterSituacion">
+                                        <option value="">Todos</option>
+                                        <option value="A">Activo (A)</option>
+                                        <option value="V">Vacaciones (V)</option>
+                                        <option value="P">Permiso (P)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Cargo</label>
+                                    <select class="form-select" id="filterCargo">
+                                        <option value="">Todos</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Sub Área</label>
+                                    <select class="form-select" id="filterSubArea">
+                                        <option value="">Todos</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Tema</label>
+                                    <select class="form-select" id="filterTema">
+                                        <option value="">Todos</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Rol Capacitador</label>
+                                    <select class="form-select" id="filterRol">
+                                        <option value="">Todos</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-3">
+                                    <label class="form-label">Fecha Desde</label>
+                                    <input type="date" class="form-control" id="filterFechaDesde">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Fecha Hasta</label>
+                                    <input type="date" class="form-control" id="filterFechaHasta">
+                                </div>
+                                <div class="col-md-6 text-end align-self-end">
+                                    <button class="btn btn-secondary" id="btnClearFilters">
+                                        <i class="fas fa-eraser"></i> Limpiar Filtros
+                                    </button>
+                                    <button class="btn btn-primary" id="btnApplyFilters">
+                                        <i class="fas fa-search"></i> Aplicar Filtros
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary by Category -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card shadow">
+                                <div class="card-header py-3">
+                                    <h6 class="text-primary m-0 fw-bold">Top 10 Cargos con Capacitaciones Pendientes</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="topCargosPendientes">
+                                        <div class="text-center">
+                                            <div class="spinner-border spinner-border-sm" role="status">
+                                                <span class="visually-hidden">Cargando...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card shadow">
+                                <div class="card-header py-3">
+                                    <h6 class="text-primary m-0 fw-bold">Top 10 Temas con Capacitaciones Pendientes</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="topTemasPendientes">
+                                        <div class="text-center">
+                                            <div class="spinner-border spinner-border-sm" role="status">
+                                                <span class="visually-hidden">Cargando...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Table -->
+                    <div class="card shadow">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="text-primary m-0 fw-bold">Detalle de Capacitaciones por Colaborador</h6>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="mb-0 me-2">Mostrar:</label>
+                                <select class="form-select form-select-sm" id="recordsPerPage" style="width: auto;">
+                                    <option value="10">10</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="1000">1000</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm" id="tableDashboard">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Estado</th>
+                                            <th>Situación</th>
+                                            <th>Colaborador</th>
+                                            <th>Cédula</th>
+                                            <th>Cargo</th>
+                                            <th>Sub Área</th>
+                                            <th>Tema</th>
+                                            <th>Última Capacitación</th>
+                                            <th>Próxima Capacitación</th>
+                                            <th>Días</th>
+                                            <th>Rol Capacitador</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="11" class="text-center">
+                                                <div class="spinner-border" role="status">
+                                                    <span class="visually-hidden">Cargando...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small class="text-muted" id="recordCount">Total: 0 registros</small>
+                                <nav aria-label="Paginación de tabla">
+                                    <ul class="pagination pagination-sm mb-0" id="tablePagination">
+                                        <!-- Pagination will be rendered here -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="bg-white sticky-footer">
+                <div class="container my-auto">
+                    <div class="text-center my-auto copyright"><span>© OSM 2025</span></div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script src="../assets/js/navbar.js"></script>
+    <script src="assets/js/xlsx.full.min.js"></script>
+    <script src="assets/js/date-utils.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+    <script src="../assets/js/web_config.js"></script>
+</body>
+</html>

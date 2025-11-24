@@ -5,6 +5,9 @@
  * Access: Administrator role only
  */
 
+// Apply security headers
+require_once __DIR__ . '/security_headers.php';
+
 session_start();
 header('Content-Type: application/json');
 
@@ -22,14 +25,29 @@ if ($_SESSION['rol_nombre'] !== 'Administrador' && $_SESSION['rol_nombre'] !== '
     exit;
 }
 
+// Load configuration
+require_once __DIR__ . '/config.php';
+
 // Upload configuration
 $uploadDir = __DIR__ . '/../assets/img/uploads/';
 $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-$maxFileSize = 5 * 1024 * 1024; // 5MB
+$allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+$maxFileSize = UPLOAD_MAX_SIZE; // From config
 
 // Create upload directory if it doesn't exist
 if (!file_exists($uploadDir)) {
     mkdir($uploadDir, 0755, true);
+}
+
+// Ensure .htaccess exists to prevent script execution
+$htaccessPath = $uploadDir . '.htaccess';
+if (!file_exists($htaccessPath)) {
+    $htaccessContent = "# Prevent script execution\n" .
+                       "<FilesMatch \"\\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|htm|shtml|sh|cgi)$\">\n" .
+                       "    Order Allow,Deny\n" .
+                       "    Deny from all\n" .
+                       "</FilesMatch>\n";
+    file_put_contents($htaccessPath, $htaccessContent);
 }
 
 try {
@@ -51,10 +69,17 @@ try {
     
     // Check file size
     if ($file['size'] > $maxFileSize) {
-        throw new Exception('El archivo es demasiado grande (máximo 5MB)');
+        $maxMB = round($maxFileSize / 1024 / 1024, 1);
+        throw new Exception("El archivo es demasiado grande (máximo {$maxMB}MB)");
     }
     
-    // Check file type
+    // Validate file extension first
+    $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($fileExtension, $allowedExtensions)) {
+        throw new Exception('Extensión de archivo no permitida. Solo se permiten: ' . implode(', ', $allowedExtensions));
+    }
+    
+    // Check MIME type using finfo (more reliable than $_FILES['type'])
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mimeType = finfo_file($finfo, $file['tmp_name']);
     finfo_close($finfo);
@@ -63,10 +88,19 @@ try {
         throw new Exception('Tipo de archivo no permitido. Solo se permiten imágenes (JPG, PNG, GIF, WEBP)');
     }
     
-    // Generate unique filename
-    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    // Additional validation: check if it's really an image
+    $imageInfo = @getimagesize($file['tmp_name']);
+    if ($imageInfo === false) {
+        throw new Exception('El archivo no es una imagen válida');
+    }
+    
+    // Sanitize upload type
+    $uploadType = preg_replace('/[^a-z0-9_-]/i', '', $uploadType);
+    
+    // Generate unique filename with timestamp
     $timestamp = time();
-    $filename = $uploadType . '_' . $timestamp . '.' . $extension;
+    $randomString = bin2hex(random_bytes(8));
+    $filename = $uploadType . '_' . $timestamp . '_' . $randomString . '.' . $fileExtension;
     $targetPath = $uploadDir . $filename;
     
     // Move uploaded file
@@ -74,8 +108,14 @@ try {
         throw new Exception('Error al guardar el archivo');
     }
     
+    // Set restrictive permissions
+    chmod($targetPath, 0644);
+    
     // Return relative path for database
     $relativePath = 'assets/img/uploads/' . $filename;
+    
+    // Log successful upload
+    error_log("File uploaded successfully by user {$_SESSION['usuario_id']}: $filename");
     
     echo json_encode([
         'success' => true,
@@ -85,6 +125,9 @@ try {
     ]);
     
 } catch (Exception $e) {
+    // Log error without exposing details to client
+    error_log("File upload error: " . $e->getMessage());
+    
     http_response_code(400);
     echo json_encode([
         'success' => false,

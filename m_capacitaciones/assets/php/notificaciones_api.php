@@ -158,7 +158,7 @@ try {
             break;
 
         case 'get_trainer_alerts':
-            // Get 7-day alerts for trainers - notifications that will expire in 7 days or less
+            // Get 30-day alerts for trainers - trainings that need attention
             $usuario_id = $_SESSION['usuario_id'] ?? null;
             
             if (!$usuario_id) {
@@ -178,29 +178,41 @@ try {
                 jsonResponse(['success' => true, 'data' => []]);
             }
 
-            // Get notifications that expire in 7 days or less
+            // Get trainings that need attention:
+            // - Show alerts starting from fecha_notificacion_previa (1 month before)
+            // - Keep showing alerts up to 30 days after the training was due
+            //   (this gives trainers time to schedule the training even if overdue)
             $placeholders = implode(',', array_fill(0, count($roles), '?'));
             $stmt = $pg->prepare("
                 SELECT 
-                    n.*,
+                    p.id as id_programacion,
+                    p.id_tema,
                     t.nombre AS tema_nombre,
                     c.cargo AS cargo_nombre,
                     p.sub_area,
+                    a.sub_area AS sub_area_nombre,
                     r.nombre AS rol_capacitador_nombre,
-                    COUNT(DISTINCT n.id_colaborador) as colaboradores_pendientes,
-                    STRING_AGG(DISTINCT col.ac_nombre1 || ' ' || COALESCE(col.ac_apellido1, ''), ', ' ORDER BY col.ac_nombre1 || ' ' || COALESCE(col.ac_apellido1, '')) as nombres_colaboradores
-                FROM cap_notificaciones n
-                INNER JOIN cap_programacion p ON n.id_programacion = p.id
+                    p.fecha_ultima_capacitacion,
+                    p.fecha_proxima_capacitacion,
+                    p.fecha_notificacion_previa,
+                    (p.fecha_proxima_capacitacion - CURRENT_DATE)::int AS dias_para_proxima,
+                    (
+                        SELECT COUNT(DISTINCT n.id_colaborador)
+                        FROM cap_notificaciones n
+                        WHERE n.id_programacion = p.id
+                        AND n.estado IN ('pendiente', 'proximo_vencer', 'vencida')
+                    ) AS colaboradores_pendientes
+                FROM cap_programacion p
                 INNER JOIN cap_tema t ON p.id_tema = t.id
                 INNER JOIN adm_cargos c ON p.id_cargo = c.id_cargo
                 INNER JOIN adm_roles r ON p.id_rol_capacitador = r.id
-                INNER JOIN adm_colaboradores col ON n.id_colaborador = col.ac_id
+                LEFT JOIN adm_área a ON p.sub_area = a.id_area
                 WHERE p.id_rol_capacitador IN ($placeholders)
-                AND n.dias_para_vencimiento <= 7
-                AND n.dias_para_vencimiento >= -30
-                AND n.estado IN ('proximo_vencer', 'vencida')
-                GROUP BY n.id_programacion, p.id, t.nombre, c.cargo, p.sub_area, r.nombre, n.fecha_proxima, n.dias_para_vencimiento
-                ORDER BY n.fecha_proxima ASC
+                AND p.activo = true
+                AND p.fecha_notificacion_previa IS NOT NULL
+                AND p.fecha_notificacion_previa <= CURRENT_DATE
+                AND (p.fecha_proxima_capacitacion >= CURRENT_DATE - INTERVAL '30 days')
+                ORDER BY p.fecha_proxima_capacitacion ASC
             ");
             $stmt->execute($roles);
             $alerts = $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -1,8 +1,19 @@
 <?php
+// ed_formulario_api.php
+// API para leer/editar/listar formularios y asistentes (usado en la vista de edición de formulario)
+
 session_start();
 require_once __DIR__ . '/../../../php/db_postgres.php';
 header('Content-Type: application/json');
 
+// Validar que existe una sesión activa
+if (!isset($_SESSION['usuario_id'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Sesión no iniciada. Por favor inicie sesión.']);
+    exit;
+}
+
+/* Helper simple para devolver JSON y terminar */
 function respond($data) {
     echo json_encode($data);
     exit;
@@ -10,6 +21,10 @@ function respond($data) {
 
 $action = $_GET['action'] ?? ($_POST['action'] ?? null);
 
+/* Acción: leer_formulario
+   Devuelve el formulario, listas de selects (temas, procesos, lugares, actividades),
+   responsable (usuario), creador/editor y asistentes asociados.
+*/
 if ($action === 'leer_formulario') {
     $id = intval($_GET['id'] ?? 0);
     if ($id > 0) {
@@ -62,6 +77,7 @@ if ($action === 'leer_formulario') {
     }
 }
 
+/* Acción: listar (paginado y filtrado para tabla de listados) */
 if ($action === 'listar') {
     $limit = max(1, intval($_GET['limit'] ?? 10));
     $page = max(1, intval($_GET['page'] ?? 1));
@@ -121,6 +137,7 @@ if ($action === 'listar') {
     ]);
 }
 
+/* Acción: eliminar formulario (borra asistentes y el formulario en transacción) */
 if ($action === 'eliminar') {
     $id = intval($_POST['id'] ?? 0);
     if ($id > 0) {
@@ -134,6 +151,7 @@ if ($action === 'eliminar') {
     }
 }
 
+/* Buscar colaborador (versión usada por vistas AJAX/Modal) */
 if ($action === 'buscar_colaborador') {
     $cedula = $_GET['cedula'] ?? '';
     $st = $pg->prepare("
@@ -147,12 +165,13 @@ if ($action === 'buscar_colaborador') {
     respond(['colaborador' => $col]);
 }
 
+/* Agregar asistente (API para modal que agrega un asistente individual) */
 if ($action === 'agregar_asistente') {
     $id_formulario = intval($_POST['id_formulario'] ?? 0);
     $cedula = $_POST['cedula'] ?? '';
-    $estado_aprovacion = $_POST['estado_aprovacion'] ?? '';
+    $estado_aprobacion = $_POST['estado_aprobacion'] ?? '';
 
-    if ($estado_aprovacion === '') {
+    if ($estado_aprobacion === '') {
         respond(['error' => 'Debes seleccionar estado de aprobación']);
     }
 
@@ -187,16 +206,17 @@ if ($action === 'agregar_asistente') {
 
     $pg->prepare("
         INSERT INTO cap_formulario_asistente (
-            id_formulario, cedula, estado_aprovacion, nombre, empresa, cargo, área, sub_área, rango, situacion
+            id_formulario, cedula, estado_aprobacion, nombre, empresa, cargo, área, sub_área, rango, situacion
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ")->execute([
-        $id_formulario, $cedula, $estado_aprovacion, $nombre, $empresa,
+        $id_formulario, $cedula, $estado_aprobacion, $nombre, $empresa,
         $cargoRow['cargo'], $areaRow['area'], $areaRow['sub_area'], $cargoRow['rango_cargo'], $situacion
     ]);
 
     respond(['ok' => true]);
 }
 
+/* Actualizar formulario principal (edición desde UI) */
 if ($action === 'actualizar_formulario') {
     $id = intval($_POST['id'] ?? 0);
     $id_proceso = $_POST['id_proceso'] ?? null;
@@ -242,6 +262,7 @@ if ($action === 'actualizar_formulario') {
     }
 }
 
+/* Eliminar asistente por ID */
 if ($action === 'eliminar_asistente') {
     $id = intval($_POST['id'] ?? 0);
     if ($id > 0) {

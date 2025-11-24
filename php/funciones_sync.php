@@ -1,7 +1,11 @@
 <?php
+// Rol por defecto para colaboradores sincronizados desde SQL Server
+define('ROL_COLABORADOR', 2);
+
 function getColaboradoresSQLServer(PDO $conn_sqlsrv) {
     $query = "
         SELECT 
+            EMPLE_COD,
             REPLACE(SCEDULA, '.', '') AS SCEDULA,
             NOMBRE_1, NOMBRE_2, APELLIDO_1, APELLIDO_2,
             EMPRESA, CARGO, SITUACION, PROYECTO_COSTO
@@ -15,6 +19,7 @@ function syncAllColaboradores(PDO $conn_sqlsrv, PDO $conn_pgsql) {
     $colaboradores = getColaboradoresSQLServer($conn_sqlsrv);
 
     foreach ($colaboradores as $colaborador) {
+        $emple_cod = $colaborador['EMPLE_COD'];
         $cedula = preg_replace('/\D/', '', $colaborador['SCEDULA']);
         $nombre1 = $colaborador['NOMBRE_1'];
         $nombre2 = $colaborador['NOMBRE_2'] ?? '';
@@ -40,15 +45,15 @@ function syncAllColaboradores(PDO $conn_sqlsrv, PDO $conn_pgsql) {
         $area_id = ensureArea($conn_pgsql, $sub_area);
         $rango = getRangoCargo($conn_pgsql, $cargo_id);
 
-        $es_activo = in_array($situacion_codigo, ['A', 'V', 'P']);
-
-        // Verifica si el mismo registro ya existe
-        $stmt = $conn_pgsql->prepare("SELECT ac_id FROM adm_colaboradores WHERE ac_cedula = ? AND ac_id_situación = ? AND ac_sub_area = ? AND ac_id_cargo = ? AND ac_empresa = ?");
-        $stmt->execute([$cedula, $situacion_id, $sub_area, $cargo_id, $empresa_id]);
+        // Verifica si el registro ya existe por ac_id (EMPLE_COD)
+        $stmt = $conn_pgsql->prepare("SELECT ac_id FROM adm_colaboradores WHERE ac_id = ?");
+        $stmt->execute([$emple_cod]);
 
         if ($stmt->rowCount() > 0) {
+            // El registro existe, actualizar todos los campos
             $sql = "
                 UPDATE adm_colaboradores SET
+                    ac_cedula = :cedula,
                     ac_nombre1 = :nombre1,
                     ac_nombre2 = :nombre2,
                     ac_apellido1 = :apellido1,
@@ -59,81 +64,64 @@ function syncAllColaboradores(PDO $conn_sqlsrv, PDO $conn_pgsql) {
                     ac_id_situación = :situacion,
                     ac_sub_area = :subarea,
                     ac_rango = :rango
-                WHERE ac_cedula = :cedula
-                  AND ac_id_situación = :situacion
-                  AND ac_sub_area = :subarea
-                  AND ac_id_cargo = :cargo
-                  AND ac_empresa = :empresa
+                WHERE ac_id = :emple_cod
             ";
+            
+            $params = [
+                ':emple_cod' => $emple_cod,
+                ':cedula' => $cedula,
+                ':nombre1' => $nombre1,
+                ':nombre2' => $nombre2,
+                ':apellido1' => $apellido1,
+                ':apellido2' => $apellido2,
+                ':empresa' => $empresa_id,
+                ':cargo' => $cargo_id,
+                ':area' => $area_id,
+                ':situacion' => $situacion_id,
+                ':subarea' => $sub_area,
+                ':rango' => $rango
+            ];
         } else {
-            // si está activo, actualizar si ya hay otro activo por cédula
-            if ($es_activo) {
-                $stmt2 = $conn_pgsql->prepare("SELECT ac_id FROM adm_colaboradores WHERE ac_cedula = ? AND ac_id_situación IN ('A', 'V', 'P')");
-                $stmt2->execute([$cedula]);
-
-                if ($stmt2->rowCount() > 0) {
-                    $sql = "
-                        UPDATE adm_colaboradores SET
-                            ac_nombre1 = :nombre1,
-                            ac_nombre2 = :nombre2,
-                            ac_apellido1 = :apellido1,
-                            ac_apellido2 = :apellido2,
-                            ac_empresa = :empresa,
-                            ac_id_cargo = :cargo,
-                            ac_id_area = :area,
-                            ac_id_situación = :situacion,
-                            ac_sub_area = :subarea,
-                            ac_rango = :rango
-                        WHERE ac_cedula = :cedula AND ac_id_situación IN ('A', 'V', 'P')
-                    ";
-                } else {
-                    $sql = getInsertSQL();
-                }
-            } else {
-                $sql = getInsertSQL(true); // inactivos insertan sin conflictos
-            }
-        }
-
-        $params = [
-            ':cedula' => $cedula,
-            ':nombre1' => $nombre1,
-            ':nombre2' => $nombre2,
-            ':apellido1' => $apellido1,
-            ':apellido2' => $apellido2,
-            ':empresa' => $empresa_id,
-            ':cargo' => $cargo_id,
-            ':area' => $area_id,
-            ':situacion' => $situacion_id,
-            ':subarea' => $sub_area,
-            ':rango' => $rango
-        ];
-
-        if (strpos($sql, ':password') !== false) {
-            $params[':password'] = $password_default;
+            // El registro no existe, insertar nuevo con ac_id = EMPLE_COD
+            // Se asigna contraseña generada automáticamente y rol 2 (colaborador)
+            $sql = "
+                INSERT INTO adm_colaboradores (
+                    ac_id, ac_cedula, ac_nombre1, ac_nombre2, ac_apellido1, ac_apellido2,
+                    ac_empresa, ac_id_cargo, ac_id_area, ac_id_situación, ac_contraseña,
+                    ac_sub_area, ac_rango, ac_id_rol
+                ) VALUES (
+                    :emple_cod, :cedula, :nombre1, :nombre2, :apellido1, :apellido2,
+                    :empresa, :cargo, :area, :situacion, :password,
+                    :subarea, :rango, :rol
+                )
+            ";
+            
+            $params = [
+                ':emple_cod' => $emple_cod,
+                ':cedula' => $cedula,
+                ':nombre1' => $nombre1,
+                ':nombre2' => $nombre2,
+                ':apellido1' => $apellido1,
+                ':apellido2' => $apellido2,
+                ':empresa' => $empresa_id,
+                ':cargo' => $cargo_id,
+                ':area' => $area_id,
+                ':situacion' => $situacion_id,
+                ':password' => $password_default,
+                ':subarea' => $sub_area,
+                ':rango' => $rango,
+                ':rol' => ROL_COLABORADOR
+            ];
         }
 
         $stmt = $conn_pgsql->prepare($sql);
         $stmt->execute($params);
 
-        logSyncAction("Procesado: {$cedula} - {$nombre1} {$apellido1} ({$situacion_codigo})");
+        logSyncAction("Procesado: EMPLE_COD={$emple_cod}, Cedula={$cedula} - {$nombre1} {$apellido1} ({$situacion_codigo})");
     }
 }
 
-function getInsertSQL(bool $ignore_conflict = false): string {
-    $conflict = $ignore_conflict ? "ON CONFLICT DO NOTHING" : "";
-    return "
-        INSERT INTO adm_colaboradores (
-            ac_cedula, ac_nombre1, ac_nombre2, ac_apellido1, ac_apellido2,
-            ac_empresa, ac_id_cargo, ac_id_area, ac_id_situación, ac_contraseña,
-            ac_sub_area, ac_rango, ac_id_rol
-        ) VALUES (
-            :cedula, :nombre1, :nombre2, :apellido1, :apellido2,
-            :empresa, :cargo, :area, :situacion, :password,
-            :subarea, :rango, 2
-        )
-        $conflict
-    ";
-}
+
 
 function logSyncAction(string $msg): void {
     $file = __DIR__ . '/sync_colaboradores.log';

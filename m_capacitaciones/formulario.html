@@ -5,21 +5,27 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>OSM</title>
+    <!-- Meta Open Graph / icono -->
     <meta property="og:image" content="../assets/img/Sin%20título-2.png">
     <meta property="og:type" content="website">
     <link rel="icon" type="image/png" sizes="697x475" href="../assets/img/Sin%20título-2.png">
+    <!-- CSS -->
     <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
     <link rel="stylesheet" href="../assets/fonts/fontawesome-all.min.css">
     <link rel="stylesheet" href="../assets/css/bs-theme-overrides.css">
+    <!-- Comentario: Ocultar body hasta cargar recursos (previene parpadeo) -->
     <style>body { visibility: hidden; }</style>
 </head>
 
+<!-- Comentario: body con roles permitidos. No cambiar; usado por control de permisos en JS -->
 <body id="page-top" body data-role="Administrador,Capacitador,Aux_Capacitador,Capacitador_SIE,Capacitador_GH,Capacitador_TI,Capacitador_MT,Capacitador_ADM,Capacitador_IND,Capacitador_AGR">
 <div id="wrapper">
+    <!-- Sidebar dinámico (se inyecta via JS) -->
     <div id="sidebar"></div> <!-- Sidebar dinámico -->
     <div class="d-flex flex-column" id="content-wrapper">
         <div id="content">
+            <!-- Navbar dinámico (se inyecta via JS) -->
             <div id="navbar"></div> <!-- Navbar dinámico -->
                 <div class="container">
                     <!-- Mensaje de éxito (inicialmente oculto) -->
@@ -31,8 +37,10 @@
                     </div>
                         <div class="row g-5" style="background: var(--bs-body-bg);border-radius: 10px;margin-top: 0px;margin-right: 0px;margin-left: 0px;box-shadow: inset 0px 0px;">
                             <div class="col-md-12 col-lg-12 col-xl-12" style="margin-top: 23px;">
+                                <!-- FORMULARIO PRINCIPAL -->
                                 <form class="needs-validation" novalidate="" id="form-capacitacion">
                                     <div class="row g-3">
+                                       <!-- Proceso: select poblado por JS -->
                                        <div class="col-sm-6">
                                           <label class="form-label" for="proceso">Proceso</label>
                                           <select class="form-select" id="proceso" required>
@@ -40,39 +48,57 @@
                                           </select>
                                           <div class="invalid-feedback"><span>Seleccionar tipo de proceso</span></div>
                                         </div>
+
+                                        <!-- Lugar: select poblado por JS -->
                                         <div class="col-sm-6" id="lugar"><label class="form-label form-label" for="lugar-1">Lugar</label><select class="form-select form-select" id="lugar-1" required="">
                                                 <option value="">Sitio</option>
                                             </select>
                                             <div class="invalid-feedback"><span>Seleccionar sitio de capacitación</span></div>
                                         </div>
-                                        <div class="col-12 col-md-12 col-lg-4"><label class="form-label form-label" for="cedula-r">Responsable Capacitacion</label>
+
+                                        <!-- Responsable: búsqueda por cédula -->
+                                        <div class="col-12 col-md-12 col-lg-4"><label class="form-label" for="cedula-r">Responsable Capacitacion</label>
                                             <div class="input-group has-validation" id="cedula-r"><button class="btn btn-primary link-primary" id="bt-responsable" type="button" style="border-color: var(--bs-btn-hover-border-color);"><i class="fas fa-search" style="font-size: 15px;color: var(--bs-body-bg);"></i>
                                             </button><input class="form-control form-control" type="text" id="cedula" placeholder="Cedula" required="">
                                                 <div class="input-group-text invalid-feedback"><span>Ingresar cedula del capacitador</span></div>
                                             </div>
                                         </div>
+
+                                        <!-- Nombre del responsable (readonly, llenado por JS) -->
                                         <div class="col-12 col-sm-12 col-md-12 col-lg-8 col-xl-8 col-xxl-8"><label class="form-label form-label" for="nombre-r">Nombre Responsable</label>
                                             <div class="input-group has-validation"><input class="form-control form-control" type="text" id="nombre-r" placeholder="Nombre Capacitador" required="" style="margin-top: 0px;" readonly="">
                                             </div>
                                         </div>
+
+                                        <!-- Tipo actividad: select poblado por JS -->
                                         <div class="col-sm-6" id="t_actividad"><label class="form-label form-label" for="t-actividad">Tipo Actividad</label><select class="form-select form-select" id="t-actividad" required="">
                                                 <option value="">tipo</option>
                                             </select>
                                         </div>
+
+                                        <!-- Tema: select poblado por JS -->
                                         <div class="col-sm-6" id="tema"><label class="form-label form-label" for="tema-a">Tema</label><select class="form-select form-select" id="tema-a" required="">
                                                 <option value="">Sitio</option>
                                             </select>
                                         </div>
+
+                                        <!-- Horas y fecha -->
                                         <div class="col-md-5"><label class="form-label form-label" for="h-inicio">Hora Inicio</label><input class="form-control" id="h-inico" type="time" required="">
                                         </div>
                                         <div class="col-md-4"><label class="form-label form-label" for="h-final">Hora Fin</label><input class="form-control" id="h-final" type="time" required="">
                                         </div>
                                         <div class="col-md-3"><label class="form-label form-label" for="zip">Fecha</label><input class="form-control" id="fecha" type="date" required="">
                                         </div>
+
+                                        <!-- Asistentes: campo readonly y botón que abre modal -->
                                         <div class="col-12 col-md-12 col-lg-12"><label class="form-label form-label" for="asistentes-c">Asistentes</label>
                                             <div class="input-group has-validation"><input class="form-control form-control" type="text" id="asistentes-c" placeholder="Cantidad Asistentes" required="" readonly="" style="border-top-right-radius: 0;border-bottom-right-radius: 0;"><button class="btn btn-primary" id="bt-asistentes" type="button" style="color: var(--bs-body-bg);width: 109.797px;height: 37.5px;margin-top: 0px;padding: 6px 12px;padding-top: 5px;padding-right: 0px;padding-bottom: 10px;font-size: 15px;border-color: var(--bs-btn-hover-border-color);" data-bs-target="#modal-asistentes" data-bs-toggle="modal">Agregar&nbsp;<i class="fas fa-plus" style="font-size: 14px;color: var(--bs-body-bg);"></i></button></div>
                                         </div>
-                                        <div class="col-12"><label class="form-label form-label" for="address2">Observaciones</label><input class="form-control form-control" type="text" id="observaciones" placeholder="Observaciones" style="margin-top: 0px;height: 102px;"></div>
+
+                                        <!-- Observaciones -->
+                                        <div class="col-12 col-md-12 col-lg-12"><label class="form-label form-label" for="address2">Observaciones</label><input class="form-control form-control" type="text" id="observaciones" placeholder="Observaciones" style="margin-top: 0px;height: 102px;"></div>
+
+                                        <!-- Archivo adjunto (opcional) -->
                                         <div class="col-12">
                                             <label class="form-label" for="archivo">Archivo Adjunto (Opcional)</label>
                                             <div class="input-group">
@@ -89,6 +115,8 @@
                         </div>
                         </div>
                     </main>
+
+                    <!-- Modal asistentes: agregar y listar asistentes -->
                     <div class="modal fade" role="dialog" tabindex="-1" id="modal-asistentes">
                         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-xl-down" role="document">
                             <div class="modal-content">
@@ -104,6 +132,7 @@
     <div class="col-12 col-md-3">
         <label class="form-label" for="ced-capacitado">cedula</label>
         <div class="input-group">
+            <!-- Botón para validar/seleccionar persona por cédula -->
             <button class="btn btn-primary" id="bt-ag-capacitado-1" type="button" style="background:#7A2C1E;border-color:#7A2C1E;">
                 <i class="far fa-check-circle" style="color:var(--bs-body-bg);font-size:20px;"></i>
             </button>
@@ -112,6 +141,7 @@
     </div>
     <div class="col-12 col-md-4">
         <label class="form-label" for="nom-capacitado">Nombre</label>
+        <!-- Nombre autocompletado/readonly por JS -->
         <input class="form-control" type="text" id="nom-capacitado" placeholder="nombre persona capacitada" readonly>
     </div>
     <div class="col-12 col-md-3">
@@ -132,6 +162,8 @@
 </div>
                                             </form>
                                         </div>
+
+                                        <!-- Tabla con asistentes agregados (JS inserta las filas) -->
                                         <div class="col">
                                             <div class="card shadow">
                                                 <div class="card-header py-3">
@@ -188,7 +220,7 @@
     <script src="../assets/js/auth_guard.js"></script>
     <script src="../assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="../assets/js/sidebar.js"></script>
-    <!-- Cambia aquí a formulario.js -->
+    <!-- Comentario: cambiar ruta si corresponde; aquí se cargan los scripts de formulario y lógica -->
     <script src="assets/js/formulario.js"></script>
     <script src="assets/js/capacitaciones.js"></script>
     <script src="../assets/js/web_config.js"></script>

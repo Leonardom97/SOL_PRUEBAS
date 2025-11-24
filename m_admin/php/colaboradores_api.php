@@ -1,6 +1,14 @@
 <?php
+session_start();
 require_once('../../php/db_postgres.php');
 header('Content-Type: application/json');
+
+// Validar que existe una sesión activa
+if (!isset($_SESSION['usuario_id'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Sesión no iniciada. Por favor inicie sesión.']);
+    exit;
+}
 
 // --- GET: LISTADO CON FILTRO GLOBAL, PAGINACIÓN ---
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && !isset($_GET['id'])) {

@@ -111,6 +111,9 @@ nav.sidebar,
   max-width: 960px;
 }
 
+.bg-body-tertiary {
+}
+
 .btn:focus {
   border-color: #772e22;
   box-shadow: 0 0 0 0.25rem rgba(119, 46, 34, 0.25);
@@ -130,6 +133,8 @@ nav.sidebar,
   outline: none;
 }
 
+html {
+}
 
 .page-link:focus {
   border-color: #772e22;
@@ -288,100 +293,3 @@ nav.sidebar,
 .sidebar #accordionSidebar::-webkit-scrollbar {
     display: none;
 }
-
-
-
-    body {
-      visibility: hidden;
-    }
-
-    /* Icon button styling */
-    .icon-btn {
-      width: 36px;
-      height: 36px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.25rem;
-      border-radius: 6px;
-    }
-
-    /* Toast position */
-    .toast-container-top {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      z-index: 1100;
-    }
-
-    /* Table action tweak */
-    .table td .btn {
-      padding: 0.35rem 0.45rem;
-    }
-
-    /* Toggle switch estilo "pill + knob" (tamaño reducido para coincidir con iconos) */
-    .toggle-switch {
-      display: inline-block;
-      width: 36px;              /* ancho reducido */
-      height: 20px;             /* alto reducido */
-      border-radius: 999px;
-      padding: 3px;             /* pequeño padding para el knob */
-      box-sizing: border-box;
-      position: relative;
-      transition: background-color .12s ease, border-color .12s ease;
-      border: 1px solid rgba(0,0,0,0.12);
-      background: #f1f1f1;
-      vertical-align: middle;
-    }
-    .toggle-switch .knob {
-      position: absolute;
-      width: calc(50% - 6px);   /* tamaño del knob relativamente pequeño */
-      height: calc(100% - 6px);
-      background: #fff;
-      border-radius: 50%;
-      top: 50%;
-      transform: translateY(-50%);
-      left: 3px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-      transition: left .12s ease, transform .12s ease;
-    }
-    /* estado ON (activo) */
-    .toggle-switch.on {
-      background: #28a745;
-      border-color: #28a745;
-    }
-    .toggle-switch.on .knob {
-      left: calc(50% + 3px);
-    }
-    /* estado OFF (inactivo) */
-    .toggle-switch.off {
-      background: #dc3545;
-      border-color: #dc3545;
-    }
-    .toggle-switch.off .knob {
-      left: 3px;
-    }
-
-    /* ajusta el botón alrededor para que no aporte estilos extra y para que tenga tamaño igual que los iconos */
-    .btn-inactivate {
-      line-height: 0;
-      vertical-align: middle;
-      background: transparent;
-      border: none;
-      padding: 0;
-      margin: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-    }
-/* Switch: verde activo (estado=0 => activo), rojo inactivo (estado=1 => inactivo) */
-.toggle-switch { display:inline-block; width:36px; height:20px; border-radius:999px; padding:3px; box-sizing:border-box; border:1px solid rgba(0,0,0,0.12); background:#f1f1f1; vertical-align:middle; position:relative; }
-.toggle-switch .knob { position:absolute; width:calc(50% - 6px); height:calc(100% - 6px); background:#fff; border-radius:50%; top:50%; transform:translateY(-50%); left:3px; transition:left .12s ease; }
-.toggle-switch.on { background: #28a745; border-color:#28a745; }
-.toggle-switch.on .knob { left: calc(50% + 3px); }
-.toggle-switch.off { background: #dc3545; border-color:#dc3545; }
-.toggle-switch.off .knob { left: 3px; }
-.btn-inactivate { padding:0; width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border:none; background:transparent; }
-.row-inactive td { opacity:0.65; color:#6c757d; }

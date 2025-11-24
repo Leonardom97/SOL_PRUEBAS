@@ -76,24 +76,7 @@
                                 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label for="primaryColor" class="form-label fw-bold">Color Principal</label>
-                                        <div class="input-group">
-                                            <input type="color" class="form-control form-control-color" id="primaryColor" name="primary_color" required>
-                                            <input type="text" class="form-control" id="primaryColorHex" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
-                                        </div>
-                                        <small class="form-text text-muted">Color principal del tema (afecta botones, enlaces, sidebar, etc.)</small>
-                                    </div>
-                                    
-                                    <div class="col-md-6">
-                                        <label for="themeName" class="form-label fw-bold">Nombre del Tema</label>
-                                        <input type="text" class="form-control" id="themeName" name="theme_name" maxlength="50">
-                                        <small class="form-text text-muted">Nombre descriptivo para identificar este tema</small>
-                                    </div>
-                                </div>
-                                
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Icono del Sitio (Favicon)</label>
+                                        <label for="faviconFile" class="form-label fw-bold">Icono del Sitio (Favicon)</label>
                                         <div class="input-group mb-2">
                                             <input type="file" class="form-control" id="faviconFile" accept="image/*">
                                             <button class="btn btn-primary" type="button" id="uploadFavicon">
@@ -106,7 +89,7 @@
                                     </div>
                                     
                                     <div class="col-md-6">
-                                        <label class="form-label fw-bold">Imagen de Inicio de Sesión</label>
+                                        <label for="loginImageFile" class="form-label fw-bold">Imagen de Inicio de Sesión</label>
                                         <div class="input-group mb-2">
                                             <input type="file" class="form-control" id="loginImageFile" accept="image/*">
                                             <button class="btn btn-primary" type="button" id="uploadLoginImage">
@@ -118,6 +101,10 @@
                                         <small class="form-text text-muted">Imagen que aparece en la página de inicio de sesión</small>
                                     </div>
                                 </div>
+                                
+                                <!-- Hidden fields for color configuration (maintained but not editable by user) -->
+                                <input type="hidden" id="primaryColor" name="primary_color">
+                                <input type="hidden" id="themeName" name="theme_name">
                                 
                                 <div class="row">
                                     <div class="col-12">
@@ -133,8 +120,8 @@
                         </div>
                     </div>
                     
-                    <!-- Saved Themes -->
-                    <div class="card shadow mb-4">
+                    <!-- Saved Themes section - HIDDEN as per requirements -->
+                    <div class="card shadow mb-4" style="display: none;">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
                             <h6 class="m-0 fw-bold text-primary">Temas Guardados (Máximo 3)</h6>
                             <button class="btn btn-sm btn-primary" id="saveAsNewTheme">

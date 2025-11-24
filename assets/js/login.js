@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Password visibility toggle functionality
+    // Funcionalidad para alternar visibilidad de contraseña
     document.querySelectorAll('.toggle-password').forEach(icon => {
         icon.addEventListener('click', function() {
             const targetId = this.getAttribute('data-target');
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (res.success) {
                     window.location.href = res.redirect;
                 } else if (res.concurrent_session) {
-                    // Handle concurrent session warning
+                    // Manejar advertencia de sesión concurrente
                     handleConcurrentSession(res, data, 'colaborador');
                 } else {
                     alert(res.message || 'Error al iniciar sesión como colaborador.');
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (res.success) {
                     window.location.href = res.redirect;
                 } else if (res.concurrent_session) {
-                    // Handle concurrent session warning
+                    // Manejar advertencia de sesión concurrente
                     handleConcurrentSession(res, data, 'admin');
                 } else {
                     alert(res.message || 'Error al iniciar sesión como administrador.');
@@ -97,7 +97,7 @@ function handleConcurrentSession(response, formData, tipo) {
                    `¿Deseas cerrar la sesión anterior y continuar?`;
     
     if (confirm(message)) {
-        // Force login by closing existing session
+        // Forzar inicio de sesión cerrando sesión existente
         formData.append('force_login', 'true');
         
         const endpoint = tipo === 'admin' ? 'php/login_admin.php' : 'php/login_colaborador.php';

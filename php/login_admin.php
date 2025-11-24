@@ -14,12 +14,12 @@ if (empty($cedula) || empty($password)) {
     exit;
 }
 
-// Initialize session manager
+// Inicializar gestor de sesiones
 $sessionManager = new SessionManager($pg);
 
-// Get client information for logging
-$ip_address = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
-$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
+// Obtener información del cliente para registro
+$ip_address = $_SERVER['REMOTE_ADDR'] ?? 'Desconocida';
+$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Desconocido';
 $host_name = gethostbyaddr($ip_address);
 
 try {
@@ -34,7 +34,7 @@ try {
     $usuario = $stmt->fetch();
 
     if (!$usuario) {
-        // Log failed attempt
+        // Registrar intento fallido
         $stmt = $pg->prepare("
             INSERT INTO adm_intentos_login 
             (usuario_identificador, tipo_usuario, exitoso, ip_address, user_agent, host_name, mensaje_error)
@@ -52,7 +52,7 @@ try {
     }
 
     if (!$usuario['estado_us']) {
-        // Log failed attempt
+        // Registrar intento fallido
         $stmt = $pg->prepare("
             INSERT INTO adm_intentos_login 
             (usuario_identificador, tipo_usuario, exitoso, ip_address, user_agent, host_name, mensaje_error)
@@ -70,7 +70,7 @@ try {
     }
 
     if (!password_verify($password, $usuario['contraseña'])) {
-        // Log failed attempt
+        // Registrar intento fallido
         $stmt = $pg->prepare("
             INSERT INTO adm_intentos_login 
             (usuario_identificador, tipo_usuario, exitoso, ip_address, user_agent, host_name, mensaje_error)
@@ -98,7 +98,7 @@ try {
     $roles = $stmtRoles->fetchAll(PDO::FETCH_ASSOC);
 
     if (!$roles) {
-        // Log failed attempt
+        // Registrar intento fallido
         $stmt = $pg->prepare("
             INSERT INTO adm_intentos_login 
             (usuario_identificador, tipo_usuario, exitoso, ip_address, user_agent, host_name, mensaje_error)
@@ -115,17 +115,17 @@ try {
         exit;
     }
 
-    // Check for existing active session
+    // Verificar sesiones activas existentes
     if ($force_login) {
-        // Force login by closing existing sessions
+        // Forzar inicio de sesión cerrando sesiones existentes
         $sessionResult = $sessionManager->forceLogin($usuario['id'], 'admin', $cedula);
     } else {
-        // Try to register login normally
+        // Intentar registrar inicio de sesión normalmente
         $sessionResult = $sessionManager->registerLogin($usuario['id'], 'admin', $cedula);
     }
     
     if (!$sessionResult['success']) {
-        // Existing session found
+        // Sesión existente encontrada
         $existingSession = $sessionResult['existing_session'] ?? null;
         echo json_encode([
             'success' => false,
@@ -146,11 +146,11 @@ try {
     // 🔐 Asignar variables de sesión
     $_SESSION['usuario_id'] = $usuario['id'];
     $_SESSION['usuario'] = $usuario['id_usuario'];
-    $_SESSION['cedula'] = $usuario['cedula'] ?? $usuario['id_usuario'];  // Store cedula explicitly
+    $_SESSION['cedula'] = $usuario['cedula'] ?? $usuario['id_usuario'];  // Almacenar cédula explícitamente
     $_SESSION['nombre'] = $usuario['nombre1'] . ' ' . $usuario['apellido1'];
     $_SESSION['roles'] = $roles;
     $_SESSION['rol'] = $rolPrincipal;
-    $_SESSION['rol_nombre'] = $rolPrincipal; // For web_main_api.php compatibility
+    $_SESSION['rol_nombre'] = $rolPrincipal; // Para compatibilidad con web_main_api.php
     $_SESSION['tipo_usuario'] = 'admin'; // ✅ IMPORTANTE para verificar_sesion.php
 
     echo json_encode(['success' => true, 'redirect' => '../panel.html']);

@@ -19,3 +19,4 @@ try {
 } catch (PDOException $e) {
     die("Error al conectar a PostgreSQL: " . $e->getMessage());
 }
+?>

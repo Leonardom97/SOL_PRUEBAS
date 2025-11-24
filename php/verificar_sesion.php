@@ -11,17 +11,17 @@ if (!isset($_SESSION['usuario_id'])) {
     exit;
 }
 
-// Initialize session manager
+// Inicializar gestor de sesiones
 $sessionManager = new SessionManager($pg);
 
-// Check if session is still valid in database
+// Verificar si la sesión sigue siendo válida en la base de datos
 if (isset($_SESSION['sesion_db_id'])) {
     if (!$sessionManager->isSessionValid($_SESSION['sesion_db_id'])) {
-        // Session was closed (possibly by admin or concurrent login)
+        // Sesión fue cerrada (posiblemente por admin o inicio de sesión concurrente)
         session_unset();
         session_destroy();
         
-        // Delete the session cookie
+        // Eliminar la cookie de sesión
         if (isset($_COOKIE[session_name()])) {
             setcookie(session_name(), '', time() - 3600, '/');
         }
@@ -34,16 +34,16 @@ if (isset($_SESSION['sesion_db_id'])) {
         exit;
     }
     
-    // Update activity timestamp to keep session alive
+    // Actualizar timestamp de actividad para mantener la sesión activa
     $sessionManager->updateActivity($_SESSION['sesion_db_id']);
 } else {
-    // If sesion_db_id is missing but PHP session exists, this could be an old session
-    // Try to find or create the database session record
+    // Si sesion_db_id falta pero existe sesión PHP, podría ser una sesión antigua
+    // Intentar encontrar o crear el registro de sesión en la base de datos
     $tipo_usuario = $_SESSION['tipo_usuario'] ?? 'admin';
     $usuario_id = $_SESSION['usuario_id'];
     $cedula = $_SESSION['usuario'] ?? '';
     
-    // Check if there's an active session in the database
+    // Verificar si hay una sesión activa en la base de datos
     $stmt = $pg->prepare("
         SELECT id FROM adm_sesiones
         WHERE usuario_id = :usuario_id 
@@ -61,16 +61,16 @@ if (isset($_SESSION['sesion_db_id'])) {
     $existingSession = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($existingSession) {
-        // Found existing session, link it to PHP session
+        // Sesión existente encontrada, vincularla a la sesión PHP
         $_SESSION['sesion_db_id'] = $existingSession['id'];
         $sessionManager->updateActivity($existingSession['id']);
     } else {
-        // No matching session found - close any active sessions and create new one
+        // No se encontró sesión correspondiente - cerrar sesiones activas y crear una nueva
         $sessionResult = $sessionManager->forceLogin($usuario_id, $tipo_usuario, $cedula);
         if ($sessionResult['success']) {
             $_SESSION['sesion_db_id'] = $sessionResult['session_db_id'];
         } else {
-            // Failed to create session, logout
+            // Falló al crear sesión, cerrar sesión
             session_unset();
             session_destroy();
             echo json_encode(['success' => false, 'message' => 'Error al validar sesión']);

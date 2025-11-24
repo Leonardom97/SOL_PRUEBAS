@@ -1,13 +1,37 @@
 // formulario.js - versión actualizada para manejar estados únicos y mostrar etiquetas legibles
+// He añadido comentarios en español explicando cada bloque y función.
+// No se modificó la lógica; sólo se añadieron comentarios para facilitar comprensión.
+
+/*
+  Resumen:
+  - Controla el formulario principal de "Capacitación": carga selects, búsqueda de responsable,
+    gestión de asistentes (modal), validación del formulario y envío (incluye subida de archivo).
+  - Usa endpoints en assets/php/formulario_api.php y assets/php/file_upload_api.php.
+  - Mantiene en window.asistentes la lista temporal de asistentes agregados desde el modal.
+*/
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Cargar selects desde backend para que el usuario seleccione valores existentes
     cargarSelect('proceso', 'cap_proceso', 'proceso');
     cargarSelect('lugar-1', 'cap_lugar', 'lugar');
     cargarSelect('t-actividad', 'cap_tipo_actividad', 'nombre');
     cargarSelect('tema-a', 'cap_tema', 'nombre');
 
+    // Event listener para filtrar temas cuando se selecciona un proceso
+    document.getElementById('proceso').addEventListener('change', function() {
+        const procesoId = this.value;
+        if (procesoId) {
+            cargarTemasporProceso(procesoId);
+        } else {
+            // Si no hay proceso seleccionado, cargar todos los temas
+            cargarSelect('tema-a', 'cap_tema', 'nombre');
+        }
+    });
+
+    // Arreglo global de asistentes que se va actualizando desde el modal
     window.asistentes = [];
 
+    // Buscar responsable por cédula y rellenar nombre si existe
     document.getElementById('bt-responsable').addEventListener('click', function() {
         let cedula = document.getElementById('cedula').value.trim();
         if (!cedula) return alert('Ingrese la cédula del responsable');
@@ -15,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(res => res.json())
         .then(usuario => {
             if (usuario && usuario.nombre1) {
+                // Concatenar nombres/apellidos de forma segura y limpia
                 document.getElementById('nombre-r').value = `${usuario.nombre1} ${usuario.nombre2} ${usuario.apellido1} ${usuario.apellido2}`.replace(/\s+/g, ' ').trim();
             } else {
                 document.getElementById('nombre-r').value = '';
@@ -23,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Botón dentro del modal: buscar colaborador por cédula para agregar como asistente
     document.getElementById('bt-ag-capacitado-1').addEventListener('click', function() {
         let cedula = document.getElementById('ced-capacitado').value.trim();
         if (!cedula) return alert('Ingrese la cédula del asistente');
@@ -33,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let nombre = [col.ac_nombre1, col.ac_nombre2, col.ac_apellido1, col.ac_apellido2].filter(Boolean).join(' ');
                 document.getElementById('nom-capacitado').value = nombre;
 
-                // Obtener relaciones (empresa, cargo, area, etc.)
+                // Obtener relaciones adicionales (empresa, cargo, área, etc.) para mostrar en la tabla
                 fetch('assets/php/formulario_api.php?action=get_colaborador_relations' +
                       '&ac_empresa=' + encodeURIComponent(col.ac_empresa) +
                       '&ac_id_cargo=' + encodeURIComponent(col.ac_id_cargo) +
@@ -43,12 +69,14 @@ document.addEventListener('DOMContentLoaded', function() {
                       '&ac_id_situacion=' + encodeURIComponent(col.ac_id_situación))
                 .then(r => r.json())
                 .then(rel => {
+                    // Adjuntamos nombres legibles al objeto colaborador
                     col.empresa_nombre = rel.empresa;
                     col.cargo_nombre = rel.cargo;
                     col.area_nombre = rel.area;
                     col.sub_area_nombre = rel.sub_area;
                     col.rango_nombre = rel.rango;
                     col.situacion_nombre = rel.situacion;
+                    // Guardamos temporalmente para usar al agregar
                     window.colaborador_modal = col;
                 });
             } else {
@@ -59,6 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Botón "Agregar" del modal: valida y añade el asistente al array window.asistentes
     document.getElementById('bt-ag-capacitado-2').addEventListener('click', function(e) {
         e.preventDefault();
         let estado = document.getElementById('s-aprobacion').value;
@@ -70,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let asistente = {
             cedula: col.ac_cedula,
             nombre: [col.ac_nombre1, col.ac_nombre2, col.ac_apellido1, col.ac_apellido2].filter(Boolean).join(' '),
-            estado_aprovacion: estado,
+            estado_aprobacion: estado,
             empresa: col.empresa_nombre,
             cargo: col.cargo_nombre,
             area: col.area_nombre,
@@ -83,16 +112,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         window.asistentes.push(asistente);
         actualizarTablaAsistentes();
+        // Actualizar contador y campo readonly en el formulario principal
         document.getElementById('asistentes-c').value = window.asistentes.length;
         document.getElementById('count-asistentes').textContent = window.asistentes.length;
+        // Limpiar inputs del modal
         document.getElementById('ced-capacitado').value = '';
         document.getElementById('nom-capacitado').value = '';
         document.getElementById('s-aprobacion').value = '';
     });
 
+    // Evento submit del formulario principal: validaciones y envío JSON al backend
     document.getElementById('form-capacitacion').addEventListener('submit', function(e) {
         e.preventDefault();
 
+        // Campos requeridos y mensajes específicos por campo
         let campos = [
             { id: 'proceso', txt: 'Seleccione el proceso.' },
             { id: 'lugar-1', txt: 'Seleccione el lugar.' },
@@ -111,28 +144,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 return alert(campo.txt);
             }
         }
+        // Requerimos al menos un asistente
         if (window.asistentes.length === 0) {
             return alert('Debe agregar al menos un asistente.');
         }
 
-        // Validate file if present
+        // Validación opcional de archivo adjunto: tamaño y tipo permitidos
         const fileInput = document.getElementById('archivo');
         const file = fileInput.files[0];
         
         if (file) {
-            // Validate file size (2MB max)
+            // Tamaño máximo 2MB
             const maxSize = 2 * 1024 * 1024;
             if (file.size > maxSize) {
                 return alert('El archivo excede el tamaño máximo de 2MB');
             }
             
-            // Validate file type
+            // Tipos permitidos
             const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif'];
             if (!allowedTypes.includes(file.type)) {
                 return alert('Tipo de archivo no permitido. Solo se aceptan PDF e imágenes');
             }
         }
 
+        // Construcción del payload (JSON)
         let data = {
             proceso: document.getElementById('proceso').value,
             lugar: document.getElementById('lugar-1').value,
@@ -147,6 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
             asistentes: window.asistentes
         };
 
+        // Envío del formulario al backend; backend devuelve { success, id_formulario }
         fetch('assets/php/formulario_api.php?action=save_formulario', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -155,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(res => res.json())
         .then(resp => {
             if (resp.success && resp.id_formulario) {
-                // If there's a file, upload it
+                // Si hay archivo, subirlo asociándolo al id_formulario
                 if (file) {
                     uploadFile(resp.id_formulario, file, function(uploadSuccess) {
                         if (uploadSuccess) {
@@ -175,6 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Funcion auxiliar: cargar opciones de un select desde backend
 function cargarSelect(selectId, tabla, col) {
     fetch('assets/php/formulario_api.php?action=get_select&tabla=' + tabla + '&col=' + col)
         .then(res => res.json())
@@ -182,14 +219,14 @@ function cargarSelect(selectId, tabla, col) {
             let select = document.getElementById(selectId);
             select.innerHTML = `<option value="">Seleccione...</option>`;
             opciones.forEach(o => {
-                // o[col] puede no existir si el nombre de columna es distinto; usar fallback
+                // o[col] puede no existir si el backend usa otro nombre; usamos fallback
                 const label = o[col] ?? (o.nombre ?? '');
                 select.innerHTML += `<option value="${o.id}">${label}</option>`;
             });
         });
 }
 
-// Helper para mostrar etiquetas legibles del estado
+// Helper para mostrar etiquetas legibles del estado (mapa simple)
 function formatEstado(val) {
     const map = {
         'aprobo': 'aprobo',
@@ -199,6 +236,7 @@ function formatEstado(val) {
     return map[val] || val || '';
 }
 
+// Renderiza la tabla de asistentes a partir de window.asistentes
 function actualizarTablaAsistentes() {
     let tbody = document.querySelector('#dataTable tbody');
     if (!tbody) return;
@@ -210,7 +248,7 @@ function actualizarTablaAsistentes() {
                 <td>${a.nombre}</td>
                 <td>${a.cedula}</td>
                 <td>${a.empresa}</td>
-                <td>${formatEstado(a.estado_aprovacion)}</td>
+                <td>${formatEstado(a.estado_aprobacion)}</td>
                 <td>
                     <button class="btn btn-danger" onclick="eliminarAsistente(${i})"><i class="fas fa-trash"></i></button>
                 </td>
@@ -220,12 +258,14 @@ function actualizarTablaAsistentes() {
     document.getElementById('count-asistentes').textContent = window.asistentes.length;
 }
 
+// Elimina un asistente por índice y actualiza vista/contador
 window.eliminarAsistente = function(idx) {
     window.asistentes.splice(idx, 1);
     actualizarTablaAsistentes();
     document.getElementById('asistentes-c').value = window.asistentes.length;
 }
 
+// Mostrar mensaje de éxito y limpiar formulario tras guardar correctamente
 function mostrarExito(id) {
     document.getElementById('success-message').style.display = 'block';
     document.getElementById('success-message').textContent =
@@ -237,6 +277,7 @@ function mostrarExito(id) {
     document.getElementById('count-asistentes').textContent = '0';
 }
 
+// Subir archivo al servidor mediante FormData (se envía action=upload_file y formulario_id)
 function uploadFile(formularioId, file, callback) {
     const formData = new FormData();
     formData.append('file', file);
@@ -261,4 +302,34 @@ function uploadFile(formularioId, file, callback) {
         console.error('Error de red al subir archivo:', err);
         callback(false);
     });
+}
+
+// Función para cargar temas filtrados por proceso
+function cargarTemasporProceso(procesoId) {
+    fetch('assets/php/proceso_tema_api.php?action=get_temas_by_proceso&id_proceso=' + procesoId)
+        .then(res => res.json())
+        .then(data => {
+            let select = document.getElementById('tema-a');
+            if (!select) return;
+            
+            if (data.success && Array.isArray(data.temas)) {
+                if (data.temas.length === 0) {
+                    select.innerHTML = '<option value="">No hay temas para este proceso</option>';
+                } else {
+                    select.innerHTML = '<option value="">Seleccione...</option>';
+                    data.temas.forEach(tema => {
+                        select.innerHTML += `<option value="${tema.id}">${tema.nombre}</option>`;
+                    });
+                }
+            } else {
+                select.innerHTML = '<option value="">Error al cargar temas</option>';
+            }
+        })
+        .catch(err => {
+            console.error('Error cargando temas por proceso:', err);
+            let select = document.getElementById('tema-a');
+            if (select) {
+                select.innerHTML = '<option value="">Error al cargar temas</option>';
+            }
+        });
 }

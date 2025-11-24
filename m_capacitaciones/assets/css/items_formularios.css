@@ -1,0 +1,115 @@
+/* items_formularios.css - Estilos para la página de edición de items de formularios */
+
+/* Estilo para filas inactivas */
+tr.row-inactive {
+    opacity: 0.5;
+    background-color: #f8f9fa;
+}
+
+tr.row-inactive td {
+    color: #6c757d;
+}
+
+/* Estilos para botones de iconos pequeños */
+.icon-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    background: #ccc;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.toggle-switch.on {
+    background: #28a745;
+}
+
+.toggle-switch.off {
+    background: #dc3545;
+}
+
+.toggle-switch .knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: left 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch.on .knob {
+    left: 22px;
+}
+
+.toggle-switch.off .knob {
+    left: 2px;
+}
+
+/* Toast container personalizado */
+.toast-container-top {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 9999;
+}
+
+/* Animaciones para las tablas */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+tbody tr {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Estilos mejorados para las tarjetas */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-bottom: 1px solid rgba(13, 110, 253, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .toggle-switch {
+        width: 36px;
+        height: 20px;
+    }
+    
+    .toggle-switch .knob {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .toggle-switch.on .knob {
+        left: 18px;
+    }
+}

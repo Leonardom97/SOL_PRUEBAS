@@ -1,7 +1,7 @@
 <?php
 /**
- * Session Manager
- * Handles session tracking, concurrent login prevention, and session management
+ * Gestor de Sesiones
+ * Maneja el seguimiento de sesiones, prevención de inicio de sesión concurrente, y gestión de sesiones
  */
 
 require_once __DIR__ . '/db_postgres.php';
@@ -14,12 +14,12 @@ class SessionManager {
     }
     
     /**
-     * Register a new login session
+     * Registrar una nueva sesión de inicio de sesión
      * @return array ['success' => bool, 'message' => string, 'existing_session' => array|null]
      */
     public function registerLogin($usuario_id, $tipo_usuario, $cedula) {
         try {
-            // Check for existing active sessions
+            // Verificar sesiones activas existentes
             $stmt = $this->pg->prepare("
                 SELECT s.id, s.session_id, s.ip_address, s.host_name, s.fecha_inicio
                 FROM adm_sesiones s
@@ -36,7 +36,7 @@ class SessionManager {
             $existingSession = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($existingSession) {
-                // Return existing session info for notification
+                // Retornar información de sesión existente para notificación
                 return [
                     'success' => false,
                     'message' => 'Ya existe una sesión activa para este usuario',
@@ -44,17 +44,17 @@ class SessionManager {
                 ];
             }
             
-            // Get client information
+            // Obtener información del cliente
             $ip_address = $this->getClientIP();
-            $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
+            $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Desconocido';
             $host_name = gethostbyaddr($ip_address);
             $session_id = session_id();
             
-            // Log login attempt
+            // Registrar intento de inicio de sesión
             $this->logLoginAttempt($cedula, $tipo_usuario, true, $ip_address, $user_agent, $host_name, null);
             
-            // Delete old inactive sessions with the same session_id to prevent unique constraint violation
-            // This can happen when browser is closed and restored, reusing the same PHP session_id
+            // Eliminar sesiones inactivas antiguas con el mismo session_id para prevenir violación de restricción única
+            // Esto puede ocurrir cuando el navegador se cierra y se restaura, reutilizando el mismo PHP session_id
             $stmt = $this->pg->prepare("
                 DELETE FROM adm_sesiones 
                 WHERE session_id = :session_id 
@@ -62,7 +62,7 @@ class SessionManager {
             ");
             $stmt->execute([':session_id' => $session_id]);
             
-            // Create new session record
+            // Crear nuevo registro de sesión
             $stmt = $this->pg->prepare("
                 INSERT INTO adm_sesiones 
                 (usuario_id, tipo_usuario, session_id, ip_address, user_agent, host_name, fecha_inicio, fecha_actividad, activa)
@@ -79,7 +79,7 @@ class SessionManager {
             ]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Store session tracking ID in PHP session
+            // Almacenar ID de seguimiento de sesión en sesión PHP
             $_SESSION['sesion_db_id'] = $result['id'];
             
             return [
@@ -98,11 +98,11 @@ class SessionManager {
     }
     
     /**
-     * Force login by closing existing session
+     * Forzar inicio de sesión cerrando sesión existente
      */
     public function forceLogin($usuario_id, $tipo_usuario, $cedula) {
         try {
-            // Close existing sessions
+            // Cerrar sesiones existentes
             $stmt = $this->pg->prepare("
                 UPDATE adm_sesiones 
                 SET activa = FALSE, 
@@ -117,7 +117,7 @@ class SessionManager {
                 ':tipo_usuario' => $tipo_usuario
             ]);
             
-            // Now register the new login
+            // Ahora registrar el nuevo inicio de sesión
             return $this->registerLogin($usuario_id, $tipo_usuario, $cedula);
             
         } catch (PDOException $e) {
@@ -130,7 +130,7 @@ class SessionManager {
     }
     
     /**
-     * Update session activity timestamp
+     * Actualizar timestamp de actividad de la sesión
      */
     public function updateActivity($session_db_id) {
         try {
@@ -148,7 +148,7 @@ class SessionManager {
     }
     
     /**
-     * Close a session (logout)
+     * Cerrar una sesión (logout)
      */
     public function closeSession($session_db_id, $razon = 'logout', $cerrada_por = null) {
         try {
@@ -173,7 +173,7 @@ class SessionManager {
     }
     
     /**
-     * Get all active sessions (for admin panel)
+     * Obtener todas las sesiones activas (para panel de admin)
      */
     public function getActiveSessions() {
         try {
@@ -212,7 +212,7 @@ class SessionManager {
     }
     
     /**
-     * Get session history for a user
+     * Obtener historial de sesiones para un usuario
      */
     public function getUserSessionHistory($usuario_id, $tipo_usuario, $limit = 10) {
         try {
@@ -248,7 +248,7 @@ class SessionManager {
     }
     
     /**
-     * Get login attempts history
+     * Obtener historial de intentos de inicio de sesión
      */
     public function getLoginAttempts($limit = 50, $exitoso = null) {
         try {
@@ -286,7 +286,7 @@ class SessionManager {
     }
     
     /**
-     * Log a login attempt
+     * Registrar un intento de inicio de sesión
      */
     private function logLoginAttempt($cedula, $tipo_usuario, $exitoso, $ip_address, $user_agent, $host_name, $mensaje_error) {
         try {
@@ -310,7 +310,7 @@ class SessionManager {
     }
     
     /**
-     * Get client IP address
+     * Obtener dirección IP del cliente
      */
     private function getClientIP() {
         $ip = '';
@@ -327,13 +327,13 @@ class SessionManager {
         } elseif (isset($_SERVER['REMOTE_ADDR'])) {
             $ip = $_SERVER['REMOTE_ADDR'];
         } else {
-            $ip = 'UNKNOWN';
+            $ip = 'DESCONOCIDA';
         }
         return $ip;
     }
     
     /**
-     * Check if session is still valid in database
+     * Verificar si la sesión sigue siendo válida en la base de datos
      */
     public function isSessionValid($session_db_id) {
         try {
@@ -352,7 +352,7 @@ class SessionManager {
     }
     
     /**
-     * Close inactive sessions (older than timeout)
+     * Cerrar sesiones inactivas (más antiguas que el timeout)
      */
     public function closeInactiveSessions($timeout_minutes = 120) {
         try {

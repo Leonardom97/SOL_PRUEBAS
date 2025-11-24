@@ -31,7 +31,7 @@ function filtrarDatos() {
     return Object.keys(filtros).every(col => {
       if (!filtros[col]) return true;
       
-      // Special handling for the "registrado_por" column
+      // Manejo especial para la columna "registrado_por"
       if (col === 'registrado_por') {
         const searchText = filtros[col].toLowerCase();
         const creado = (row.creado_por_nombre || '').toLowerCase();
@@ -39,7 +39,7 @@ function filtrarDatos() {
         return creado.includes(searchText) || editado.includes(searchText);
       }
       
-      // Regular column filtering
+      // Filtrado de columnas regular
       return row[col] && row[col].toString().toLowerCase().includes(filtros[col].toLowerCase());
     });
   }).sort((a, b) => {
@@ -47,7 +47,7 @@ function filtrarDatos() {
     
     let va, vb;
     
-    // Special handling for sorting by "registrado_por"
+    // Manejo especial para ordenar por "registrado_por"
     if (sortCol === 'registrado_por') {
       va = a.creado_por_nombre || '';
       vb = b.creado_por_nombre || '';
@@ -66,7 +66,15 @@ function filtrarDatos() {
 }
 
 function renderTabla() {
-  const tbody = document.querySelector('#tabla tbody');
+  // Intentar nueva estructura primero, usar estructura antigua para compatibilidad
+  let tbody = document.querySelector('#tabla-capacitaciones tbody');
+  if (!tbody) {
+    tbody = document.querySelector('#tabla tbody');
+    if (!tbody) {
+      console.warn('No table body found for rendering');
+      return;
+    }
+  }
   tbody.innerHTML = '';
   const filtrados = filtrarDatos();
   const total = filtrados.length;
@@ -79,7 +87,7 @@ function renderTabla() {
     const tr = document.createElement('tr');
     if (seleccionados.has(idStr)) tr.classList.add('selected');
     
-    // Build the "Registrado por" cell content
+    // Construir el contenido de la celda "Registrado por"
     let registradoPor = '';
     if (row.creado_por_nombre) {
       registradoPor = 'Creado por: ' + row.creado_por_nombre;
@@ -91,7 +99,7 @@ function renderTabla() {
     }
     
     tr.innerHTML = `
-      <td><input type="checkbox" class="selectRow" value="${idStr}" ${seleccionados.has(idStr)?'checked':''}></td>
+      <td><input type="checkbox" class="selectRow md-checkbox" value="${idStr}" ${seleccionados.has(idStr)?'checked':''}></td>
       <td>${row.id}</td>
       <td>${row.capacitador || ''}</td>
       <td>${row.cedula || ''}</td>
@@ -105,23 +113,32 @@ function renderTabla() {
     `;
     tbody.appendChild(tr);
   }
-  document.getElementById('downloadSelected').classList.toggle('disabled', seleccionados.size === 0);
+  const downloadSelectedBtn = document.getElementById('downloadSelected');
+  if (downloadSelectedBtn) {
+    downloadSelectedBtn.classList.toggle('disabled', seleccionados.size === 0);
+  }
   renderBootstrapPagination(total);
   renderSortIcons();
 }
 
 function renderBootstrapPagination(total) {
-  const pagNav = document.getElementById('bootstrap-pagination-nav');
-  const pagUl = pagNav.querySelector('.pagination');
+  const pagNav = document.getElementById('pagination-capacitaciones') || document.getElementById('bootstrap-pagination-nav');
+  if (!pagNav) return;
+  const pagUl = pagNav.querySelector('.md-pagination-list') || pagNav.querySelector('.pagination');
+  if (!pagUl) return;
   pagUl.innerHTML = '';
 
   const totalPaginas = Math.max(1, Math.ceil(total / porPagina));
+  
+  if (totalPaginas <= 1) {
+    return;
+  }
 
-  // Prev
+  // Botón Anterior
   const prevLi = document.createElement('li');
-  prevLi.className = 'page-item' + (pagina === 1 ? ' disabled' : '');
+  prevLi.className = (pagNav.id === 'pagination-capacitaciones' ? 'md-page-item' : 'page-item') + (pagina === 1 ? ' disabled' : '');
   const prevA = document.createElement('a');
-  prevA.className = 'page-link';
+  prevA.className = pagNav.id === 'pagination-capacitaciones' ? 'md-page-link' : 'page-link';
   prevA.href = '#';
   prevA.setAttribute('aria-label', 'Previous');
   prevA.innerHTML = '<span aria-hidden="true">&laquo;</span>';
@@ -132,12 +149,64 @@ function renderBootstrapPagination(total) {
   prevLi.appendChild(prevA);
   pagUl.appendChild(prevLi);
 
-  // Números
-  for(let i=1; i<=totalPaginas; i++) {
+  // Calcular números de página a mostrar (máximo 7)
+  let startPage = 1;
+  let endPage = totalPaginas;
+  
+  if (totalPaginas > 7) {
+    if (pagina <= 4) {
+      // Cerca del inicio: mostrar 1 2 3 4 5 ... último
+      startPage = 1;
+      endPage = 5;
+    } else if (pagina >= totalPaginas - 3) {
+      // Cerca del final: mostrar 1 ... N-4 N-3 N-2 N-1 N
+      startPage = totalPaginas - 4;
+      endPage = totalPaginas;
+    } else {
+      // En el medio: mostrar 1 ... actual-1 actual actual+1 ... último
+      startPage = pagina - 1;
+      endPage = pagina + 1;
+    }
+  }
+
+  const itemClass = pagNav.id === 'pagination-capacitaciones' ? 'md-page-item' : 'page-item';
+  const linkClass = pagNav.id === 'pagination-capacitaciones' ? 'md-page-link' : 'page-link';
+  
+  // Botón primera página si no está en el rango
+  if (startPage > 1) {
     const li = document.createElement('li');
-    li.className = 'page-item' + (i === pagina ? ' active' : '');
+    li.className = itemClass;
     const a = document.createElement('a');
-    a.className = 'page-link';
+    a.className = linkClass;
+    a.href = '#';
+    a.textContent = '1';
+    a.onclick = function(e){
+      e.preventDefault();
+      pagina = 1;
+      renderTabla();
+    };
+    li.appendChild(a);
+    pagUl.appendChild(li);
+    
+    // Agregar puntos suspensivos si hay una brecha
+    if (startPage > 2) {
+      const ellipsisLi = document.createElement('li');
+      ellipsisLi.className = itemClass + ' disabled';
+      const ellipsisA = document.createElement('a');
+      ellipsisA.className = linkClass;
+      ellipsisA.href = '#';
+      ellipsisA.textContent = '...';
+      ellipsisLi.appendChild(ellipsisA);
+      pagUl.appendChild(ellipsisLi);
+    }
+  }
+
+  // Números de página
+  for(let i=startPage; i<=endPage; i++) {
+    const li = document.createElement('li');
+    li.className = itemClass + (i === pagina ? ' active' : '');
+    const a = document.createElement('a');
+    a.className = linkClass;
     a.href = '#';
     a.textContent = i;
     a.onclick = function(e){
@@ -149,11 +218,40 @@ function renderBootstrapPagination(total) {
     pagUl.appendChild(li);
   }
 
-  // Next
+  // Botón última página si no está en el rango
+  if (endPage < totalPaginas) {
+    // Agregar puntos suspensivos si hay una brecha
+    if (endPage < totalPaginas - 1) {
+      const ellipsisLi = document.createElement('li');
+      ellipsisLi.className = itemClass + ' disabled';
+      const ellipsisA = document.createElement('a');
+      ellipsisA.className = linkClass;
+      ellipsisA.href = '#';
+      ellipsisA.textContent = '...';
+      ellipsisLi.appendChild(ellipsisA);
+      pagUl.appendChild(ellipsisLi);
+    }
+    
+    const li = document.createElement('li');
+    li.className = itemClass;
+    const a = document.createElement('a');
+    a.className = linkClass;
+    a.href = '#';
+    a.textContent = totalPaginas;
+    a.onclick = function(e){
+      e.preventDefault();
+      pagina = totalPaginas;
+      renderTabla();
+    };
+    li.appendChild(a);
+    pagUl.appendChild(li);
+  }
+
+  // Botón Siguiente
   const nextLi = document.createElement('li');
-  nextLi.className = 'page-item' + (pagina === totalPaginas ? ' disabled' : '');
+  nextLi.className = itemClass + (pagina === totalPaginas ? ' disabled' : '');
   const nextA = document.createElement('a');
-  nextA.className = 'page-link';
+  nextA.className = linkClass;
   nextA.href = '#';
   nextA.setAttribute('aria-label', 'Next');
   nextA.innerHTML = '<span aria-hidden="true">&raquo;</span>';
@@ -166,7 +264,7 @@ function renderBootstrapPagination(total) {
 }
 
 // Filtros individuales por columna
-document.querySelectorAll('.consulta-cap-input').forEach(inp=>{
+document.querySelectorAll('.consulta-cap-input, #tabla-capacitaciones .md-input').forEach(inp=>{
   inp.addEventListener('input', e=>{
     filtros[inp.dataset.col] = inp.value;
     pagina = 1;
@@ -175,79 +273,103 @@ document.querySelectorAll('.consulta-cap-input').forEach(inp=>{
 });
 
 // Selección individual de filas
-document.getElementById('tabla').addEventListener('change', function(e){
-  if(e.target.classList.contains('selectRow')){
-    const idStr = String(e.target.value);
-    if(e.target.checked) {
-      seleccionados.add(idStr);
-    } else {
-      seleccionados.delete(idStr);
-    }
-    renderTabla();
-  }
-});
-
-// Selección de todos en página
-document.getElementById('selectAll').addEventListener('change', function(e){
-  const filtrados = filtrarDatos();
-  const inicio = (pagina-1)*porPagina;
-  const fin = Math.min(inicio+porPagina, filtrados.length);
-  for(let i=inicio; i<fin; i++){
-    const idStr = String(filtrados[i].id);
-    if(e.target.checked) seleccionados.add(idStr);
-    else seleccionados.delete(idStr);
-  }
-  renderTabla();
-});
-
-// Limpiar filtros
-document.getElementById('clearFiltersBtn').addEventListener('click', function(){
-  filtros = {};
-  document.querySelectorAll('.consulta-cap-input').forEach(inp=>{
-    inp.value = '';
-  });
-  pagina = 1;
-  renderTabla();
-});
-
-// Select de límite
-document.getElementById('limitSelect').addEventListener('change', function(e){
-  porPagina = parseInt(e.target.value,10);
-  pagina = 1;
-  renderTabla();
-});
-
-// Dropdown logic
-const downloadBtn = document.getElementById('downloadBtn');
-const menu = document.getElementById('dropdownContent');
-downloadBtn.addEventListener('click',function(e){
-  e.stopPropagation();
-  menu.classList.toggle('open');
-});
-document.addEventListener('click',function(e){
-  if(menu.classList.contains('open')) menu.classList.remove('open');
-});
-menu.addEventListener('click', function(e){
-  e.stopPropagation();
-});
-
-// Ordenar columnas
-function renderSortIcons() {
-  document.querySelectorAll('th.sortable .icon-sort').forEach(icon => {
-    icon.classList.remove('active', 'fa-sort-amount-up', 'fa-sort-amount-down', 'fa-filter');
-    if (sortCol === icon.dataset.col) {
-      icon.classList.add('active');
-      if (sortDir === 'asc') {
-        icon.classList.add('fa-sort-amount-up');
+const tablaEl = document.getElementById('tabla-capacitaciones') || document.getElementById('tabla');
+if (tablaEl) {
+  tablaEl.addEventListener('change', function(e){
+    if(e.target.classList.contains('selectRow')){
+      const idStr = String(e.target.value);
+      if(e.target.checked) {
+        seleccionados.add(idStr);
       } else {
-        icon.classList.add('fa-sort-amount-down');
+        seleccionados.delete(idStr);
       }
-    } else {
-      icon.classList.add('fa-filter');
+      renderTabla();
     }
   });
 }
-document.querySelectorAll('th.sortable .icon-sort').forEach(icon => {
+
+// Selección de todos en página
+const selectAllEl = document.getElementById('selectAll1') || document.getElementById('selectAll');
+if (selectAllEl) {
+  selectAllEl.addEventListener('change', function(e){
+    const filtrados = filtrarDatos();
+    const inicio = (pagina-1)*porPagina;
+    const fin = Math.min(inicio+porPagina, filtrados.length);
+    for(let i=inicio; i<fin; i++){
+      const idStr = String(filtrados[i].id);
+      if(e.target.checked) seleccionados.add(idStr);
+      else seleccionados.delete(idStr);
+    }
+    renderTabla();
+  });
+}
+
+// Limpiar filtros
+const clearBtn = document.getElementById('clearFiltersBtn1') || document.getElementById('clearFiltersBtn');
+if (clearBtn) {
+  clearBtn.addEventListener('click', function(){
+    filtros = {};
+    document.querySelectorAll('.consulta-cap-input, #tabla-capacitaciones .md-input').forEach(inp=>{
+      inp.value = '';
+    });
+    pagina = 1;
+    renderTabla();
+  });
+}
+
+// Select de límite
+const limitSelectEl = document.getElementById('limitSelect1') || document.getElementById('limitSelect');
+if (limitSelectEl) {
+  limitSelectEl.addEventListener('change', function(e){
+    porPagina = parseInt(e.target.value,10);
+    pagina = 1;
+    renderTabla();
+  });
+}
+
+// Lógica de dropdown (estructura antigua)
+const downloadBtn = document.getElementById('downloadBtn');
+const menu = document.getElementById('dropdownContent');
+if (downloadBtn && menu) {
+  downloadBtn.addEventListener('click',function(e){
+    e.stopPropagation();
+    menu.classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(menu.classList.contains('open')) menu.classList.remove('open');
+  });
+  menu.addEventListener('click', function(e){
+    e.stopPropagation();
+  });
+}
+
+// Botón de exportar para la nueva estructura de pestañas
+const exportBtnCapacitaciones = document.getElementById('exportBtnCapacitaciones');
+if (exportBtnCapacitaciones) {
+  exportBtnCapacitaciones.addEventListener('click', function(e){
+    e.preventDefault();
+    descargarXLSX('filtered');
+  });
+}
+
+// Ordenar columnas
+function renderSortIcons() {
+  document.querySelectorAll('#tabla-capacitaciones .icon-sort, th.sortable .icon-sort').forEach(icon => {
+    icon.classList.remove('active', 'fa-sort-amount-up', 'fa-sort-amount-down', 'fa-filter', 'fa-sort-up', 'fa-sort-down');
+    icon.classList.add('fa-sort');
+    if (sortCol === icon.dataset.col) {
+      icon.classList.add('active');
+      if (sortDir === 'asc') {
+        icon.classList.remove('fa-sort');
+        icon.classList.add('fa-sort-up');
+      } else {
+        icon.classList.remove('fa-sort');
+        icon.classList.add('fa-sort-down');
+      }
+    }
+  });
+}
+document.querySelectorAll('#tabla-capacitaciones .icon-sort, th.sortable .icon-sort').forEach(icon => {
   icon.addEventListener('click', function(e){
     const col = icon.dataset.col;
     if (sortCol === col) {
@@ -272,7 +394,7 @@ function descargarXLSX(tipo){
     [
       'id','Capacitador','Cédula','Tema','Lugar','Actividad','Proceso','Fecha',
       'hora inicio','hora final','duracion total','observaciones','total asistentes',
-      'aprovados','no aprovados','creado por','editado por'
+      'aprobados','no aprobados','creado por','editado por'
     ]
   ];
   filas.forEach(row=>{
@@ -303,20 +425,30 @@ function descargarXLSX(tipo){
   XLSX.writeFile(wb, `capacitaciones_${tipo}.xlsx`);
 }
 
-// Dropdown options
-document.getElementById('downloadAll').addEventListener('click', function(e){
-  e.preventDefault();
-  descargarXLSX('all');
-  menu.classList.remove('open');
-});
-document.getElementById('downloadFiltered').addEventListener('click', function(e){
-  e.preventDefault();
-  descargarXLSX('filtered');
-  menu.classList.remove('open');
-});
-document.getElementById('downloadSelected').addEventListener('click', function(e){
-  e.preventDefault();
-  if(seleccionados.size===0) return;
-  descargarXLSX('selected');
-  menu.classList.remove('open');
-});
+// Opciones de dropdown (estructura antigua)
+const downloadAllBtn = document.getElementById('downloadAll');
+const downloadFilteredBtn = document.getElementById('downloadFiltered');
+const downloadSelectedBtn2 = document.getElementById('downloadSelected');
+
+if (downloadAllBtn) {
+  downloadAllBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    descargarXLSX('all');
+    if (menu) menu.classList.remove('open');
+  });
+}
+if (downloadFilteredBtn) {
+  downloadFilteredBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    descargarXLSX('filtered');
+    if (menu) menu.classList.remove('open');
+  });
+}
+if (downloadSelectedBtn2) {
+  downloadSelectedBtn2.addEventListener('click', function(e){
+    e.preventDefault();
+    if(seleccionados.size===0) return;
+    descargarXLSX('selected');
+    if (menu) menu.classList.remove('open');
+  });
+}

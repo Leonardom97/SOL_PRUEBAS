@@ -2,6 +2,9 @@
   max-width: 960px;
 }
 
+.bg-body-tertiary {
+}
+
 .btn:focus {
   border-color: #772e22;
   box-shadow: 0 0 0 0.25rem rgba(119, 46, 34, 0.25);
@@ -21,7 +24,8 @@
   outline: none;
 }
 
-
+html {
+}
 
 .page-link:focus {
   border-color: #772e22;

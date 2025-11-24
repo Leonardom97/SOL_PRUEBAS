@@ -1,24 +1,68 @@
 <?php
+// formulario_api.php
+// API para manejar selects, búsqueda de usuarios/colaboradores, guardado de formularios y relaciones.
+// Este archivo se coloca en assets/php/formulario_api.php (según uso desde JS del front-end).
+
+// Apply security headers
+require_once __DIR__ . '/../../../php/security_headers.php';
+
 session_start();
-require '../../../php/db_postgres.php';
+require '../../../php/db_postgres.php'; // incluye conexión $pg
+
+// Validar que existe una sesión activa
+if (!isset($_SESSION['usuario_id'])) {
+    header('Content-Type: application/json');
+    http_response_code(401);
+    echo json_encode(['error' => 'Sesión no iniciada. Por favor inicie sesión.']);
+    exit;
+}
 
 // Obtiene la acción enviada por GET o POST
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
-// Función para responder en formato JSON y detener la ejecución
+// Función utilitaria para responder JSON y terminar ejecución
 function jsonResponse($data) {
     header('Content-Type: application/json');
     echo json_encode($data);
     exit();
 }
 
-// Acción: Obtener datos para llenar un select HTML
+/* Acción: Obtener datos para llenar un select HTML
+   Parámetros esperados: tabla, col
+   Devuelve filas con id y la columna indicada.
+   Para tablas cap_* filtra por estado = 0 (activo).
+*/
 if ($action == 'get_select') {
-    $tabla = $_GET['tabla'];
-    $col = $_GET['col'];
+    $tabla = $_GET['tabla'] ?? '';
+    $col = $_GET['col'] ?? '';
+    
+    // SECURITY: Whitelist of allowed tables and columns to prevent SQL injection
+    $allowedTables = [
+        'cap_proceso' => ['proceso'],
+        'cap_tema' => ['nombre'],
+        'cap_lugar' => ['lugar'],
+        'cap_tipo_actividad' => ['nombre'],
+        'adm_roles' => ['nombre'],
+        'adm_empresa' => ['emp_nombre'],
+        'adm_cargos' => ['cargo'],
+        'adm_área' => ['area', 'sub_area']
+    ];
+    
+    // Validate table exists in whitelist
+    if (!isset($allowedTables[$tabla])) {
+        http_response_code(400);
+        jsonResponse(['error' => 'Tabla no permitida']);
+    }
+    
+    // Validate column exists in whitelist for this table
+    if (!in_array($col, $allowedTables[$tabla])) {
+        http_response_code(400);
+        jsonResponse(['error' => 'Columna no permitida para esta tabla']);
+    }
 
     // Solo muestra registros con estado = 0 para ciertas tablas específicas
     if (in_array($tabla, ['cap_proceso', 'cap_tema', 'cap_lugar', 'cap_tipo_actividad'])) {
+        // Safe to use $tabla and $col now as they are validated against whitelist
         $stmt = $pg->prepare("SELECT id, \"$col\" FROM \"$tabla\" WHERE estado = 0 ORDER BY \"$col\" ASC");
         $stmt->execute();
         $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -26,12 +70,14 @@ if ($action == 'get_select') {
         
     } else {
         // Para otras tablas, muestra todos los registros
-        $stmt = $pg->query("SELECT id, \"$col\" FROM \"$tabla\" ORDER BY \"$col\" ASC");
+        // Safe to use $tabla and $col now as they are validated against whitelist
+        $stmt = $pg->prepare("SELECT id, \"$col\" FROM \"$tabla\" ORDER BY \"$col\" ASC");
+        $stmt->execute();
         $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         jsonResponse($datos);
     }
 
-// Acción: Obtener información básica de usuario por cédula
+// Acción: Obtener información básica de usuario por cédula (tabla adm_usuarios)
 } elseif ($action == 'get_usuario') {
     $cedula = $_GET['cedula'];
     $stmt = $pg->prepare("SELECT nombre1, nombre2, apellido1, apellido2 FROM adm_usuarios WHERE cedula = ?");
@@ -39,10 +85,10 @@ if ($action == 'get_select') {
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     jsonResponse($row ?: []);
 
-// Acción: Obtener información de colaborador por cédula (solo activos, vacaciones o permiso)
+// Acción: Obtener información de colaborador por cédula (solo estados permitidos A/V/P)
 } elseif ($action == 'get_colaborador') {
     $cedula = $_GET['cedula'];
-    // Nota: Usar el nombre correcto de columna: ac_id_situación (con tilde)
+    // Nota: Usar el nombre correcto de columna: ac_id_situación (con tilde) según la BD provista
     $stmt = $pg->prepare("SELECT * FROM adm_colaboradores WHERE ac_cedula = ? AND ac_id_situación IN ('A', 'V', 'P') LIMIT 1");
     $stmt->execute([$cedula]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -144,7 +190,7 @@ if ($action == 'get_select') {
 
     // Prepara la inserción de asistentes al formulario
     $stmt_asistente = $pg->prepare("INSERT INTO cap_formulario_asistente (
-            id_formulario, cedula, id_colaborador, estado_aprovacion, nombre, empresa, cargo, área, sub_área, rango, situacion
+            id_formulario, cedula, id_colaborador, estado_aprobacion, nombre, empresa, cargo, área, sub_área, rango, situacion
         ) VALUES (
             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
         )");
@@ -188,7 +234,7 @@ if ($action == 'get_select') {
             $id_formulario,
             $asistente['cedula'],
             $id_colaborador,  // Puede ser NULL si no se encuentra
-            $asistente['estado_aprovacion'],
+            $asistente['estado_aprobacion'],
             $asistente['nombre'] ?? '',
             $asistente['empresa'] ?? '',
             $asistente['cargo'] ?? '',

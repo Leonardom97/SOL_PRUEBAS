@@ -4,10 +4,14 @@
  * Handles file uploads with validation for PDF and images
  */
 
+// Apply security headers
+require_once __DIR__ . '/../../../php/security_headers.php';
+
 session_start();
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../../php/db_postgres.php';
+require_once __DIR__ . '/../../../php/config.php';
 
 // Check if user is authenticated
 if (!isset($_SESSION['usuario_id'])) {
@@ -31,6 +35,9 @@ try {
                 echo json_encode(['success' => false, 'message' => 'ID de formulario requerido']);
                 exit;
             }
+            
+            // Sanitize formulario_id to prevent directory traversal
+            $formulario_id = preg_replace('/[^a-zA-Z0-9_-]/', '', $formulario_id);
             
             $file = $_FILES['file'];
             $fileSize = $file['size'];
@@ -71,6 +78,15 @@ try {
                 exit;
             }
             
+            // Additional validation for images
+            if (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                $imageInfo = @getimagesize($fileTmpName);
+                if ($imageInfo === false) {
+                    echo json_encode(['success' => false, 'message' => 'El archivo no es una imagen válida']);
+                    exit;
+                }
+            }
+            
             // Create directory structure: m_capacitaciones/assets/docs/[formulario_id]/archivos/
             $baseDir = __DIR__ . '/../docs';
             $formularioDir = $baseDir . '/' . $formulario_id;
@@ -88,10 +104,22 @@ try {
                 mkdir($uploadDir, 0755, true);
             }
             
+            // Ensure .htaccess exists to prevent script execution
+            $htaccessPath = $baseDir . '/.htaccess';
+            if (!file_exists($htaccessPath)) {
+                $htaccessContent = "# Prevent script execution\n" .
+                                   "<FilesMatch \"\\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|htm|shtml|sh|cgi)$\">\n" .
+                                   "    Order Allow,Deny\n" .
+                                   "    Deny from all\n" .
+                                   "</FilesMatch>\n";
+                file_put_contents($htaccessPath, $htaccessContent);
+            }
+            
             // Generate unique filename to prevent overwriting
             $timestamp = time();
+            $randomString = bin2hex(random_bytes(8));
             $safeFileName = preg_replace('/[^a-zA-Z0-9_.-]/', '_', pathinfo($fileName, PATHINFO_FILENAME));
-            $newFileName = $safeFileName . '_' . $timestamp . '.' . $fileExtension;
+            $newFileName = $safeFileName . '_' . $timestamp . '_' . $randomString . '.' . $fileExtension;
             $targetPath = $uploadDir . '/' . $newFileName;
             
             // Move uploaded file
@@ -99,6 +127,9 @@ try {
                 echo json_encode(['success' => false, 'message' => 'Error al guardar el archivo']);
                 exit;
             }
+            
+            // Set restrictive permissions
+            chmod($targetPath, 0644);
             
             // Update database with filename
             $stmt = $pg->prepare("
@@ -110,6 +141,9 @@ try {
                 ':filename' => $newFileName,
                 ':formulario_id' => $formulario_id
             ]);
+            
+            // Log successful upload
+            error_log("Training file uploaded by user {$_SESSION['usuario_id']} for form $formulario_id: $newFileName");
             
             echo json_encode([
                 'success' => true,

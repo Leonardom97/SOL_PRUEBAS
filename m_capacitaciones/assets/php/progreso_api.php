@@ -122,7 +122,7 @@ try {
                 INNER JOIN cap_tema t ON f.id_tema = t.id
                 LEFT JOIN adm_usuarios u ON f.id_usuario = u.id
                 WHERE fa.cedula = ?
-                AND fa.estado_aprovacion = 'aprobo'
+                AND fa.estado_aprobacion = 'aprobo'
                 ORDER BY f.fecha DESC
             ");
             $stmt->execute([$cedula]);
@@ -158,7 +158,7 @@ try {
                 LEFT JOIN cap_proceso pr ON f.id_proceso = pr.id
                 LEFT JOIN cap_lugar l ON f.id_lugar = l.id
                 WHERE fa.cedula = ?
-                AND fa.estado_aprovacion = 'aprobo'
+                AND fa.estado_aprobacion = 'aprobo'
                 ORDER BY f.fecha DESC
                 LIMIT ?
             ");
@@ -267,7 +267,7 @@ try {
                 LEFT JOIN cap_lugar l ON f.id_lugar = l.id
                 LEFT JOIN adm_usuarios u ON f.id_usuario = u.id
                 WHERE fa.cedula = ?
-                AND fa.estado_aprovacion = 'aprobo'
+                AND fa.estado_aprobacion = 'aprobo'
                 ORDER BY f.fecha DESC
             ");
             $stmt->execute([$cedula]);
@@ -295,7 +295,7 @@ try {
                     f.fecha,
                     f.hora_inicio,
                     f.hora_final AS hora_fin,
-                    fa.estado_aprovacion,
+                    fa.estado_aprobacion,
                     fa.empresa,
                     fa.cargo,
                     fa.área AS area,
