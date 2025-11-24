@@ -1,18 +1,18 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : clipa
+ Source Server         : Local
  Source Server Type    : PostgreSQL
- Source Server Version : 90525 (90525)
- Source Host           : 192.168.125.25:5432
- Source Catalog        : web_osm
+ Source Server Version : 170006 (170006)
+ Source Host           : localhost:5432
+ Source Catalog        : Prueba
  Source Schema         : public
 
  Target Server Type    : PostgreSQL
- Target Server Version : 90525 (90525)
+ Target Server Version : 170006 (170006)
  File Encoding         : 65001
 
- Date: 21/11/2025 21:33:46
+ Date: 24/11/2025 11:15:19
 */
 
 
@@ -24,6 +24,28 @@ CREATE SEQUENCE "public"."adm_intentos_login_id_seq"
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for adm_resources_catalog_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "public"."adm_resources_catalog_id_seq";
+CREATE SEQUENCE "public"."adm_resources_catalog_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 2147483647
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for adm_role_permissions_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "public"."adm_role_permissions_id_seq";
+CREATE SEQUENCE "public"."adm_role_permissions_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 2147483647
 START 1
 CACHE 1;
 
@@ -492,6 +514,7 @@ INSERT INTO "public"."adm_colaboradores" VALUES (60098, '1122145567', 'KEVIN', '
 INSERT INTO "public"."adm_colaboradores" VALUES (60099, '1075211887', 'WILMER', '1', '104', '001', 'E', '13912SGW', '001', 'OPERATIVOS PRODUCCION AGRICOLA', '', 'SANCENO', 'GARCIA', 2);
 INSERT INTO "public"."adm_colaboradores" VALUES (60100, '19620729', 'ANDRES', '1', '104', '001', 'E', '22754SSAM', '001', 'OPERATIVOS PRODUCCION AGRICOLA', 'MANUEL', 'SILVA', 'SILVERA', 2);
 INSERT INTO "public"."adm_colaboradores" VALUES (60101, '17704280', 'BENJAMIN', '1', '104', '001', 'E', '6305CCB', '001', 'OPERATIVOS PRODUCCION AGRICOLA', '', 'COBALEDA', 'CARVAJAL', 2);
+INSERT INTO "public"."adm_colaboradores" VALUES (20147, '4061108', 'PEDRO', '1', '062', '001', 'E', '63133AP', '001', 'NO DEFINIDO', '', 'ALFONSO', '', 2);
 INSERT INTO "public"."adm_colaboradores" VALUES (60102, '1007720148', 'JORGE', '1', '104', '001', 'E', '22173COJI', '001', 'OPERATIVOS PRODUCCION AGRICOLA', 'IVAN', 'CASTAÑEDA', 'ORTIZ', 2);
 INSERT INTO "public"."adm_colaboradores" VALUES (60103, '1085106163', 'ALIX', '1', '104', '001', 'E', '8188OCAJ', '001', 'OPERATIVOS PRODUCCION AGRICOLA', 'JOSE', 'OROZCO', 'CARRILLO', 2);
 INSERT INTO "public"."adm_colaboradores" VALUES (60104, '19617449', 'MANUEL', '1', '104', '001', 'E', '19474JMMS', '001', 'OPERATIVOS PRODUCCION AGRICOLA', 'SALVADOR', 'JULIO', 'MESA', 2);
@@ -816,7 +839,6 @@ INSERT INTO "public"."adm_colaboradores" VALUES (20044, '18129784', 'JHON', '1',
 INSERT INTO "public"."adm_colaboradores" VALUES (30000, '7837896', 'LUIS', '1', '052', '000', 'A', '39921GLA', '000', 'AUXILIARES OPERATIVOS', 'ANGEL', 'GUAYARA', '', 2);
 INSERT INTO "public"."adm_colaboradores" VALUES (30002, '17416230', 'UMAR', '1', '018', '000', 'A', '18255UPU', '000', 'CONDUCTORES', '', 'UMBARILA', 'POVEDA', 2);
 INSERT INTO "public"."adm_colaboradores" VALUES (20021, '12275158', 'DOUMER', '1', '104', '001', 'A', '77183PMDF', '001', 'OPERATIVOS PRODUCCION AGRICOLA', 'FELIPE', 'PAZ', 'MAJIN', 2);
-INSERT INTO "public"."adm_colaboradores" VALUES (20147, '4061108', 'PEDRO', '1', '062', '001', 'E', '63133AP', '001', 'NO DEFINIDO', '', 'ALFONSO', '', 2);
 INSERT INTO "public"."adm_colaboradores" VALUES (20148, '4060414', 'IGNACIO', '1', '062', '001', 'E', '62439SGI', '001', 'NO DEFINIDO', '', 'SILVA', 'GONZALEZ', 2);
 INSERT INTO "public"."adm_colaboradores" VALUES (20166, '1121857022', 'EDWIN', '1', '062', '001', 'E', '59047BAEO', '001', 'NO DEFINIDO', 'ORLANDO', 'BEJARANO', 'ARENAS', 2);
 INSERT INTO "public"."adm_colaboradores" VALUES (20176, '1019103601', 'YORDIN', '1', '061', '000', 'E', '5626CDYA', '000', 'NO DEFINIDO', 'ALONSO', 'CAMACHO', 'DELGADO', 2);
@@ -1925,6 +1947,86 @@ INSERT INTO "public"."adm_intentos_login" VALUES (271, '123456789', 'admin', 't'
 INSERT INTO "public"."adm_intentos_login" VALUES (272, '123456789', 'admin', 't', '192.168.0.123', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '192.168.0.123', NULL, '2025-11-20 13:10:03.349387');
 INSERT INTO "public"."adm_intentos_login" VALUES (273, '1006838624', 'admin', 't', '192.168.90.54', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '192.168.90.54', NULL, '2025-11-20 15:10:49.935763');
 INSERT INTO "public"."adm_intentos_login" VALUES (274, '123456789', 'admin', 't', '168.90.15.81', 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36', '168901581.ip77.static.mediacommerce.com.co', NULL, '2025-11-21 10:04:16.875516');
+INSERT INTO "public"."adm_intentos_login" VALUES (275, '123456789', 'admin', 't', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36', 'S1338500', NULL, '2025-11-24 11:13:23.568937');
+
+-- ----------------------------
+-- Table structure for adm_resources_catalog
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."adm_resources_catalog";
+CREATE TABLE "public"."adm_resources_catalog" (
+  "id" int4 NOT NULL DEFAULT nextval('adm_resources_catalog_id_seq'::regclass),
+  "resource_type" varchar(20) COLLATE "pg_catalog"."default" NOT NULL,
+  "resource_path" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
+  "resource_name" varchar(255) COLLATE "pg_catalog"."default",
+  "module_name" varchar(100) COLLATE "pg_catalog"."default",
+  "icon" varchar(50) COLLATE "pg_catalog"."default",
+  "data_roles" text COLLATE "pg_catalog"."default",
+  "is_active" bool DEFAULT true,
+  "last_scanned" timestamp(6) DEFAULT CURRENT_TIMESTAMP,
+  "created_at" timestamp(6) DEFAULT CURRENT_TIMESTAMP
+)
+;
+COMMENT ON COLUMN "public"."adm_resources_catalog"."resource_type" IS 'Tipo de recurso';
+COMMENT ON COLUMN "public"."adm_resources_catalog"."resource_path" IS 'Ruta del recurso';
+COMMENT ON COLUMN "public"."adm_resources_catalog"."resource_name" IS 'Nombre descriptivo para mostrar';
+COMMENT ON COLUMN "public"."adm_resources_catalog"."module_name" IS 'Módulo al que pertenece';
+COMMENT ON COLUMN "public"."adm_resources_catalog"."data_roles" IS 'Roles originales del atributo data-role (separados por coma, solo para referencia)';
+COMMENT ON COLUMN "public"."adm_resources_catalog"."is_active" IS 'Indica si el recurso está activo y disponible';
+COMMENT ON TABLE "public"."adm_resources_catalog" IS 'Catálogo de todos los recursos disponibles en el sistema (páginas, módulos, items de sidebar)';
+
+-- ----------------------------
+-- Records of adm_resources_catalog
+-- ----------------------------
+INSERT INTO "public"."adm_resources_catalog" VALUES (1, 'module', '/m_admin/', 'Administrador', 'Administrador', 'fas fa-cogs', 'administrador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (2, 'module', '/m_capacitaciones/', 'Capacitaciones', 'Capacitaciones', 'fas fa-table', 'administrador,capacitador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (3, 'module', '/m_agronomia/', 'Agronomía', 'Agronomía', 'fas fa-leaf', 'administrador,supervisor_agronomico,aux_agronomico', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (4, 'module', '/m_bascula/', 'Báscula', 'Báscula', 'fas fa-weight', 'administrador,bascula,aux_bascula', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (5, 'module', '/m_almacen/', 'Almacén', 'Almacén', 'fas fa-archive', 'administrador,almacen,aux_almacen', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (6, 'page', '/panel.html', 'Panel Principal', 'General', 'fas fa-tachometer-alt', 'todos', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (7, 'page', '/Usuarios.html', 'Usuarios', 'Usuarios', 'fas fa-user-cog', 'todos', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (8, 'page', '/sesiones.html', 'Gestión de Sesiones', 'Administrador', 'fas fa-clock', 'administrador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (9, 'page', '/m_admin/ed_usuario.html', 'Usuarios Principales', 'Administrador', NULL, 'administrador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (10, 'page', '/m_admin/ed_uscolaboradores.html', 'Usuarios Colaboradores', 'Administrador', NULL, 'administrador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (11, 'page', '/includes/roles.html', 'Gestión de Roles', 'Administrador', NULL, 'administrador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (12, 'page', '/includes/web_main.html', 'Configuración Web', 'Administrador', NULL, 'administrador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (13, 'page', '/m_capacitaciones/formulario.html', 'Formulario', 'Capacitaciones', NULL, 'administrador,capacitador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (14, 'page', '/m_capacitaciones/ed_formulario.html', 'Edición Formulario', 'Capacitaciones', NULL, 'administrador,capacitador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (15, 'page', '/m_capacitaciones/Consultas_capacitacion.html', 'Consulta por Capacitación', 'Capacitaciones', NULL, 'administrador,capacitador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (16, 'page', '/m_capacitaciones/programacion.html', 'Programación', 'Capacitaciones', NULL, 'administrador,capacitador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (17, 'page', '/m_capacitaciones/dashboard.html', 'Dashboard Capacitaciones', 'Capacitaciones', NULL, 'administrador,capacitador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (18, 'page', '/m_capacitaciones/items_formularios.html', 'Items Formularios', 'Capacitaciones', NULL, 'administrador,capacitador', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (19, 'page', '/m_agronomia/tb_agronomia.html', 'Formulario', 'Agronomía', NULL, 'administrador,supervisor_agronomico', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (20, 'page', '/m_agronomia/Consultas.html', 'Consulta', 'Agronomía', NULL, 'administrador,supervisor_agronomico', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (21, 'page', '/m_bascula/pesaje.html', 'Pesaje', 'Báscula', NULL, 'administrador,bascula', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (22, 'page', '/m_bascula/Consultas.html', 'Consulta', 'Báscula', NULL, 'administrador,bascula', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (23, 'page', '/m_almacen/formulario.html', 'Formulario', 'Almacén', NULL, 'administrador,almacen', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+INSERT INTO "public"."adm_resources_catalog" VALUES (24, 'page', '/m_almacen/Consultas.html', 'Consulta', 'Almacén', NULL, 'administrador,almacen', 't', '2025-11-24 11:12:04.631924', '2025-11-24 11:12:04.631924');
+
+-- ----------------------------
+-- Table structure for adm_role_permissions
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."adm_role_permissions";
+CREATE TABLE "public"."adm_role_permissions" (
+  "id" int4 NOT NULL DEFAULT nextval('adm_role_permissions_id_seq'::regclass),
+  "rol_id" int4 NOT NULL,
+  "resource_type" varchar(20) COLLATE "pg_catalog"."default" NOT NULL DEFAULT 'page'::character varying,
+  "resource_path" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
+  "resource_name" varchar(255) COLLATE "pg_catalog"."default",
+  "module_name" varchar(100) COLLATE "pg_catalog"."default",
+  "created_at" timestamp(6) DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" timestamp(6) DEFAULT CURRENT_TIMESTAMP
+)
+;
+COMMENT ON COLUMN "public"."adm_role_permissions"."rol_id" IS 'ID del rol al que se asigna el permiso';
+COMMENT ON COLUMN "public"."adm_role_permissions"."resource_type" IS 'Tipo de recurso: page (página individual), module (módulo completo), sidebar_item (elemento de menú)';
+COMMENT ON COLUMN "public"."adm_role_permissions"."resource_path" IS 'Ruta del recurso (ej: /Usuarios.html, /m_capacitaciones/)';
+COMMENT ON COLUMN "public"."adm_role_permissions"."resource_name" IS 'Nombre legible del recurso para mostrar en la UI';
+COMMENT ON COLUMN "public"."adm_role_permissions"."module_name" IS 'Nombre del módulo al que pertenece el recurso';
+COMMENT ON TABLE "public"."adm_role_permissions" IS 'Permisos de roles para acceder a páginas, módulos y elementos de sidebar';
+
+-- ----------------------------
+-- Records of adm_role_permissions
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for adm_roles
@@ -2146,7 +2248,8 @@ INSERT INTO "public"."adm_sesiones" VALUES (234, 1, 'admin', 'h7ho6t9ihmlajajpur
 INSERT INTO "public"."adm_sesiones" VALUES (232, 3, 'admin', 'f9v4ai2odhj5ed1vtfvch2ohvv', '177.93.50.74', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'azteca-comunicaciones.com', '2025-11-19 22:46:57.100728', '2025-11-19 22:47:00.627087', 'f', NULL, 'concurrent_login', '2025-11-20 15:10:49.919614');
 INSERT INTO "public"."adm_sesiones" VALUES (237, 3, 'admin', 'hdat2q5rgs3ekt3ivd992k00sb', '192.168.90.54', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '192.168.90.54', '2025-11-20 15:10:49.939882', '2025-11-20 15:10:50.140137', 't', NULL, NULL, NULL);
 INSERT INTO "public"."adm_sesiones" VALUES (236, 1, 'admin', 'ctodeuunie8mrhfdh7mvnquhj7', '192.168.0.123', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '192.168.0.123', '2025-11-20 13:10:03.359283', '2025-11-20 13:10:38.080309', 'f', NULL, 'concurrent_login', '2025-11-21 10:04:16.871504');
-INSERT INTO "public"."adm_sesiones" VALUES (238, 1, 'admin', 'jon6fjhp0s6uhokjg58k9ij6ej', '168.90.15.81', 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36', '168901581.ip77.static.mediacommerce.com.co', '2025-11-21 10:04:16.87916', '2025-11-21 10:05:16.83193', 't', NULL, NULL, NULL);
+INSERT INTO "public"."adm_sesiones" VALUES (238, 1, 'admin', 'jon6fjhp0s6uhokjg58k9ij6ej', '168.90.15.81', 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36', '168901581.ip77.static.mediacommerce.com.co', '2025-11-21 10:04:16.87916', '2025-11-21 10:05:16.83193', 'f', NULL, 'concurrent_login', '2025-11-24 11:13:23.554721');
+INSERT INTO "public"."adm_sesiones" VALUES (239, 1, 'admin', 's9gus90nboqbf9a1q6aso3efsr', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36', 'S1338500', '2025-11-24 11:13:23.573433', '2025-11-24 11:14:16.717978', 't', NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for adm_situación
@@ -14500,18 +14603,67 @@ $BODY$
   COST 100;
 
 -- ----------------------------
+-- Function structure for update_role_permissions_updated_at
+-- ----------------------------
+DROP FUNCTION IF EXISTS "public"."update_role_permissions_updated_at"();
+CREATE OR REPLACE FUNCTION "public"."update_role_permissions_updated_at"()
+  RETURNS "pg_catalog"."trigger" AS $BODY$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+
+-- ----------------------------
+-- View structure for v_role_permissions_full
+-- ----------------------------
+DROP VIEW IF EXISTS "public"."v_role_permissions_full";
+CREATE VIEW "public"."v_role_permissions_full" AS  SELECT rp.id,
+    rp.rol_id,
+    r.nombre AS rol_nombre,
+    rp.resource_type,
+    rp.resource_path,
+    rp.resource_name,
+    rp.module_name,
+    rc.icon,
+    rc.data_roles AS original_data_roles,
+    rp.created_at,
+    rp.updated_at
+   FROM adm_role_permissions rp
+     JOIN adm_roles r ON rp.rol_id = r.id
+     LEFT JOIN adm_resources_catalog rc ON rp.resource_type::text = rc.resource_type::text AND rp.resource_path::text = rc.resource_path::text
+  WHERE rc.is_active = true OR rc.is_active IS NULL;
+COMMENT ON VIEW "public"."v_role_permissions_full" IS 'Vista que combina permisos de roles con información completa del catálogo de recursos';
+
+-- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."adm_intentos_login_id_seq"
 OWNED BY "public"."adm_intentos_login"."id";
-SELECT setval('"public"."adm_intentos_login_id_seq"', 274, true);
+SELECT setval('"public"."adm_intentos_login_id_seq"', 275, true);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+ALTER SEQUENCE "public"."adm_resources_catalog_id_seq"
+OWNED BY "public"."adm_resources_catalog"."id";
+SELECT setval('"public"."adm_resources_catalog_id_seq"', 24, true);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+ALTER SEQUENCE "public"."adm_role_permissions_id_seq"
+OWNED BY "public"."adm_role_permissions"."id";
+SELECT setval('"public"."adm_role_permissions_id_seq"', 1, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."adm_sesiones_id_seq"
 OWNED BY "public"."adm_sesiones"."id";
-SELECT setval('"public"."adm_sesiones_id_seq"', 238, true);
+SELECT setval('"public"."adm_sesiones_id_seq"', 239, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -14640,6 +14792,60 @@ CREATE INDEX "idx_intentos_identificador" ON "public"."adm_intentos_login" USING
 -- Primary Key structure for table adm_intentos_login
 -- ----------------------------
 ALTER TABLE "public"."adm_intentos_login" ADD CONSTRAINT "adm_intentos_login_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Indexes structure for table adm_resources_catalog
+-- ----------------------------
+CREATE INDEX "idx_resources_catalog_active" ON "public"."adm_resources_catalog" USING btree (
+  "is_active" "pg_catalog"."bool_ops" ASC NULLS LAST
+);
+CREATE INDEX "idx_resources_catalog_module" ON "public"."adm_resources_catalog" USING btree (
+  "module_name" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+CREATE INDEX "idx_resources_catalog_type" ON "public"."adm_resources_catalog" USING btree (
+  "resource_type" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Uniques structure for table adm_resources_catalog
+-- ----------------------------
+ALTER TABLE "public"."adm_resources_catalog" ADD CONSTRAINT "unique_resource_path" UNIQUE ("resource_type", "resource_path");
+
+-- ----------------------------
+-- Primary Key structure for table adm_resources_catalog
+-- ----------------------------
+ALTER TABLE "public"."adm_resources_catalog" ADD CONSTRAINT "adm_resources_catalog_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Indexes structure for table adm_role_permissions
+-- ----------------------------
+CREATE INDEX "idx_role_permissions_module" ON "public"."adm_role_permissions" USING btree (
+  "module_name" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+CREATE INDEX "idx_role_permissions_resource" ON "public"."adm_role_permissions" USING btree (
+  "resource_type" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST,
+  "resource_path" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+CREATE INDEX "idx_role_permissions_rol_id" ON "public"."adm_role_permissions" USING btree (
+  "rol_id" "pg_catalog"."int4_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Triggers structure for table adm_role_permissions
+-- ----------------------------
+CREATE TRIGGER "update_adm_role_permissions_updated_at" BEFORE UPDATE ON "public"."adm_role_permissions"
+FOR EACH ROW
+EXECUTE PROCEDURE "public"."update_role_permissions_updated_at"();
+
+-- ----------------------------
+-- Uniques structure for table adm_role_permissions
+-- ----------------------------
+ALTER TABLE "public"."adm_role_permissions" ADD CONSTRAINT "unique_rol_resource" UNIQUE ("rol_id", "resource_type", "resource_path");
+
+-- ----------------------------
+-- Primary Key structure for table adm_role_permissions
+-- ----------------------------
+ALTER TABLE "public"."adm_role_permissions" ADD CONSTRAINT "adm_role_permissions_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
 -- Indexes structure for table adm_roles
@@ -14869,6 +15075,11 @@ ALTER TABLE "public"."cap_tipo_actividad" ADD CONSTRAINT "cap_tipo_actividad_pke
 -- Foreign Keys structure for table adm_colaboradores
 -- ----------------------------
 ALTER TABLE "public"."adm_colaboradores" ADD CONSTRAINT "adm_colaboradores_ac_id_rol_fkey" FOREIGN KEY ("ac_id_rol") REFERENCES "public"."adm_roles" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Keys structure for table adm_role_permissions
+-- ----------------------------
+ALTER TABLE "public"."adm_role_permissions" ADD CONSTRAINT "fk_role_permissions_rol" FOREIGN KEY ("rol_id") REFERENCES "public"."adm_roles" ("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- ----------------------------
 -- Foreign Keys structure for table adm_usuario_roles
