@@ -1,6 +1,6 @@
 <?php
 /**
- * API ct_cal_sanidad.
+ * API ct_cal_labores.
  * Acciones: list, upsert, inactivate, rechazar, aprobar
  */
 require_once __DIR__ . '/api_helpers.php';
@@ -18,12 +18,13 @@ try {
     
     require_admin_if_needed($action);
 
-    $table = 'ct_cal_sanidad';
-    $idCol = 'ct_cal_sanidad_id';
+    $table = 'ct_cal_labores';
+    $idCol = 'ct_cal_labores_id';
     $colsAllowed = [
-        'ct_cal_sanidad_id', 'fecha', 'hora', 'responsable', 'labor', 'colaborador', 'plantacion', 'finca', 'siembra', 'lote', 'parcela', 'linea', 'palma', 'tipo_labor', 'estado', 'etapa', 'instar', 'verificacion', 'observaciones', 'error_registro', 'supervision', 'check'
+        'ct_cal_labores_id', 'fecha', 'hora', 'colaborador', 'tipo_auditoria', 'labor_especifica', 'labor', 'plantacion', 'finca', 'siembra', 'lote', 'parcela', 'linea', 'palma', 'linea_entrada', 'linea_salida', 'tipo_validacion', 'grado_enfermedad', 'numero_galerias', 'promedio', 'estado', 'producto', 'observación', 'error_registro', 'supervision', 'check'
     ];
 
+    // Handle each action using helper functions
     if ($action === 'list') {
         $result = handle_list($table, $colsAllowed, $idCol);
         respond($result);

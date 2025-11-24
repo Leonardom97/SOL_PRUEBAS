@@ -1,6 +1,6 @@
 <?php
 /**
- * API ct_cal_sanidad.
+ * API nivel_freatico.
  * Acciones: list, upsert, inactivate, rechazar, aprobar
  */
 require_once __DIR__ . '/api_helpers.php';
@@ -18,12 +18,13 @@ try {
     
     require_admin_if_needed($action);
 
-    $table = 'ct_cal_sanidad';
-    $idCol = 'ct_cal_sanidad_id';
+    $table = 'nivel_freatico';
+    $idCol = 'nivel_freatico_id';
     $colsAllowed = [
-        'ct_cal_sanidad_id', 'fecha', 'hora', 'responsable', 'labor', 'colaborador', 'plantacion', 'finca', 'siembra', 'lote', 'parcela', 'linea', 'palma', 'tipo_labor', 'estado', 'etapa', 'instar', 'verificacion', 'observaciones', 'error_registro', 'supervision', 'check'
+        'nivel_freatico_id', 'fecha', 'hora', 'colaborador', 'plantacion', 'finca', 'siembra', 'lote', 'parcela', 'linea', 'palma', 'n_pozo_observacion', 'superficie_tubo', 'profundidad_agua', 'verificacion', 'validacion', 'enterrado', 'nivel_freatico', 'error_registro', 'supervision', 'check'
     ];
 
+    // Handle each action using helper functions
     if ($action === 'list') {
         $result = handle_list($table, $colsAllowed, $idCol);
         respond($result);

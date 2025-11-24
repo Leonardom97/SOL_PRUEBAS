@@ -1,6 +1,6 @@
 <?php
 /**
- * API ct_cal_sanidad.
+ * API plagas.
  * Acciones: list, upsert, inactivate, rechazar, aprobar
  */
 require_once __DIR__ . '/api_helpers.php';
@@ -18,12 +18,13 @@ try {
     
     require_admin_if_needed($action);
 
-    $table = 'ct_cal_sanidad';
-    $idCol = 'ct_cal_sanidad_id';
+    $table = 'plagas';
+    $idCol = 'plagas_id';
     $colsAllowed = [
-        'ct_cal_sanidad_id', 'fecha', 'hora', 'responsable', 'labor', 'colaborador', 'plantacion', 'finca', 'siembra', 'lote', 'parcela', 'linea', 'palma', 'tipo_labor', 'estado', 'etapa', 'instar', 'verificacion', 'observaciones', 'error_registro', 'supervision', 'check'
+        'plagas_id', 'fecha', 'hora', 'colaborador', 'plantacion', 'finca', 'siembra', 'lote', 'parcela', 'linea', 'palma', 'ubicacion', 'orden', 'plaga', 'etapa', 'cantidad', 'instar', 'estado', 'error_registro', 'supervision', 'check'
     ];
 
+    // Handle each action using helper functions
     if ($action === 'list') {
         $result = handle_list($table, $colsAllowed, $idCol);
         respond($result);

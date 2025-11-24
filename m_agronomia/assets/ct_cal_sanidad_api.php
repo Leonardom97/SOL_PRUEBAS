@@ -24,6 +24,7 @@ try {
         'ct_cal_sanidad_id', 'fecha', 'hora', 'responsable', 'labor', 'colaborador', 'plantacion', 'finca', 'siembra', 'lote', 'parcela', 'linea', 'palma', 'tipo_labor', 'estado', 'etapa', 'instar', 'verificacion', 'observaciones', 'error_registro', 'supervision', 'check'
     ];
 
+    // Handle each action using helper functions
     if ($action === 'list') {
         $result = handle_list($table, $colsAllowed, $idCol);
         respond($result);

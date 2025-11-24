@@ -1,6 +1,6 @@
 <?php
 /**
- * API ct_cal_sanidad.
+ * API fertilizacion_organica.
  * Acciones: list, upsert, inactivate, rechazar, aprobar
  */
 require_once __DIR__ . '/api_helpers.php';
@@ -18,12 +18,13 @@ try {
     
     require_admin_if_needed($action);
 
-    $table = 'ct_cal_sanidad';
-    $idCol = 'ct_cal_sanidad_id';
+    $table = 'fertilizacion_organica';
+    $idCol = 'fertilizacion_organica_id';
     $colsAllowed = [
-        'ct_cal_sanidad_id', 'fecha', 'hora', 'responsable', 'labor', 'colaborador', 'plantacion', 'finca', 'siembra', 'lote', 'parcela', 'linea', 'palma', 'tipo_labor', 'estado', 'etapa', 'instar', 'verificacion', 'observaciones', 'error_registro', 'supervision', 'check'
+        'fertilizacion_organica_id', 'fecha_actividad', 'responsable', 'plantacion', 'finca', 'siembra', 'lote', 'parcela', 'linea_entrada', 'linea_salida', 'hora_entrada', 'hora_salida', 'labor_especifica', 'producto_aplicado', 'dosis_kg', 'unidad_aplicacion', 'contratista_colaborador', 'n_colaboradores', 'colaboradores', 'tipo_labor', 'contratista_maquinaria', 'n_operadores', 'tipo_maquina', 'nombre_operadores', 'bultos_aplicados', 'n_traslado', 'kg_aplicados', 'supervision', 'check', 'error_registro'
     ];
 
+    // Handle each action using helper functions
     if ($action === 'list') {
         $result = handle_list($table, $colsAllowed, $idCol);
         respond($result);
