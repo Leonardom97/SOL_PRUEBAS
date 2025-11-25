@@ -11,6 +11,9 @@ Este documento describe el modelo base extraído del módulo de **mantenimientos
 
 #### Constantes de Configuración
 ```javascript
+// NOTA: Estos IDs deben coincidir exactamente con los IDs en tu HTML
+// En este ejemplo, se mantienen los nombres originales del código fuente
+// (algunos usan 'reuniones' y otros 'mantenimientos' por razones históricas)
 const DOM = {
   tbody: 'tbody-mantenimientos',        // ID del tbody de la tabla
   table: 'tabla-reuniones',             // ID de la tabla
@@ -729,6 +732,10 @@ if ($action === 'inactivar') {
 
 ### 3.1 Tabla con Filtros
 
+> **NOTA**: Este es el HTML real del módulo de mantenimientos. 
+> Observe que algunos IDs usan 'reuniones' y otros 'mantenimientos' por razones históricas del código fuente.
+> Al implementar su propia tabla, use nombres consistentes en todos los IDs.
+
 ```html
 <section id="tab-content-reuniones" class="md-table-card">
   <div class="md-table-toolbar">
@@ -868,7 +875,11 @@ filtro_plantacion=PL-001 (opcional)
 
 ### Paso 1: Preparar Constantes
 1. Copiar estructura de constantes DOM
-2. Actualizar IDs con los de tu nueva tabla
+2. **IMPORTANTE**: Actualizar TODOS los IDs para que coincidan con tu HTML
+   - Usar un nombre consistente (ej: 'empleados' en todos los IDs)
+   - `tbody: 'tbody-empleados'`
+   - `table: 'tabla-empleados'`
+   - `pagination: 'pagination-empleados'`
 3. Definir array COLUMNAS con campos de tu tabla
 4. Configurar API endpoint
 5. Definir ID_KEY (clave primaria)
@@ -925,6 +936,7 @@ filtro_plantacion=PL-001 (opcional)
 6. **Rol-based**: Algunas acciones requieren verificación de permisos
 7. **Optimización**: Debounce en filtros evita llamadas excesivas al servidor
 8. **UX**: Feedback visual con iconos de estado (aprobado, pendiente, etc.)
+9. **⚠️ Consistencia de IDs**: Al implementar una nueva tabla, usar nombres consistentes en todos los IDs HTML y constantes JavaScript (ej: todos deben usar 'empleados' o todos 'mantenimientos')
 
 ---
 
