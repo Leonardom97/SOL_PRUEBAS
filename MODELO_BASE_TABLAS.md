@@ -732,9 +732,13 @@ if ($action === 'inactivar') {
 
 ### 3.1 Tabla con Filtros
 
-> **NOTA**: Este es el HTML real del módulo de mantenimientos. 
+> **NOTA IMPORTANTE**: Este es el HTML real del módulo de mantenimientos. 
 > Observe que algunos IDs usan 'reuniones' y otros 'mantenimientos' por razones históricas del código fuente.
-> Al implementar su propia tabla, use nombres consistentes en todos los IDs.
+> 
+> **RECOMENDACIÓN PARA NUEVAS IMPLEMENTACIONES**: 
+> - Use nombres consistentes en TODOS los IDs (ej: 'empleados' en todo)
+> - Si está trabajando con código existente, mantenga los IDs actuales por compatibilidad
+> - Para migración/estandarización: Actualizar IDs en HTML + constantes JavaScript + eventos al mismo tiempo
 
 ```html
 <section id="tab-content-reuniones" class="md-table-card">
@@ -926,21 +930,148 @@ filtro_plantacion=PL-001 (opcional)
 
 ---
 
-## 8. NOTAS IMPORTANTES
+## 8. SEGURIDAD - MEJORES PRÁCTICAS
 
-1. **Seguridad**: Todos los inputs de usuario se sanitizan con `preg_replace` en PHP
-2. **Compatibilidad**: El sistema soporta múltiples formatos de respuesta JSON
-3. **Fallback**: La función fetchData intenta múltiples acciones alternativas
-4. **Cache**: Se usa `cache: 'no-store'` en fetch para evitar datos obsoletos
-5. **Errores**: Sistema de manejo de errores con suppress de mensajes específicos
-6. **Rol-based**: Algunas acciones requieren verificación de permisos
-7. **Optimización**: Debounce en filtros evita llamadas excesivas al servidor
-8. **UX**: Feedback visual con iconos de estado (aprobado, pendiente, etc.)
-9. **⚠️ Consistencia de IDs**: Al implementar una nueva tabla, usar nombres consistentes en todos los IDs HTML y constantes JavaScript (ej: todos deben usar 'empleados' o todos 'mantenimientos')
+### 8.1 Validación de Columnas en Ordenamiento
+
+El código actual usa `preg_replace` para sanitizar nombres de columnas, pero se recomienda implementar una whitelist:
+
+```php
+// RECOMENDADO: Whitelist de columnas permitidas
+$allowedColumns = [
+    'mantenimientos_id', 'fecha', 'responsable', 'plantacion', 
+    'finca', 'siembra', 'lote', 'parcela', 'labor_especifica',
+    'observacion', 'contratista', 'codigo', 'colaborador'
+];
+
+if (!empty($_GET['ordenColumna'])) {
+    $ordenColumna = preg_replace('/[^a-zA-Z0-9_]/', '', $_GET['ordenColumna']);
+    
+    // Verificar contra whitelist
+    if (!in_array($ordenColumna, $allowedColumns, true)) {
+        throw new RuntimeException('Columna de ordenamiento no válida');
+    }
+    
+    $ordenAsc = (isset($_GET['ordenAsc']) && $_GET['ordenAsc'] == '0') ? 'DESC' : 'ASC';
+    $orderSql = "ORDER BY \"$ordenColumna\" $ordenAsc";
+}
+```
+
+### 8.2 Validación de Columnas en Filtros
+
+Similar recomendación para filtros:
+
+```php
+$allowedFilterColumns = [
+    'fecha', 'responsable', 'plantacion', 'finca', 'siembra', 
+    'lote', 'parcela', 'labor_especifica', 'observacion'
+];
+
+foreach ($_GET as $key => $value) {
+    if (strpos($key, 'filtro_') === 0 && $value !== '') {
+        $col = preg_replace('/[^a-zA-Z0-9_]/', '', substr($key, 7));
+        
+        // Verificar contra whitelist
+        if (!in_array($col, $allowedFilterColumns, true)) {
+            continue; // O throw exception
+        }
+        
+        $where[] = "\"$col\" ILIKE ?";
+        $params[] = '%' . $value . '%';
+    }
+}
+```
+
+### 8.3 Validación de Entrada Adicional
+
+```php
+// Validar tipos de datos
+if (!is_numeric($page) || $page < 1) {
+    $page = 1;
+}
+
+if (!is_numeric($pageSize) || $pageSize < 1 || $pageSize > 1000) {
+    $pageSize = 25; // Default seguro
+}
+
+// Limitar longitud de filtros
+foreach ($params as &$param) {
+    if (strlen($param) > 255) {
+        $param = substr($param, 0, 255);
+    }
+}
+```
+
+### 8.4 Protección CSRF (Recomendado)
+
+Para operaciones POST (save, inactivate, reject, approve), considerar implementar tokens CSRF:
+
+```php
+// Generar token en sesión
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+// Validar en API
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $token = $body['csrf_token'] ?? '';
+    if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+        respond(['success' => false, 'error' => 'Token CSRF inválido'], 403);
+    }
+}
+```
+
+### 8.5 Rate Limiting
+
+Considerar implementar rate limiting para prevenir abuso:
+
+```php
+// Ejemplo simple con sesión
+if (!isset($_SESSION['api_calls'])) {
+    $_SESSION['api_calls'] = ['count' => 0, 'time' => time()];
+}
+
+if (time() - $_SESSION['api_calls']['time'] > 60) {
+    $_SESSION['api_calls'] = ['count' => 0, 'time' => time()];
+}
+
+$_SESSION['api_calls']['count']++;
+
+if ($_SESSION['api_calls']['count'] > 100) {
+    respond(['success' => false, 'error' => 'Rate limit exceeded'], 429);
+}
+```
 
 ---
 
-## 9. EJEMPLO COMPLETO DE ADAPTACIÓN
+## 9. NOTAS IMPORTANTES
+
+### Seguridad
+1. **Sanitización de Inputs**: Todos los inputs de usuario se sanitizan con `preg_replace` en PHP
+2. **Prepared Statements**: Se usan prepared statements con PDO para todas las queries
+3. **⚠️ Validación de Columnas**: La sanitización de columnas con `preg_replace` es una capa básica. **RECOMENDACIÓN**: Implementar whitelist de columnas permitidas:
+   ```php
+   $allowedColumns = ['fecha', 'responsable', 'plantacion', 'finca', ...];
+   if (!in_array($ordenColumna, $allowedColumns)) {
+       throw new RuntimeException('Columna no válida');
+   }
+   ```
+4. **Parameter Binding**: Se usa bindValue en vez de concatenación directa de strings
+5. **Validación de Filtros**: Los filtros usan ILIKE con parámetros bound para evitar SQL injection
+
+### Compatibilidad y Robustez
+6. **Múltiples Formatos JSON**: El sistema soporta múltiples formatos de respuesta JSON
+7. **Fallback**: La función fetchData intenta múltiples acciones alternativas
+8. **Cache**: Se usa `cache: 'no-store'` en fetch para evitar datos obsoletos
+
+### Funcionalidad
+9. **Errores**: Sistema de manejo de errores con suppress de mensajes específicos
+10. **Rol-based**: Algunas acciones requieren verificación de permisos
+11. **Optimización**: Debounce en filtros evita llamadas excesivas al servidor
+12. **UX**: Feedback visual con iconos de estado (aprobado, pendiente, etc.)
+13. **⚠️ Consistencia de IDs**: Al implementar una nueva tabla, usar nombres consistentes en todos los IDs HTML y constantes JavaScript (ej: todos deben usar 'empleados' o todos 'mantenimientos')
+
+---
+
+## 10. EJEMPLO COMPLETO DE ADAPTACIÓN
 
 ### Para crear una tabla "Empleados":
 
@@ -1010,7 +1141,7 @@ if ($action === 'actualizar') {
 
 ---
 
-## 10. CONCLUSIÓN
+## 11. CONCLUSIÓN
 
 Este modelo proporciona una base sólida y probada para implementar tablas con funcionalidades completas de:
 - ✅ Paginación del lado del servidor
