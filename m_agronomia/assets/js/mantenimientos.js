@@ -33,6 +33,7 @@
     form:'form-editar',
     modal:'modal-editar'
   };
+  // Column order matches tb_agronomia.html exactly (Mantenimientos section)
   const COLUMNAS=[
     'mantenimientos_id','fecha','responsable','plantacion','finca','siembra','lote','parcela',
     'labor_especifica','observacion','contratista','codigo','colaborador','personas',
@@ -42,7 +43,7 @@
   const API='assets/php/mantenimientos_api.php';
   const ID_KEY='mantenimientos_id';
   const DATE_COL='fecha';
-  const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivar',reject:'rechazar'};
+  const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivate',reject:'rechazar'};
 
   // Debounce for filter inputs
   const FILTER_DEBOUNCE_MS = 300;

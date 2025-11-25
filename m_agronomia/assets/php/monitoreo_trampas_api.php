@@ -42,11 +42,12 @@ try{
 
   $table='monitoreo_trampas';
   $idCol='monitoreo_trampas_id';
+  // Column list matches tb_agronomia.html exactly
   $colsAllowed=[
-    'monitoreo_trampas_id','id','fecha','hora','colaborador','labor','ubicacion','plantacion','finca',
+    'monitoreo_trampas_id','fecha','hora','colaborador','labor','ubicacion','plantacion','finca',
     'siembra','lote','parcela','tipo_trampa','linea','palma','plaga','hembra','macho','lado_a','lado_b',
     'numero_trampa','estado_lona','estado_trampa','estado_ventana','estado_cania','estado_melaza',
-    'estado_feromona','estado_tapa','estado_envase','latitude','longitude','observacion','supervision','check'
+    'estado_feromona','estado_tapa','estado_envase','observacion','supervision','check','error_registro'
   ];
 
   if($action==='list'){

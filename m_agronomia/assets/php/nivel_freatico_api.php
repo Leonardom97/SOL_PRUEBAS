@@ -57,11 +57,11 @@ if(in_array($method,['POST','PUT','PATCH'],true)){
 
 $table='nivel_freatico';
 $idCol='nivel_freatico_id';
+// Column list matches tb_agronomia.html exactly
 $colsAllowed=[
-  'nivel_freatico_id','id','fecha','hora','colaborador','plantacion','finca','siembra',
-  'lote','parcela','linea','palma','n_pozo_observacion','profundidad_agua','verificacion',
-  'validacion','enterrado','nivel_freatico','labor','latitude','longitude','superficie_tubo',
-  'supervision','check'
+  'nivel_freatico_id','fecha','hora','colaborador','plantacion','finca','siembra',
+  'lote','parcela','linea','palma','n_pozo_observacion','superficie_tubo','profundidad_agua',
+  'verificacion','validacion','enterrado','nivel_freatico','supervision','check','error_registro'
 ];
 
 /* LIST */
@@ -205,7 +205,35 @@ if($action==='rechazar'){
     }
 }
 
-/* APROBAR e INACTIVATE mantienen comportamiento estándar (puedes conservar tu lógica actual) */
+/* INACTIVATE */
+if($action==='inactivate'){
+    if($method!=='POST') respond(['success'=>false,'error'=>'method_not_allowed','allowed'=>'POST'],405);
+    try{
+        $id=isset($body[$idCol])?trim($body[$idCol]):'';
+        if($id==='') $id = isset($body['id'])?trim($body['id']):'';
+        if($id==='') throw new RuntimeException("$idCol requerido");
+        $pg=getMain();
+        $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+        $st=$pg->prepare("UPDATE $table SET error_registro='inactivo' WHERE $idCol=?");
+        $ok=$st->execute([$id]);
+        respond(['success'=>$ok && $st->rowCount()>0,'action'=>'inactivate','id'=>$id,'estado'=>'inactivo']);
+    }catch(Throwable $e){
+        respond(['success'=>false,'error'=>'exception','message'=>$e->getMessage()]);
+    }
+}
+
+/* APROBAR */
+if($action==='aprobar'){
+    if($method!=='POST') respond(['success'=>false,'error'=>'method_not_allowed','allowed'=>'POST'],405);
+    try{
+        $id=isset($body[$idCol])?trim($body[$idCol]):'';
+        if($id==='') $id = isset($body['id'])?trim($body['id']):'';
+        if($id==='') throw new RuntimeException("$idCol requerido");
+        respond(['success'=>false,'error'=>'not_implemented','message'=>'Aprobar: mantener o adaptar la implementación existente.']);
+    }catch(Throwable $e){
+        respond(['success'=>false,'error'=>'exception','message'=>$e->getMessage()]);
+    }
+}
 
 respond(['success'=>false,'error'=>'unknown_action','message'=>'Acción no soportada'],400);
 ?>

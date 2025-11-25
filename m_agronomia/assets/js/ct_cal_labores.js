@@ -11,11 +11,12 @@
     modal:'modal-editar'
   };
 
-  // Nota: en HTML aparece observación con tilde -> 'observación'
+  // Nota: en HTML aparece observación con tilde -> usamos 'observacion' sin tilde para match con DB
+  // Column order matches tb_agronomia.html exactly (CT CAL LABORES section)
   const COLUMNAS=[
     'ct_cal_labores_id','fecha','hora','colaborador','tipo_auditoria','labor_especifica','labor',
     'plantacion','finca','siembra','lote','parcela','linea','palma','linea_entrada','linea_salida',
-    'tipo_validacion','grado_enfermedad','numero_galerias','promedio','estado','producto','observación',
+    'tipo_validacion','grado_enfermedad','numero_galerias','promedio','estado','producto','observacion',
     'error_registro','supervision'
   ];
 

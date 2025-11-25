@@ -11,7 +11,7 @@
     modal: 'modal-editar'
   };
 
-  // Columnas (si tu backend usa nombres distintos, ajusta este array)
+  // Column order matches tb_agronomia.html exactly (CT CAL TRAMPAS section)
   const COLUMNAS = [
     'ct_cal_trampas_id','fecha','hora','responsable','colaborador','plantacion','finca','siembra','lote',
     'parcela','trampa','plaga','hembra','macho','lado_a','lado_b','estado_lona','estado_trampa',

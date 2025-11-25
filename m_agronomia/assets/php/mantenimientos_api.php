@@ -22,7 +22,7 @@ function map_action(?string $a): string {
   $m=[
     'conexion'=>'conexion','listar'=>'conexion','list'=>'conexion',
     'actualizar'=>'actualizar','upsert'=>'actualizar',
-    'inactivar'=>'inactivar','desactivar'=>'inactivar',
+    'inactivar'=>'inactivar','desactivar'=>'inactivar','inactivate'=>'inactivar',
     'rechazar'=>'rechazar','reject'=>'rechazar',
     'aprobar'=>'aprobar','approve'=>'aprobar'
   ];

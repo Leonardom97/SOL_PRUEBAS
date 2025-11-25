@@ -45,10 +45,10 @@ try{
   require_admin_if_needed($action);
 
   $table='compactacion'; $idCol='compactacion_id';
+  // Column list matches tb_agronomia.html exactly
   $colsAllowed=[
     'compactacion_id','fecha','hora','colaborador','plantacion','finca','siembra','lote',
-    'parcela','linea','palma','ubicacion','presion','profundidad','labor',
-    'latitude','longitude','supervision','check'
+    'parcela','linea','palma','ubicacion','presion','profundidad','supervision','check','error_registro'
   ];
 
   if($action==='list'){

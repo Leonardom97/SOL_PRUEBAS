@@ -45,11 +45,12 @@ try{
   require_admin_if_needed($action);
 
   $table='ct_cal_trampas'; $idCol='ct_cal_trampas_id';
+  // Column list matches tb_agronomia.html exactly
   $colsAllowed=[
-    'ct_cal_trampas_id','fecha','hora','colaborador','plantacion','finca','siembra','lote','parcela',
-    'tipo_trampa','linea','palma','plaga','hembra','macho','lado_a','lado_b','numero_trampa',
-    'estado_lona','estado_trampa','estado_ventana','estado_cania','estado_melaza','estado_feromona',
-    'latitude','longitude','estado_tapa','estado_envase','observacion','supervision','check','error_registro'
+    'ct_cal_trampas_id','fecha','hora','responsable','colaborador','plantacion','finca','siembra','lote','parcela',
+    'trampa','plaga','hembra','macho','lado_a','lado_b','estado_lona','estado_trampa',
+    'estado_ubicacion','estado_ventana','estado_cania','estado_melaza','estado_feromona','calificacion',
+    'observaciones','supervision','check','error_registro'
   ];
 
   if($action==='list'){
