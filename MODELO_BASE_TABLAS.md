@@ -103,8 +103,11 @@ async function fetchData() {
         }
       }
       
-      // Debug: mostrar URL de solicitud
-      console.debug('[mantenimientos] request ->', `${API}?${qs.toString()}`);
+      // Debug: mostrar URL de solicitud (solo en desarrollo)
+      // NOTA: En producción, evitar loggear parámetros sensibles o usar versión sanitizada
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.debug('[mantenimientos] request ->', `${API}?${qs.toString()}`);
+      }
       
       // Realizar fetch
       const r = await fetch(`${API}?${qs.toString()}`, {cache: 'no-store'});
@@ -461,8 +464,9 @@ document.addEventListener('DOMContentLoaded', init);
 ```php
 <?php
 /**
- * API mantenimientos (adaptado).
- * Maneja operaciones CRUD y aprobación/rechazo de registros.
+ * API mantenimientos
+ * Maneja operaciones CRUD y aprobación/rechazo de registros para la tabla de mantenimientos.
+ * Soporta paginación, filtrado y ordenamiento del lado del servidor.
  */
 header('Content-Type: application/json; charset=utf-8');
 
@@ -528,12 +532,22 @@ try {
 
 ### 2.4 Acción: CONEXION (Listar con Paginación y Filtros)
 
+> **⚠️ NOTA DE SEGURIDAD**: Este ejemplo muestra el código básico. 
+> Para producción, implementar las mejoras de seguridad de la sección 8 (whitelisting de columnas).
+
 ```php
 if ($action === 'conexion') {
     $pg = getMain();
     $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
     $pageSize = isset($_GET['pageSize']) ? max(1, intval($_GET['pageSize'])) : 25;
     $offset = ($page - 1) * $pageSize;
+    
+    // RECOMENDADO: Definir whitelist de columnas permitidas
+    $allowedColumns = [
+        'mantenimientos_id', 'fecha', 'responsable', 'plantacion', 
+        'finca', 'siembra', 'lote', 'parcela', 'labor_especifica',
+        'observacion', 'contratista', 'codigo', 'colaborador'
+    ];
     
     // Construir filtros
     $where = [];
@@ -542,6 +556,12 @@ if ($action === 'conexion') {
         if (strpos($key, 'filtro_') === 0 && $value !== '') {
             $col = preg_replace('/[^a-zA-Z0-9_]/', '', substr($key, 7));
             if ($col === '') continue;
+            
+            // Verificar contra whitelist (RECOMENDADO)
+            if (!in_array($col, $allowedColumns, true)) {
+                continue; // O throw new RuntimeException('Columna no permitida');
+            }
+            
             $where[] = "\"$col\" ILIKE ?";
             $params[] = '%' . $value . '%';
         }
@@ -552,7 +572,13 @@ if ($action === 'conexion') {
     $orderSql = '';
     if (!empty($_GET['ordenColumna'])) {
         $ordenColumna = preg_replace('/[^a-zA-Z0-9_]/', '', $_GET['ordenColumna']);
+        
         if ($ordenColumna !== '') {
+            // Verificar contra whitelist (RECOMENDADO)
+            if (!in_array($ordenColumna, $allowedColumns, true)) {
+                throw new RuntimeException('Columna de ordenamiento no válida');
+            }
+            
             $ordenAsc = (isset($_GET['ordenAsc']) && $_GET['ordenAsc'] == '0') ? 'DESC' : 'ASC';
             $orderSql = "ORDER BY \"$ordenColumna\" $ordenAsc";
         }
@@ -994,10 +1020,15 @@ if (!is_numeric($pageSize) || $pageSize < 1 || $pageSize > 1000) {
     $pageSize = 25; // Default seguro
 }
 
-// Limitar longitud de filtros
-foreach ($params as &$param) {
-    if (strlen($param) > 255) {
-        $param = substr($param, 0, 255);
+// Validar longitud de filtros (rechazar si son muy largos)
+$maxFilterLength = 255;
+foreach ($_GET as $key => $value) {
+    if (strpos($key, 'filtro_') === 0 && strlen($value) > $maxFilterLength) {
+        respond([
+            'success' => false, 
+            'error' => 'Filter value too long',
+            'message' => "Filter values must be under $maxFilterLength characters"
+        ], 400);
     }
 }
 ```
