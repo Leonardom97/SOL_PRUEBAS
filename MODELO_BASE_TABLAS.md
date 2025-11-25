@@ -896,6 +896,7 @@ filtro_plantacion=PL-001 (opcional)
 
 ### 5.6 Sistema de Aprobación
 - ✅ Estados: edicion, pendiente, aprobado, rechazado
+  > **Nota**: "edicion" se escribe sin acento en el código por compatibilidad técnica
 - ✅ Supervisión con check visual
 - ✅ Control por roles (administrador puede aprobar/rechazar)
 
