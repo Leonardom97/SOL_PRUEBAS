@@ -1,4 +1,28 @@
 (function(){
+  'use strict';
+  // --- override alert para suprimir solo 'exception' y 'id_required' ---
+  (function(){
+    const __orig_alert = window.alert && window.alert.bind(window);
+    if(__orig_alert){
+      const IGNORED = new Set(['exception','id_required']);
+      window.alert = function(message){
+        try {
+          const s = (message === undefined || message === null) ? '' : String(message);
+          const norm = s.trim().toLowerCase();
+          if (IGNORED.has(norm)) {
+            console.warn('[suppress_alerts] alert suprimido:', s);
+            return;
+          }
+        } catch(e) {
+          console.error('[suppress_alerts] error al evaluar alert:', e);
+        }
+        return __orig_alert(message);
+      };
+    }
+  })();
+  // ---------------------------------------------------------------
+
+
   const DOM = {
     tbody: 'tbody-ct-cal-trampas',
     table: 'tabla-ct-cal-trampas',
@@ -23,6 +47,17 @@
   const ID_KEY = 'ct_cal_trampas_id';
   const DATE_COL = 'fecha';
   const ACTIONS = { listFallback: ['conexion','listar','list'], save: 'upsert', inactivate: 'inactivate', reject: 'rechazar' };
+
+  
+  // Debounce for filter inputs
+  const FILTER_DEBOUNCE_MS = 300;
+  function debounce(fn, ms){
+    let t;
+    return function(...args){
+      clearTimeout(t);
+      t = setTimeout(()=>fn.apply(this,args), ms);
+    };
+  }
 
   let data = [], page = 1, pageSize = 25, total = 0, filters = {}, sortCol = null, sortAsc = true;
 

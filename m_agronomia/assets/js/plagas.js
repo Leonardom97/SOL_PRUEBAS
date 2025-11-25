@@ -1,4 +1,28 @@
 (function(){
+  'use strict';
+  // --- override alert para suprimir solo 'exception' y 'id_required' ---
+  (function(){
+    const __orig_alert = window.alert && window.alert.bind(window);
+    if(__orig_alert){
+      const IGNORED = new Set(['exception','id_required']);
+      window.alert = function(message){
+        try {
+          const s = (message === undefined || message === null) ? '' : String(message);
+          const norm = s.trim().toLowerCase();
+          if (IGNORED.has(norm)) {
+            console.warn('[suppress_alerts] alert suprimido:', s);
+            return;
+          }
+        } catch(e) {
+          console.error('[suppress_alerts] error al evaluar alert:', e);
+        }
+        return __orig_alert(message);
+      };
+    }
+  })();
+  // ---------------------------------------------------------------
+
+
   const DOM={
     tbody:'tbody-plagas',
     table:'tabla-plagas',
@@ -21,6 +45,17 @@
   const DATE_COL='fecha';
   const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivar',reject:'rechazar'};
 
+  
+  // Debounce for filter inputs
+  const FILTER_DEBOUNCE_MS = 300;
+  function debounce(fn, ms){
+    let t;
+    return function(...args){
+      clearTimeout(t);
+      t = setTimeout(()=>fn.apply(this,args), ms);
+    };
+  }
+
   let data=[],page=1,pageSize=25,total=0,filters={},sortCol=null,sortAsc=true;
 
   function estado(r){
@@ -40,7 +75,16 @@
       try{
         const qs=new URLSearchParams({action:act,page,pageSize});
         if(sortCol){qs.append('ordenColumna',sortCol);qs.append('ordenAsc',sortAsc?'1':'0');}
-        for(const k in filters) if(filters[k]) qs.append('filtro_'+k,filters[k]);
+        // add normalized non-empty filters
+        for(const k in filters){
+          const v = filters[k];
+          if(v == null) continue;
+          const tv = String(v).trim();
+          if(tv !== '') {
+            qs.append('filtro_'+k, tv);
+          }
+        }
+        console.debug('[plagas] request ->', `${API}?${qs.toString()}`);
         const r=await fetch(`${API}?${qs}`,{cache:'no-store'});
         if(!r.ok){ last=`${act}: HTTP ${r.status}`; continue; }
         const txt=await r.text();
@@ -205,7 +249,30 @@
 
   function renderPagination(){ const nav=document.getElementById(DOM.pagination); if(!nav) return; const ul=nav.querySelector('.md-pagination-list'); if(!ul) return; ul.innerHTML=''; const pages=Math.max(1,Math.ceil(total/pageSize)); function item(t,p,dis,act){ const li=document.createElement('li'); li.className=dis?'disabled':(act?'active':''); const b=document.createElement('button'); b.className='page-link'; b.textContent=t; b.disabled=dis; b.onclick=()=>{ if(!dis&&p!==page){ page=p; load(); } }; li.appendChild(b); return li; } ul.appendChild(item('«',Math.max(1,page-1),page===1,false)); let start=Math.max(1,page-1),end=Math.min(pages,start+3); if(end-start<3) start=Math.max(1,end-3); for(let i=start;i<=end;i++) ul.appendChild(item(String(i),i,false,i===page)); ul.appendChild(item('»',Math.min(pages,page+1),page===pages,false)); }
 
-  async function load(){ try{ const res=await fetchData(); data=res.datos||[]; total=res.total||data.length; render(); } catch(e){ alert(e.message||'Error cargando plagas'); } }
+  async function load(){
+    try{
+      const res=await fetchData();
+      data=res.datos||[]; total=res.total||data.length;
+      render();
+
+      // after render, sync thead inputs with filters (so UI reflects current filter state)
+      const table = document.getElementById(DOM.table);
+      if(table){
+        const thead = table.querySelector('thead');
+        if(thead){
+          Array.from(thead.querySelectorAll('input, select, textarea')).forEach(inp=>{
+            const col = inp.dataset && inp.dataset._col ? inp.dataset._col : (inp.dataset && inp.dataset.col ? inp.dataset.col : (inp.name || ''));
+            if(col && filters[col] !== undefined){
+              const cur = filters[col] == null ? '' : String(filters[col]);
+              if(inp.value !== cur) inp.value = cur;
+            }
+          });
+        }
+      }
+    }catch(e){
+      console.warn('[plagas] error cargar', e);
+    }
+  }
 
   function init(){ document.getElementById(DOM.form)?.addEventListener('submit',save); document.getElementById(DOM.clearBtn)?.addEventListener('click',()=>{ filters={}; page=1; document.querySelectorAll(`#${DOM.table} thead input[data-col]`).forEach(i=>i.value=''); load(); }); document.getElementById(DOM.limitSelect)?.addEventListener('change',e=>{ pageSize=parseInt(e.target.value,10)||25; page=1; load(); }); document.getElementById(DOM.selectAll)?.addEventListener('change',e=>{ document.querySelectorAll(`#${DOM.tbody} .row-check`).forEach(ch=>ch.checked=e.target.checked); }); document.querySelectorAll(`#${DOM.table} thead input[data-col]`).forEach(inp=>{ inp.addEventListener('input',()=>{ filters[inp.dataset.col]=inp.value; page=1; load(); }); }); document.querySelectorAll(`#${DOM.table} thead .icon-sort`).forEach(icon=>{ icon.addEventListener('click',()=>{ if(sortCol===icon.dataset.col) sortAsc=!sortAsc; else { sortCol=icon.dataset.col; sortAsc=true; } page=1; load(); }); }); document.getElementById(DOM.exportBtn)?.addEventListener('click',e=>{ e.stopPropagation(); showExportMenu(); }); load(); }
   document.addEventListener('DOMContentLoaded', init);

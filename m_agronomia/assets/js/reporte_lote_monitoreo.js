@@ -1,4 +1,28 @@
 (function(){
+  'use strict';
+  // --- override alert para suprimir solo 'exception' y 'id_required' ---
+  (function(){
+    const __orig_alert = window.alert && window.alert.bind(window);
+    if(__orig_alert){
+      const IGNORED = new Set(['exception','id_required']);
+      window.alert = function(message){
+        try {
+          const s = (message === undefined || message === null) ? '' : String(message);
+          const norm = s.trim().toLowerCase();
+          if (IGNORED.has(norm)) {
+            console.warn('[suppress_alerts] alert suprimido:', s);
+            return;
+          }
+        } catch(e) {
+          console.error('[suppress_alerts] error al evaluar alert:', e);
+        }
+        return __orig_alert(message);
+      };
+    }
+  })();
+  // ---------------------------------------------------------------
+
+
   const DOM={
     tbody:'tbody-reporte-lote-monitoreo',
     table:'tabla-reporte-lote-monitoreo',
@@ -21,6 +45,17 @@
   const DATE_COL='fecha';
   const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivate',reject:'rechazar'};
 
+  
+  // Debounce for filter inputs
+  const FILTER_DEBOUNCE_MS = 300;
+  function debounce(fn, ms){
+    let t;
+    return function(...args){
+      clearTimeout(t);
+      t = setTimeout(()=>fn.apply(this,args), ms);
+    };
+  }
+
   let data=[],page=1,pageSize=25,total=0,filters={},sortCol=null,sortAsc=true;
 
   function estado(r){
@@ -40,7 +75,16 @@
       try{
         const qs=new URLSearchParams({action:act,page,pageSize});
         if(sortCol){qs.append('ordenColumna',sortCol);qs.append('ordenAsc',sortAsc?'1':'0');}
-        for(const k in filters) if(filters[k]) qs.append('filtro_'+k,filters[k]);
+        // add normalized non-empty filters
+        for(const k in filters){
+          const v = filters[k];
+          if(v == null) continue;
+          const tv = String(v).trim();
+          if(tv !== '') {
+            qs.append('filtro_'+k, tv);
+          }
+        }
+        console.debug('[reporte_lote_monitoreo] request ->', `${API}?${qs.toString()}`);
 
         const r=await fetch(`${API}?${qs}`,{cache:'no-store'});
         if(!r.ok){ last=`${act}: HTTP ${r.status}`; continue; }

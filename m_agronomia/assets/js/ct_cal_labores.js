@@ -1,4 +1,28 @@
 (function(){
+  'use strict';
+  // --- override alert para suprimir solo 'exception' y 'id_required' ---
+  (function(){
+    const __orig_alert = window.alert && window.alert.bind(window);
+    if(__orig_alert){
+      const IGNORED = new Set(['exception','id_required']);
+      window.alert = function(message){
+        try {
+          const s = (message === undefined || message === null) ? '' : String(message);
+          const norm = s.trim().toLowerCase();
+          if (IGNORED.has(norm)) {
+            console.warn('[suppress_alerts] alert suprimido:', s);
+            return;
+          }
+        } catch(e) {
+          console.error('[suppress_alerts] error al evaluar alert:', e);
+        }
+        return __orig_alert(message);
+      };
+    }
+  })();
+  // ---------------------------------------------------------------
+
+
   const DOM={
     tbody:'tbody-ct-cal-labores',
     table:'tabla-ct-cal-labores',
@@ -23,6 +47,17 @@
   const ID_KEY='ct_cal_labores_id';
   const DATE_COL='fecha';
   const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivate',reject:'rechazar'};
+
+  
+  // Debounce for filter inputs
+  const FILTER_DEBOUNCE_MS = 300;
+  function debounce(fn, ms){
+    let t;
+    return function(...args){
+      clearTimeout(t);
+      t = setTimeout(()=>fn.apply(this,args), ms);
+    };
+  }
 
   let data=[],page=1,pageSize=25,total=0,filters={},sortCol=null,sortAsc=true;
 
@@ -81,7 +116,7 @@
     bindRowEvents(); renderPagination();
   }
   function bindRowEvents(){
-    const t=document.getElementById(DOM.tbody);
+    const t=document.getElementById(DOM.tbody); if(!t) return;
     t.querySelectorAll('.btn-editar').forEach(b=>b.onclick=()=>openModal(b.dataset.id,false));
     t.querySelectorAll('.btn-ver').forEach(b=>b.onclick=()=>openModal(b.dataset.id,true));
     t.querySelectorAll('.btn-inactivar').forEach(b=>b.onclick=()=>inactivar(b.dataset.id));
@@ -115,9 +150,20 @@
     if(!confirm('¿Revertir aprobación?'))return;
     try{
       const r=await fetch(`${API}?action=${ACTIONS.reject}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({[ID_KEY]:id})});
-      const j=await r.json(); if(!j.success){alert(j.error||'No revertido');return;}
+      const j=await r.json();
+      if(!j.success){
+        const err = j.error || 'No revertido';
+        const norm = (err===null||err===undefined)?'':String(err).trim().toLowerCase();
+        if(norm==='exception' || norm==='id_required'){ console.warn('[ct_cal_labores] error suprimido:', err); return; }
+        alert(err); return;
+      }
       await load(); openModal(id,false);
-    }catch{alert('Error revertir');}
+    }catch(err){
+      const msg = err?.message || 'Error revertir';
+      const norm = (msg===null||msg===undefined)?'':String(msg).trim().toLowerCase();
+      if(norm==='exception' || norm==='id_required'){ console.warn('[ct_cal_labores] error suprimido:', msg); return; }
+      alert(msg);
+    }
   }
   async function save(e){
     e.preventDefault();
@@ -127,9 +173,19 @@
     try{
       const r=await fetch(`${API}?action=${ACTIONS.save}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)});
       const j=await r.json();
-      if(j.success){alert('Guardado'); load(); setTimeout(()=>bootstrap.Modal.getInstance(document.getElementById(DOM.modal))?.hide(),150);}
-      else alert(j.error||'Error guardando');
-    }catch{alert('Error guardando');}
+      if(j.success){ alert('Guardado'); load(); setTimeout(()=>bootstrap.Modal.getInstance(document.getElementById(DOM.modal))?.hide(),150); }
+      else {
+        const err = j.error || 'Error guardando';
+        const norm = (err===null||err===undefined)?'':String(err).trim().toLowerCase();
+        if(norm==='exception' || norm==='id_required'){ console.warn('[ct_cal_labores] fallo guardar suprimido:', err); }
+        else { alert(err); }
+      }
+    }catch(err){
+      const msg = err?.message || 'Error guardando';
+      const norm = (msg===null||msg===undefined)?'':String(msg).trim().toLowerCase();
+      if(norm==='exception' || norm==='id_required'){ console.warn('[ct_cal_labores] error guardando suprimido:', msg); }
+      else { alert(msg); }
+    }
   }
   function buildXLSX(rows,name){
     const cols=COLUMNAS.filter(c=>!['error_registro','supervision'].includes(c));
@@ -146,12 +202,17 @@
     if(t==='seleccion'){ rows=[]; document.querySelectorAll(`#${DOM.tbody} .row-check`).forEach(ch=>{ if(ch.checked) rows.push(data[+ch.dataset.index]); }); }
     buildXLSX(rows,'ct_cal_labores_'+t);
   }
+  // Export menu style restored
   function showExportMenu(){
     const btn=document.getElementById(DOM.exportBtn); if(!btn)return;
     const id='exportMenuLabores'; document.getElementById(id)?.remove();
     const menu=document.createElement('div'); menu.id=id;
-    Object.assign(menu.style,{position:'absolute',top:'40px',right:'0',background:'#fff',boxShadow:'0 4px 16px rgba(0,0,0,.15)',borderRadius:'12px',padding:'8px',zIndex:1000});
-    menu.innerHTML=['todo','filtrado','seleccion'].map(t=>`<button class="exp" data-t="${t}">${t.toUpperCase()} (.xlsx)</button>`).join('');
+    Object.assign(menu.style,{position:'absolute',top:'40px',right:'0',background:'#fff',boxShadow:'0 4px 16px rgba(0,0,0,.15)',borderRadius:'12px',padding:'8px',zIndex:1000,minWidth:'170px'});
+    const items=['todo','filtrado','seleccion'];
+    menu.innerHTML = items.map(t=>{
+      const label = t==='todo'?'TODO': t==='filtrado'?'FILTRADO':'SELECCION';
+      return `<button class="exp" data-t="${t}" style="display:block;width:100%;text-align:left;padding:8px 10px;margin:6px 0;border:2px solid #000;background:#fff;border-radius:6px;cursor:pointer">${label} (.xlsx)</button>`;
+    }).join('');
     btn.parentNode.style.position='relative'; btn.parentNode.appendChild(menu);
     menu.querySelectorAll('.exp').forEach(b=>b.onclick=()=>{exportar(b.dataset.t);menu.remove();});
     setTimeout(()=>document.addEventListener('mousedown',function out(ev){
