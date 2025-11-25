@@ -115,7 +115,7 @@ try {
         $exists=(bool)$stC->fetchColumn();
 
         if($exists){
-            $sql="UPDATE mantenimientos SET ".implode(', ',$updatePairs)." WHERE ct_cal_sanidad_id = ?";
+            $sql="UPDATE ct_cal_sanidad SET ".implode(', ',$updatePairs)." WHERE ct_cal_sanidad_id = ?";
             $valsToExecute = array_merge($updateVals, [$id]);
             $ok = $pg->prepare($sql)->execute($valsToExecute);
         } else {
@@ -141,7 +141,7 @@ try {
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
         if(!$id) respond(['success'=>false,'error'=>'id_invalid'],400);
         $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-        $st=$pg->prepare("UPDATE mantenimientos SET error_registro='inactivo' WHERE ct_cal_sanidad_id=?");
+        $st=$pg->prepare("UPDATE ct_cal_sanidad SET error_registro='inactivo' WHERE ct_cal_sanidad_id=?");
         $st->execute([$id]);
         $success = $st->rowCount() > 0;
         respond(['success'=>$success,'action'=>'inactivar','id'=>$id,'estado'=>'inactivo']);
