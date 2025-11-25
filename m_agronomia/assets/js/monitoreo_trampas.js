@@ -314,6 +314,13 @@
       const v = (inp.value == null) ? '' : String(inp.value);
       if(v.trim() !== '') filters[col] = v;
 
+      // Remove old listeners if they exist
+      if(inp._filterHandlers){
+        inp.removeEventListener('input', inp._filterHandlers.input);
+        inp.removeEventListener('change', inp._filterHandlers.change);
+        inp.removeEventListener('keydown', inp._filterHandlers.keydown);
+      }
+
       // Debounced handler
       const handlerDeb = debounce(function(evt){
         const val = (evt.target.value == null) ? '' : String(evt.target.value);
@@ -335,11 +342,16 @@
         }
       }
 
-      inp.removeEventListener('input', handlerDeb);
+      // Store handlers on the input element for later removal
+      inp._filterHandlers = {
+        input: handlerDeb,
+        change: handlerDeb,
+        keydown: handlerKey
+      };
+
+      // Add new listeners
       inp.addEventListener('input', handlerDeb);
-      inp.removeEventListener('change', handlerDeb);
       inp.addEventListener('change', handlerDeb);
-      inp.removeEventListener('keydown', handlerKey);
       inp.addEventListener('keydown', handlerKey);
     });
 
