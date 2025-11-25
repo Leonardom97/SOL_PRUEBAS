@@ -19,7 +19,7 @@
   const API='assets/php/plagas_api.php';
   const ID_KEY='plagas_id';
   const DATE_COL='fecha';
-  const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivar',reject:'rechazar'};
+  const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivate',reject:'rechazar'};
 
   let data=[],page=1,pageSize=25,total=0,filters={},sortCol=null,sortAsc=true;
 
