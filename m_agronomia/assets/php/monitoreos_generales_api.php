@@ -1,4 +1,12 @@
 <?php
+/**
+ * API monitoreos_generales.
+ * - Upsert guarda en la BD temporal.
+ * - Rechazar: intenta MAIN, actualiza TEMP siempre; si MAIN afectó filas intenta eliminar en TEMP.
+ * - Aprobar: intenta actualizar MAIN; si no existe en MAIN, inserta desde TEMP; actualiza TEMP siempre.
+ *   Si MAIN fue actualizado/insertado correctamente, elimina la fila en TEMP para que no siga apareciendo en pendientes.
+ * - Acepta 'id' como fallback donde aplica.
+ */
 header('Content-Type: application/json; charset=utf-8');
 
 function respond(array $d,int $c=200){
@@ -6,199 +14,182 @@ function respond(array $d,int $c=200){
     echo json_encode($d,JSON_UNESCAPED_UNICODE);
     exit;
 }
-function map_action(?string $a): string {
-    $a=is_string($a)?strtolower(trim($a)):'';
-    $m=[
-        'conexion'=>'list','listar'=>'list','list'=>'list',
-        'actualizar'=>'upsert','upsert'=>'upsert',
-        'rechazar'=>'rechazar','reject'=>'rechazar',
-        'aprobar'=>'aprobar','approve'=>'aprobar',
-        'inactivar'=>'inactivate','desactivar'=>'inactivate','inactivate'=>'inactivate'
-    ];
-    return $m[$a] ?? '';
-}
-function clean_identifier(string $s): string {
-    return preg_replace('/[^A-Za-z0-9_]/','',$s);
-}
 function getTemporal(): PDO { require __DIR__.'/db_temporal.php'; return $pg; }
 function getMain(): PDO { require __DIR__.'/db_postgres_prueba.php'; return $pg; }
-function require_admin_if_needed(string $a){
-    if(in_array($a,['aprobar','rechazar'],true)){
-        require_once __DIR__.'/require_admin.php';
-        require_admin_only();
-    }
+
+function map_action(?string $a): string {
+  $a=is_string($a)?strtolower(trim($a)):'';
+  $m=[
+    'conexion'=>'conexion','listar'=>'conexion','list'=>'conexion',
+    'actualizar'=>'actualizar','upsert'=>'actualizar',
+    'inactivar'=>'inactivar','desactivar'=>'inactivar',
+    'rechazar'=>'rechazar','reject'=>'rechazar',
+    'aprobar'=>'aprobar','approve'=>'aprobar'
+  ];
+  return $m[$a]??'';
 }
 
-try{
-    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+try {
+    $raw = file_get_contents('php://input');
+    $body = json_decode($raw, true) ?: [];
+    $action = $_GET['action'] ?? $body['action'] ?? null;
+    if (!$action) throw new RuntimeException('action requerido. Valores: conexion, actualizar, inactivar, rechazar, aprobar');
 
-    $action = $_GET['action'] ?? $_POST['action'] ?? null;
-    if(!$action){
-        $rawInput = file_get_contents('php://input');
-        if($rawInput){
-            $tmp=json_decode($rawInput,true);
-            if(is_array($tmp) && isset($tmp['action'])) $action=$tmp['action'];
-        }
-    }
     $action = map_action($action);
-    if($action===''){
-        respond(['success'=>false,'error'=>'missing_action','message'=>'Parámetro action requerido']);
+    if (in_array($action,['aprobar','rechazar'],true)) {
+        require_once __DIR__ . '/require_admin.php';
+        require_admin_only();
     }
 
-    $body=[];
-    if(in_array($method,['POST','PUT','PATCH'],true)){
-        $raw=file_get_contents('php://input');
-        if($raw!==''){
-            $dec=json_decode($raw,true);
-            if(is_array($dec)) $body=$dec;
-        }
-    }
-
-    require_admin_if_needed($action);
-
-    $table='monitoreos_generales';
-    $idCol='monitoreos_generales_id';
-
-    if($action==='list'){
-        if($method!=='GET'){
-            respond(['success'=>false,'error'=>'method_not_allowed','allowed'=>'GET'],405);
-        }
-        $pg=getMain();
-        $page=max(1,intval($_GET['page']??1));
-        $size=max(1,intval($_GET['pageSize']??25));
-        $off=($page-1)*$size;
+    if ($action==='conexion') {
+        $pg = getMain();
+        $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        $pageSize = isset($_GET['pageSize']) ? max(1, intval($_GET['pageSize'])) : 25;
+        $offset = ($page - 1) * $pageSize;
 
         $where=[];$params=[];
-        foreach($_GET as $k=>$v){
-            if(strpos($k,'filtro_')===0 && $v!==''){
-                $col=clean_identifier(substr($k,7));
-                if($col==='') continue;
+        foreach ($_GET as $key => $value) {
+            if (strpos($key, 'filtro_') === 0 && $value !== '') {
+                $col = preg_replace('/[^a-zA-Z0-9_]/', '', substr($key, 7));
+                if ($col==='') continue;
                 $where[]="\"$col\" ILIKE ?";
-                $params[]='%'.$v.'%';
+                $params[]='%'.$value.'%';
             }
         }
         $whereSql=$where?'WHERE '.implode(' AND ',$where):'';
 
         $orderSql='';
         if(!empty($_GET['ordenColumna'])){
-            $oc=clean_identifier($_GET['ordenColumna']);
-            if($oc!==''){
-                $dir=(isset($_GET['ordenAsc'])&&$_GET['ordenAsc']=='0')?'DESC':'ASC';
-                $orderSql="ORDER BY \"$oc\" $dir";
+            $ordenColumna=preg_replace('/[^a-zA-Z0-9_]/','',$_GET['ordenColumna']);
+            if($ordenColumna!==''){
+                $ordenAsc=(isset($_GET['ordenAsc'])&&$_GET['ordenAsc']=='0')?'DESC':'ASC';
+                $orderSql="ORDER BY \"$ordenColumna\" $ordenAsc";
             }
         }
 
-        $st=$pg->prepare("SELECT * FROM $table $whereSql $orderSql LIMIT $size OFFSET $off");
-        $st->execute($params);
-        $rows=$st->fetchAll(PDO::FETCH_ASSOC);
+        $sql="SELECT * FROM monitoreos_generales $whereSql $orderSql LIMIT :lim OFFSET :off";
+        $stmt=$pg->prepare($sql);
+        $i=1; foreach($params as $p){ $stmt->bindValue($i++,$p); }
+        $stmt->bindValue(':lim',$pageSize,PDO::PARAM_INT);
+        $stmt->bindValue(':off',$offset,PDO::PARAM_INT);
+        $stmt->execute();
+        $datos=$stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $stT=$pg->prepare("SELECT COUNT(*) FROM $table $whereSql");
-        $stT->execute($params);
-        $total=(int)$stT->fetchColumn();
+        $sqlT="SELECT COUNT(*) FROM monitoreos_generales $whereSql";
+        $stmtT=$pg->prepare($sqlT);
+        $i=1; foreach($params as $p){ $stmtT->bindValue($i++,$p); }
+        $stmtT->execute();
+        $total=(int)$stmtT->fetchColumn();
 
-        respond(['success'=>true,'action'=>'list','page'=>$page,'pageSize'=>$size,'total'=>$total,'datos'=>$rows]);
+        respond(['success'=>true,'action'=>'conexion','datos'=>$datos,'total'=>$total,'page'=>$page,'pageSize'=>$pageSize]);
     }
 
-    if($action==='upsert'){
-        if($method!=='POST'){
-            respond(['success'=>false,'error'=>'method_not_allowed','allowed'=>'POST'],405);
-        }
-        if(!is_array($body)) respond(['success'=>false,'error'=>'invalid_json'],400);
-
-        $colsAllowed=[
-            'monitoreos_generales_id','fecha','hora','colaborador','plantacion','finca','siembra','lote',
-            'parcela','linea','palma','grupo','estado','validacion','sintoma','observacion','supervision','check','error_registro'
+    if ($action==='actualizar') {
+        $pg = getTemporal();
+        if(!is_array($body)) throw new RuntimeException('JSON inválido');
+        $cols=[
+            'monitoreos_generales_id','fecha','hora','colaborador','plantacion','finca','siembra','lote','parcela','linea','palma','grupo','estado','validacion','sintoma','observacion','error_registro','supervision','check'
         ];
-
-        $id=isset($body[$idCol])?trim($body[$idCol]):'';
-        if($id==='') $id = isset($body['id'])?trim($body['id']):'';
-        if($id===''){
-            respond(['success'=>false,'error'=>'id_required','message'=>"$idCol requerido"],400);
-        }
-
-        $pg=getTemporal();
-        $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+        $id=$body['monitoreos_generales_id']??null;
+        if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
+        if(!$id||trim($id)==='') throw new RuntimeException('monitoreos_generales_id requerido');
 
         $insertCols=[];$insertPlaceholders=[];$insertVals=[];
         $updatePairs=[];$updateVals=[];
-        foreach($colsAllowed as $c){
+        foreach($cols as $c){
             if(array_key_exists($c,$body)){
-                $insertCols[]=$c; $insertPlaceholders[]='?'; $insertVals[]=$body[$c];
-                if($c!==$idCol) { $updatePairs[]="\"$c\" = ?"; $updateVals[]=$body[$c]; }
+                $insertCols[]=$c;
+                $insertPlaceholders[]='?';
+                $insertVals[]=$body[$c];
+                if($c!=='monitoreos_generales_id'){
+                    $updatePairs[]="\"$c\" = ?";
+                    $updateVals[]=$body[$c];
+                }
             }
         }
-        if(!$insertCols){
-            respond(['success'=>false,'error'=>'no_columns','message'=>'Sin columnas válidas'],400);
-        }
+        if(empty($insertCols)) throw new RuntimeException('No hay datos para insertar o actualizar');
 
-        $stC=$pg->prepare("SELECT 1 FROM $table WHERE $idCol=?");
+        $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+        $stC=$pg->prepare("SELECT 1 FROM monitoreos_generales WHERE monitoreos_generales_id=?");
         $stC->execute([$id]);
         $exists=(bool)$stC->fetchColumn();
 
         if($exists){
-            $sql="UPDATE $table SET ".implode(', ',$updatePairs)." WHERE $idCol = ?";
-            $valsToExec = array_merge($updateVals, [$id]);
-            $ok = $pg->prepare($sql)->execute($valsToExec);
-        }else{
-            if(!in_array($idCol,$insertCols,true)){ $insertCols[]=$idCol; $insertPlaceholders[]='?'; $insertVals[]=$id; }
-            $sql="INSERT INTO $table (".implode(',',$insertCols).") VALUES (".implode(',',$insertPlaceholders).")";
+            $sql="UPDATE monitoreos_generales SET ".implode(', ',$updatePairs)." WHERE monitoreos_generales_id = ?";
+            $valsToExecute = array_merge($updateVals, [$id]);
+            $ok = $pg->prepare($sql)->execute($valsToExecute);
+        } else {
+            if(!in_array('monitoreos_generales_id',$insertCols,true)){
+                $insertCols[]='monitoreos_generales_id';
+                $insertPlaceholders[]='?';
+                $insertVals[]=$id;
+            }
+            $sql="INSERT INTO monitoreos_generales (".implode(',',$insertCols).") VALUES (".implode(',',$insertPlaceholders).")";
             $ok = $pg->prepare($sql)->execute($insertVals);
         }
 
-        if($ok) respond(['success'=>true,'message'=>'guardado correctamente']);
-        respond(['success'=>false,'error'=>'db_error'],500);
+        if($ok){
+            respond(['success'=>true,'message'=>'guardado correctamente']);
+        }else{
+            respond(['success'=>false,'error'=>'db_error'],500);
+        }
     }
 
-    if($action==='aprobar'){
-        if($method!=='POST'){
-            respond(['success'=>false,'error'=>'method_not_allowed','allowed'=>'POST'],405);
-        }
-        $id=isset($body[$idCol])?trim($body[$idCol]):'';
-        if($id==='') $id = isset($body['id'])?trim($body['id']):'';
-        if($id==='') respond(['success'=>false,'error'=>'id_required'],400);
-
-        // Mantener flujo de aprobar existente...
-        respond(['success'=>false,'error'=>'not_implemented','message'=>'Aprobar: mantener o adaptar la implementación existente.']);
+    if ($action==='inactivar'){
+        $pg = getMain();
+        $id=$body['monitoreos_generales_id']??null;
+        if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
+        if(!$id) respond(['success'=>false,'error'=>'id_invalid'],400);
+        $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+        $st=$pg->prepare("UPDATE monitoreos_generales SET error_registro='inactivo' WHERE monitoreos_generales_id=?");
+        $st->execute([$id]);
+        $success = $st->rowCount() > 0;
+        respond(['success'=>$success,'action'=>'inactivar','id'=>$id,'estado'=>'inactivo']);
     }
 
-    if($action==='rechazar'){
-        if($method!=='POST'){
+    if ($action==='rechazar'){
+        if($_SERVER['REQUEST_METHOD']!=='POST'){
             respond(['success'=>false,'error'=>'method_not_allowed','allowed'=>'POST'],405);
         }
-        $id=isset($body[$idCol])?trim($body[$idCol]):'';
+        $id=isset($body['monitoreos_generales_id'])?trim($body['monitoreos_generales_id']):'';
         if($id==='') $id = isset($body['id'])?trim($body['id']):'';
-        if($id==='') respond(['success'=>false,'error'=>'id_required'],400);
+        if($id==='') throw new RuntimeException('monitoreos_generales_id requerido');
 
         $warnings = [];
         $updatedMain = 0;
         $updatedTemp = 0;
         $deletedTemp = 0;
 
+        // 1) MAIN
         try {
-            $pg = getMain(); $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            $st = $pg->prepare("UPDATE public.$table SET supervision='rechazado', \"check\"=0 WHERE $idCol=:id");
-            $st->execute(['id'=>$id]);
-            $updatedMain = $st->rowCount();
-        } catch(Throwable $e) {
+            $pgMain = getMain();
+            $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $stMain = $pgMain->prepare("UPDATE public.monitoreos_generales SET supervision='rechazado', \"check\"=0 WHERE monitoreos_generales_id=:id");
+            $stMain->execute(['id'=>$id]);
+            $updatedMain = $stMain->rowCount();
+        } catch(Throwable $e){
             $warnings[] = 'main_error: '.$e->getMessage();
             $updatedMain = 0;
         }
 
+        // 2) TEMP (siempre intentamos)
         try {
-            $pgT = getTemporal(); $pgT->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            $st2 = $pgT->prepare("UPDATE public.$table SET supervision='rechazado', \"check\"=0 WHERE $idCol=:id");
-            $st2->execute(['id'=>$id]);
-            $updatedTemp = $st2->rowCount();
-        } catch(Throwable $e) {
+            $pgTemp = getTemporal();
+            $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $stTemp = $pgTemp->prepare("UPDATE public.monitoreos_generales SET supervision='rechazado', \"check\"=0 WHERE monitoreos_generales_id=:id");
+            $stTemp->execute(['id'=>$id]);
+            $updatedTemp = $stTemp->rowCount();
+        } catch(Throwable $e){
             $warnings[] = 'temp_error: '.$e->getMessage();
             $updatedTemp = 0;
         }
 
+        // 3) si MAIN afectó, eliminar fila en TEMP
         if($updatedMain > 0){
             try{
-                if(!isset($pgT)) $pgT = getTemporal();
-                $pgT->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-                $del = $pgT->prepare("DELETE FROM public.$table WHERE $idCol = :id");
+                if(!isset($pgTemp)) $pgTemp = getTemporal();
+                $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+                $del = $pgTemp->prepare("DELETE FROM public.monitoreos_generales WHERE monitoreos_generales_id = :id");
                 $del->execute(['id'=>$id]);
                 $deletedTemp = $del->rowCount();
             }catch(Throwable $e){
@@ -206,39 +197,120 @@ try{
             }
         }
 
+        $ok = ($updatedMain + $updatedTemp) > 0;
         respond([
-            'success'=>($updatedMain + $updatedTemp) > 0,
+            'success'=>$ok,
             'action'=>'rechazar',
+            'id'=>$id,
             'updated_main'=>$updatedMain,
             'updated_temp'=>$updatedTemp,
             'deleted_temp'=>$deletedTemp,
-            'id'=>$id,
             'estado'=>'rechazado',
             'warnings'=>$warnings
         ]);
     }
 
-    if($action==='inactivate'){
-        if($method!=='POST'){
+    if ($action==='aprobar'){
+        if($_SERVER['REQUEST_METHOD']!=='POST'){
             respond(['success'=>false,'error'=>'method_not_allowed','allowed'=>'POST'],405);
         }
-        $id=isset($body[$idCol])?trim($body[$idCol]):'';
+        $id=isset($body['monitoreos_generales_id'])?trim($body['monitoreos_generales_id']):'';
         if($id==='') $id = isset($body['id'])?trim($body['id']):'';
-        if($id==='') respond(['success'=>false,'error'=>'id_required'],400);
-        $pg=getMain(); $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-        $st=$pg->prepare("UPDATE $table SET error_registro='inactivo' WHERE $idCol=?");
-        $ok=$st->execute([$id]);
+        if($id==='') throw new RuntimeException('monitoreos_generales_id requerido');
+
+        $warnings = [];
+        $updatedMain = 0;
+        $insertedMain = 0;
+        $updatedTemp = 0;
+        $deletedTemp = 0;
+
+        // 1) intentar actualizar MAIN
+        try {
+            $pgMain = getMain();
+            $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $stMain = $pgMain->prepare("UPDATE public.monitoreos_generales SET supervision='aprobado', \"check\"=1 WHERE monitoreos_generales_id=:id");
+            $stMain->execute(['id'=>$id]);
+            $updatedMain = $stMain->rowCount();
+        } catch(Throwable $e){
+            $warnings[] = 'main_update_error: '.$e->getMessage();
+            $updatedMain = 0;
+        }
+
+        // 2) si no existía en MAIN, intentar insertar desde TEMP
+        if($updatedMain == 0){
+            try{
+                $pgTemp = getTemporal();
+                $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+                $stFetch = $pgTemp->prepare("SELECT * FROM public.monitoreos_generales WHERE monitoreos_generales_id = :id LIMIT 1");
+                $stFetch->execute(['id'=>$id]);
+                $row = $stFetch->fetch(PDO::FETCH_ASSOC);
+                if($row){
+                    // asegurarnos valores por defecto para supervision/check
+                    $row['supervision'] = 'aprobado';
+                    $row['check'] = 1;
+                    // construir insert dinámico
+                    $cols = array_keys($row);
+                    $place = array_map(function($c){ return ':'.preg_replace('/[^a-zA-Z0-9_]/','',$c); }, $cols);
+                    $colsSql = implode(',', array_map(function($c){ return "\"$c\""; }, $cols));
+                    $placeSql = implode(',', $place);
+                    $sqlIns = "INSERT INTO public.monitoreos_generales ($colsSql) VALUES ($placeSql)";
+                    $stIns = $pgMain->prepare($sqlIns);
+                    // bind values
+                    foreach($cols as $c){
+                        $stIns->bindValue(':'.preg_replace('/[^a-zA-Z0-9_]/','',$c), $row[$c]);
+                    }
+                    $stIns->execute();
+                    $insertedMain = $stIns->rowCount();
+                } else {
+                    $warnings[] = 'no_temp_row_to_insert';
+                }
+            }catch(Throwable $e){
+                $warnings[] = 'main_insert_error: '.$e->getMessage();
+            }
+        }
+
+        // 3) actualizar TEMP siempre que sea posible
+        try {
+            if(!isset($pgTemp)) $pgTemp = getTemporal();
+            $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $stTemp = $pgTemp->prepare("UPDATE public.monitoreos_generales SET supervision='aprobado', \"check\"=1 WHERE monitoreos_generales_id=:id");
+            $stTemp->execute(['id'=>$id]);
+            $updatedTemp = $stTemp->rowCount();
+        } catch(Throwable $e){
+            $warnings[] = 'temp_update_error: '.$e->getMessage();
+            $updatedTemp = 0;
+        }
+
+        // 4) si MAIN fue actualizado o insertado, eliminar fila en TEMP para que no siga apareciendo en pendientes
+        if(($updatedMain + $insertedMain) > 0){
+            try {
+                if(!isset($pgTemp)) $pgTemp = getTemporal();
+                $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+                $del = $pgTemp->prepare("DELETE FROM public.monitoreos_generales WHERE monitoreos_generales_id = :id");
+                $del->execute(['id'=>$id]);
+                $deletedTemp = $del->rowCount();
+            } catch(Throwable $e){
+                $warnings[] = 'temp_delete_error_after_main: '.$e->getMessage();
+            }
+        }
+
+        $ok = ($updatedMain + $insertedMain + $updatedTemp + $deletedTemp) > 0;
         respond([
-            'success'=>$ok && $st->rowCount()>0,
-            'action'=>'inactivate',
+            'success'=>$ok,
+            'action'=>'aprobar',
             'id'=>$id,
-            'estado'=>'inactivo'
+            'updated_main'=>$updatedMain,
+            'inserted_main'=>$insertedMain,
+            'updated_temp'=>$updatedTemp,
+            'deleted_temp'=>$deletedTemp,
+            'warnings'=>$warnings
         ]);
     }
 
-    respond(['success'=>false,'error'=>'unknown_action','message'=>'Acción no soportada: '.$action],400);
+    throw new RuntimeException('action no reconocido');
 
-}catch(Throwable $e){
-    respond(['success'=>false,'error'=>'exception','message'=>$e->getMessage()],500);
+} catch (Throwable $e) {
+    http_response_code(400);
+    echo json_encode(['success'=>false,'error'=>'exception','message'=>$e->getMessage()]);
 }
 ?>
