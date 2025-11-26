@@ -272,24 +272,30 @@
   // Robust initFilters: map inputs using data-col/name or th.dataset; ignore checkboxes; add debounce + Enter
   function initFilters(){
     const table = document.getElementById(DOM.table);
-    if(!table) { console.warn('[oficios_varios_palma] tabla no encontrada:', DOM.table); return; }
+    if(!table) { console.error('[oficios_varios_palma] tabla no encontrada:', DOM.table); return; }
     const thead = table.querySelector('thead');
-    if(!thead) { console.warn('[oficios_varios_palma] thead no encontrado'); return; }
+    if(!thead) { console.error('[oficios_varios_palma] thead no encontrado'); return; }
 
     const inputs = Array.from(thead.querySelectorAll('input, select, textarea'));
+    console.log('[oficios_varios_palma] inicializando filtros para', inputs.length, 'inputs');
     if(!inputs.length) { console.warn('[oficios_varios_palma] no se encontraron inputs en thead'); return; }
 
     inputs.forEach(inp=>{
       // ignore checkboxes (selection column)
       if(inp.type && inp.type.toLowerCase() === 'checkbox') return;
 
-      // determine column name
-      let col = (inp.dataset && inp.dataset.col) ? inp.dataset.col : (inp.name || '');
-      if(!col){
+      // determine column name - prioritize data-col attribute
+      let col = '';
+      if(inp.dataset && inp.dataset.col) {
+        col = inp.dataset.col;
+      } else if(inp.name) {
+        col = inp.name;
+      } else {
         const th = inp.closest('th');
         if(th){
-          col = (th.dataset && (th.dataset.col || th.dataset.field)) ? (th.dataset.col || th.dataset.field) : '';
-          if(!col){
+          if(th.dataset && (th.dataset.col || th.dataset.field)) {
+            col = th.dataset.col || th.dataset.field;
+          } else {
             // try matching header text -> COLUMNAS
             const headerText = (th.innerText || th.textContent || '').trim();
             const key = headerText.replace(/\s+/g,' ').trim().toLowerCase();
@@ -326,7 +332,7 @@
         const val = (evt.target.value == null) ? '' : String(evt.target.value);
         filters[col] = val;
         page = 1;
-        console.debug('[oficios_varios_palma] aplicar filtro (debounce):', col, val);
+        console.log('[oficios_varios_palma] aplicar filtro:', col, '=', val);
         load();
       }, FILTER_DEBOUNCE_MS);
 
@@ -337,7 +343,7 @@
           const val = (e.target.value == null) ? '' : String(e.target.value);
           filters[col] = val;
           page = 1;
-          console.debug('[oficios_varios_palma] aplicar filtro (Enter):', col, val);
+          console.log('[oficios_varios_palma] aplicar filtro (Enter):', col, '=', val);
           load();
         }
       }
@@ -353,9 +359,10 @@
       inp.addEventListener('input', handlerDeb);
       inp.addEventListener('change', handlerDeb);
       inp.addEventListener('keydown', handlerKey);
+      console.log('[oficios_varios_palma] filtro configurado para columna:', col);
     });
 
-    console.debug('[oficios_varios_palma] filtros inicializados. columnas mapeadas:', Object.keys(filters).length ? Object.keys(filters) : 'none');
+    console.log('[oficios_varios_palma] filtros inicializados. Total columnas mapeadas:', Object.keys(filters).length);
   }
 
   async function load(){
