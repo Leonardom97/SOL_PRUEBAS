@@ -71,7 +71,7 @@
           }
         }
         // debug: show request url in console
-        console.debug('[cosecha_fruta] request ->', `${API}?${qs.toString()}`);
+        console.log('[cosecha_fruta] request ->', `${API}?${qs.toString()}`);
         const r = await fetch(`${API}?${qs.toString()}`, {cache:'no-store'});
         if(!r.ok){ last = `${act}: HTTP ${r.status}`; continue; }
         const txt = await r.text();
@@ -272,24 +272,40 @@
   // Robust initFilters: map inputs using data-col/name or th.dataset; ignore checkboxes; add debounce + Enter
   function initFilters(){
     const table = document.getElementById(DOM.table);
-    if(!table) { console.warn('[cosecha_fruta] tabla no encontrada:', DOM.table); return; }
+    if(!table) { 
+      console.error('[cosecha_fruta] tabla no encontrada:', DOM.table); 
+      return; 
+    }
     const thead = table.querySelector('thead');
-    if(!thead) { console.warn('[cosecha_fruta] thead no encontrado'); return; }
+    if(!thead) { 
+      console.error('[cosecha_fruta] thead no encontrado'); 
+      return; 
+    }
 
     const inputs = Array.from(thead.querySelectorAll('input, select, textarea'));
-    if(!inputs.length) { console.warn('[cosecha_fruta] no se encontraron inputs en thead'); return; }
+    if(!inputs.length) { 
+      console.warn('[cosecha_fruta] no se encontraron inputs en thead'); 
+      return; 
+    }
+
+    console.log('[cosecha_fruta] inicializando filtros para', inputs.length, 'inputs');
 
     inputs.forEach(inp=>{
       // ignore checkboxes (selection column)
       if(inp.type && inp.type.toLowerCase() === 'checkbox') return;
 
-      // determine column name
-      let col = (inp.dataset && inp.dataset.col) ? inp.dataset.col : (inp.name || '');
-      if(!col){
+      // determine column name - prioritize data-col attribute
+      let col = '';
+      if(inp.dataset && inp.dataset.col) {
+        col = inp.dataset.col;
+      } else if(inp.name) {
+        col = inp.name;
+      } else {
         const th = inp.closest('th');
         if(th){
-          col = (th.dataset && (th.dataset.col || th.dataset.field)) ? (th.dataset.col || th.dataset.field) : '';
-          if(!col){
+          if(th.dataset && (th.dataset.col || th.dataset.field)) {
+            col = th.dataset.col || th.dataset.field;
+          } else {
             // try matching header text -> COLUMNAS
             const headerText = (th.innerText || th.textContent || '').trim();
             const key = headerText.replace(/\s+/g,' ').trim().toLowerCase();
@@ -326,7 +342,7 @@
         const val = (evt.target.value == null) ? '' : String(evt.target.value);
         filters[col] = val;
         page = 1;
-        console.debug('[cosecha_fruta] aplicar filtro (debounce):', col, val);
+        console.log('[cosecha_fruta] aplicar filtro:', col, '=', val);
         load();
       }, FILTER_DEBOUNCE_MS);
 
@@ -337,7 +353,7 @@
           const val = (e.target.value == null) ? '' : String(e.target.value);
           filters[col] = val;
           page = 1;
-          console.debug('[cosecha_fruta] aplicar filtro (Enter):', col, val);
+          console.log('[cosecha_fruta] aplicar filtro (Enter):', col, '=', val);
           load();
         }
       }
@@ -353,9 +369,11 @@
       inp.addEventListener('input', handlerDeb);
       inp.addEventListener('change', handlerDeb);
       inp.addEventListener('keydown', handlerKey);
+
+      console.log('[cosecha_fruta] filtro configurado para columna:', col);
     });
 
-    console.debug('[cosecha_fruta] filtros inicializados. columnas mapeadas:', Object.keys(filters).length ? Object.keys(filters) : 'none');
+    console.log('[cosecha_fruta] filtros inicializados. Total columnas mapeadas:', Object.keys(filters).length);
   }
 
   async function load(){
@@ -386,12 +404,20 @@
   function init(){
     document.getElementById(DOM.form)?.addEventListener('submit', save);
     document.getElementById(DOM.clearBtn)?.addEventListener('click', ()=>{
+      console.log('[cosecha_fruta] limpiando todos los filtros');
       filters={}; page=1;
       const table = document.getElementById(DOM.table);
       if(table){
         const thead = table.querySelector('thead');
-        if(thead) thead.querySelectorAll('input, select, textarea').forEach(i=> i.value = '');
+        if(thead) {
+          thead.querySelectorAll('input, select, textarea').forEach(i=> {
+            if(i.type && i.type.toLowerCase() !== 'checkbox') {
+              i.value = '';
+            }
+          });
+        }
       }
+      console.log('[cosecha_fruta] filtros limpiados, recargando datos...');
       load();
     });
     document.getElementById(DOM.limitSelect)?.addEventListener('change', e=>{ pageSize = parseInt(e.target.value,10) || 25; page = 1; load(); });
