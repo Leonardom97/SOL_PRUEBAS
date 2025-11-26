@@ -71,7 +71,7 @@
           }
         }
         // debug: show request url in console
-        console.debug('[monitoreo_trampas] request ->', `${API}?${qs.toString()}`);
+        console.log('[monitoreo_trampas] request ->', `${API}?${qs.toString()}`);
         const r = await fetch(`${API}?${qs.toString()}`, {cache:'no-store'});
         if(!r.ok){ last = `${act}: HTTP ${r.status}`; continue; }
         const txt = await r.text();
@@ -393,12 +393,20 @@
   function init(){
     document.getElementById(DOM.form)?.addEventListener('submit', save);
     document.getElementById(DOM.clearBtn)?.addEventListener('click', ()=>{
+      console.log('[monitoreo_trampas] limpiando todos los filtros');
       filters={}; page=1;
       const table = document.getElementById(DOM.table);
       if(table){
         const thead = table.querySelector('thead');
-        if(thead) thead.querySelectorAll('input, select, textarea').forEach(i=> i.value = '');
+        if(thead) {
+          thead.querySelectorAll('input, select, textarea').forEach(i=> {
+            if(i.type && i.type.toLowerCase() !== 'checkbox') {
+              i.value = '';
+            }
+          });
+        }
       }
+      console.log('[monitoreo_trampas] filtros limpiados, recargando datos...');
       load();
     });
     document.getElementById(DOM.limitSelect)?.addEventListener('change', e=>{ pageSize = parseInt(e.target.value,10) || 25; page = 1; load(); });
