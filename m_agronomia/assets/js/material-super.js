@@ -13,7 +13,19 @@ const TABS = [
   { key: "compactacion", label: "Compactación", icon: "compress", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
   { key: "plagas", label: "Plagas", icon: "skull-crossbones", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
   { key: "ct-cal-trampas", label: "Calidad Trampas", icon: "clipboard-list", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
-  { key: "reporte-lote-monitoreo", label: "Reporte Lote Monitoreo", icon: "file-alt", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] }
+  { key: "reporte-lote-monitoreo", label: "Reporte Lote Monitoreo", icon: "file-alt", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "coberturas", label: "Coberturas", icon: "layer-group", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "ct-polinizacion-flores", label: "Calidad Polinización Flores", icon: "flower", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "aud-cosecha", label: "Auditoría Cosecha", icon: "search", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "aud-fertilizacion", label: "Auditoría Fertilización", icon: "search-plus", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "aud-mantenimiento", label: "Auditoría Mantenimiento", icon: "wrench", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "aud-perdidas", label: "Auditoría Pérdidas", icon: "exclamation-triangle", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "aud-vagones", label: "Auditoría Vagones", icon: "truck", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "labores-diarias", label: "Labores Diarias", icon: "calendar-day", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "polinizacion", label: "Polinización", icon: "seedling", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "resiembra", label: "Resiembra", icon: "redo", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "salida-vivero", label: "Salida Vivero", icon: "sign-out-alt", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] },
+  { key: "siembra-nueva", label: "Siembra Nueva", icon: "plus-circle", roles: ["administrador", "supervisor_agronomico", "aux_agronomico"] }
 ];
 
 // --- Obtiene los roles del usuario logueado ---
