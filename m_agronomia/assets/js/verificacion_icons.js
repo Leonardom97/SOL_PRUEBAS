@@ -15,7 +15,19 @@
     'tabla-reporte-lote-monitoreo': { entidad: 'reporte_lote_monitoreo', idCol: 'reporte_lote_monitoreo_id' },
     'tabla-ct-cal-trampas':       { entidad: 'ct_cal_trampas',         idCol: 'ct_cal_trampas_id' },
     'tabla-compactacion':         { entidad: 'compactacion',           idCol: 'compactacion_id' },
-    'tabla-plagas':               { entidad: 'plagas',                 idCol: 'plagas_id' }
+    'tabla-plagas':               { entidad: 'plagas',                 idCol: 'plagas_id' },
+    'tabla-coberturas':           { entidad: 'coberturas',             idCol: 'coberturas_id' },
+    'tabla-ct-polinizacion-flores': { entidad: 'ct_polinizacion_flores', idCol: 'ct_polinizacion_flores_id' },
+    'tabla-aud-cosecha':          { entidad: 'aud_cosecha',            idCol: 'aud_cosecha_id' },
+    'tabla-aud-fertilizacion':    { entidad: 'aud_fertilizacion',      idCol: 'aud_fertilizacion_id' },
+    'tabla-aud-mantenimiento':    { entidad: 'aud_mantenimiento',      idCol: 'aud_mantenimiento_id' },
+    'tabla-aud-perdidas':         { entidad: 'aud_perdidas',           idCol: 'aud_perdidas_id' },
+    'tabla-aud-vagones':          { entidad: 'aud_vagones',            idCol: 'aud_vagones_id' },
+    'tabla-labores-diarias':      { entidad: 'labores_diarias',        idCol: 'labores_diarias_id' },
+    'tabla-polinizacion':         { entidad: 'polinizacion',           idCol: 'polinizacion_id' },
+    'tabla-resiembra':            { entidad: 'resiembra',              idCol: 'resiembra_id' },
+    'tabla-salida-vivero':        { entidad: 'salida_vivero',          idCol: 'salida_vivero_id' },
+    'tabla-siembra-nueva':        { entidad: 'siembra_nueva',          idCol: 'siembra_nueva_id' }
   };
 
   var TTL_MS = 5000; // cache para pendientes
