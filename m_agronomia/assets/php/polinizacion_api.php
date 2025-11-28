@@ -92,7 +92,7 @@ try {
             'labor','linea_entrada','linea_salida','hora_entrada','hora_salida','polen_g','talco_g',
             'poliniza_6_g','ana_98_g','acadian_cc','cosmoagua_g','agua_cc','cosmoflux','stimplex_cc',
             'oleorganic_cc','cosmo_oil_cc','etanol_cc','flores_dobles','flores_buenas','flores_ayudadas',
-            'aplicacion_2','aplicacion_3','observaciones'
+            'aplicacion_2','aplicacion_3','observaciones','error_registro','supervision','check'
         ];
         $id=$body['polinizacion_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
@@ -145,7 +145,7 @@ try {
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
         if(!$id) respond(['success'=>false,'error'=>'id_invalid'],400);
         $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-        $st=$pg->prepare("UPDATE polinizacion SET observaciones='inactivo' WHERE polinizacion_id=?");
+        $st=$pg->prepare("UPDATE polinizacion SET error_registro='inactivo' WHERE polinizacion_id=?");
         $st->execute([$id]);
         $success = $st->rowCount() > 0;
         respond(['success'=>$success,'action'=>'inactivar','id'=>$id,'estado'=>'inactivo']);

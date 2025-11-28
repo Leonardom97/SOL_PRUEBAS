@@ -92,7 +92,7 @@ try {
             'finca','lote','parcela','linea','palma','contratista','codigo','colaborador','tipo_labor',
             'racimos_optimos','racimos_verdes','racimos_sobremaduro','racimos_enfermos','racimos_pedunculo_largo',
             'palmas_hojas_mal_encalladas','palmas_hojas_picadas','racimo_sin_cosechar','corte_estrella',
-            'palmas_sin_alistar','pepas_frescas_plato','pepas_frescas_fuera_plato','nuevo_colaborador','error_registro'
+            'palmas_sin_alistar','pepas_frescas_plato','pepas_frescas_fuera_plato','nuevo_colaborador','error_registro','supervision','check'
         ];
         $id=$body['aud_cosecha_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];

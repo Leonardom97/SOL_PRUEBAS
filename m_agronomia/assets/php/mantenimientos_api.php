@@ -91,7 +91,7 @@ try {
             'mantenimientos_id','fecha','responsable','plantacion','finca','siembra','lote','parcela','labor_especifica',
             'observacion','contratista','codigo','colaborador','personas','hora_entrada',
             'hora_salida','linea_entrada','linea_salida','cantidad','unidad','maquina',
-            'tractorista','nuevo_operario','supervision','check'
+            'tractorista','nuevo_operario','error_registro','supervision','check'
         ];
         $id=$body['mantenimientos_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
