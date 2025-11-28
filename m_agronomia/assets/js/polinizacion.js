@@ -32,7 +32,7 @@
   const API='assets/php/polinizacion_api.php';
   const ID_KEY='polinizacion_id';
   const DATE_COL='fecha';
-  const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivar',reject:'rechazar'};
+  const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivar',reject:'rechazar',approve:'aprobar'};
 
   const FILTER_DEBOUNCE_MS = 300;
   function debounce(fn, ms){ let t; return function(...args){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,args), ms); }; }
@@ -79,12 +79,12 @@
         tr.appendChild(td);
       });
       const fecha=row[DATE_COL]||'', inactivo=(row.observaciones||'').toLowerCase()==='inactivo';
-      let edit='', lock='';
+      let edit='', lock='', inactivarBtn='';
       if(inactivo) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>';
-      else if(corte && fecha){ if(fecha < corte) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>'; else edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; }
-      else { edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; lock = '<button class="md-btn md-btn-icon" disabled title="Sin fecha corte"><i class="fa fa-question-circle"></i></button>'; }
+      else if(corte && fecha){ if(fecha < corte) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>'; else { edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; inactivarBtn = `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`; } }
+      else { edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; inactivarBtn = `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`; lock = '<button class="md-btn md-btn-icon" disabled title="Sin fecha corte"><i class="fa fa-question-circle"></i></button>'; }
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
-      tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
+      tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + inactivarBtn + lock;
       tr.appendChild(tdAcc);
       tbody.appendChild(tr);
     });
@@ -95,6 +95,16 @@
     const t = document.getElementById(DOM.tbody); if(!t) return;
     t.querySelectorAll('.btn-editar').forEach(b=>b.onclick = ()=>openModal(b.dataset.id, false));
     t.querySelectorAll('.btn-ver').forEach(b=>b.onclick = ()=>openModal(b.dataset.id, true));
+    t.querySelectorAll('.btn-inactivar').forEach(b=>b.onclick = ()=>inactivar(b.dataset.id));
+  }
+
+  async function inactivar(id){
+    if(!confirm('¿Inactivar registro?')) return;
+    try{
+      const r = await fetch(`${API}?action=${ACTIONS.inactivate}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({[ID_KEY]:id})});
+      const j = await r.json();
+      if(j.success){ load(); } else { const err = j.error || 'Fallo inactivar'; if(err.toLowerCase()!=='exception' && err.toLowerCase()!=='id_required') alert(err); }
+    }catch(err){ const msg = err?.message || 'Error inactivar'; if(msg.toLowerCase()!=='exception' && msg.toLowerCase()!=='id_required') alert(msg); }
   }
 
   function openModal(id,readonly){
@@ -105,14 +115,29 @@
     const footer = document.querySelector('#modal-editar .modal-footer');
     if(footer){
       footer.querySelectorAll('.icon-repeat-supervision').forEach(x=>x.remove());
+      footer.querySelectorAll('.icon-approve-supervision').forEach(x=>x.remove());
       if(row.supervision==='aprobado' || row.check==1){
         const btn=document.createElement('button'); btn.type='button'; btn.className='btn btn-link icon-repeat-supervision';
         btn.title='Revertir aprobación'; btn.innerHTML='<i class="fa-solid fa-repeat" style="font-size:1.6em;color:#198754;"></i>';
         btn.onclick = ()=>revertir(id); footer.insertBefore(btn, footer.firstChild);
+      } else if(row.supervision==='pendiente' || (!row.supervision && !row.check)){
+        const btn=document.createElement('button'); btn.type='button'; btn.className='btn btn-link icon-approve-supervision';
+        btn.title='Aprobar'; btn.innerHTML='<i class="fa-solid fa-check" style="font-size:1.6em;color:#198754;"></i>';
+        btn.onclick = ()=>aprobar(id); footer.insertBefore(btn, footer.firstChild);
       }
       const sb = footer.querySelector('button[type="submit"]'); if(sb) sb.style.display = readonly ? 'none' : '';
     }
     new bootstrap.Modal(document.getElementById(DOM.modal)).show();
+  }
+
+  async function aprobar(id){
+    if(!confirm('¿Aprobar registro?')) return;
+    try{
+      const r = await fetch(`${API}?action=${ACTIONS.approve}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({[ID_KEY]:id})});
+      const j = await r.json();
+      if(!j.success){ const err = j.error || 'No aprobado'; if(err.toLowerCase()!=='exception' && err.toLowerCase()!=='id_required') alert(err); return; }
+      await load(); bootstrap.Modal.getInstance(document.getElementById(DOM.modal))?.hide();
+    }catch(err){ const msg = err?.message || 'Error aprobar'; if(msg.toLowerCase()!=='exception' && msg.toLowerCase()!=='id_required') alert(msg); }
   }
 
   async function revertir(id){
