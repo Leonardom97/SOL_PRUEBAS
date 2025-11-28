@@ -6,10 +6,10 @@ if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
 // Load configuration
 require_once __DIR__ . '/config.php';
 
-$host = 'localhost';
+$host = '192.168.125.25';
 $db   = 'Prueba';
-$user = 'postgres';
-$pass = '12345';
+$user = 'formatos';
+$pass = 'Formatos2021';
 $port = '5432';
 
 try {

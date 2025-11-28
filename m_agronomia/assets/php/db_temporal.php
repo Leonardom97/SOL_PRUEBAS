@@ -4,10 +4,10 @@ if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
     exit('Acceso prohibido');
 }
 
-$host = 'localhost';
+$host = '192.168.125.25';
 $db   = 'db_temporal';
-$user = 'postgres';
-$pass = '12345';
+$user = 'formatos';
+$pass = 'Formatos2021';
 $port = '5432';
 
 try {

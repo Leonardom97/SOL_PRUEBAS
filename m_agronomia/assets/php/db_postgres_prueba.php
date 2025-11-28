@@ -14,10 +14,10 @@ if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
     http_response_code(403); exit('Acceso prohibido');
 }
 
-$host = 'localhost';
+$host = '192.168.125.25';
 $db   = 'Prueba_agronomia';
-$user = 'postgres';
-$pass = '12345';
+$user = 'formatos';
+$pass = 'Formatos2021';
 $port = '5432';
 
 try {
