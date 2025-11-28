@@ -91,7 +91,7 @@ try {
             'ct_polinizacion_flores_id','fecha','hora','responsable','colaborador','auditoria','plantacion',
             'finca','siembra','lote','parcela','linea_entrada','linea_salida','calificacion','verificacion',
             'validacion','flores_dobles','flores_buenas','flores_ayudadas','flores_anteriores_sin_polinizar',
-            'flores_nuevas_sin_polinizar','aplicacion_2','aplicacion_3','labor','error_registro'
+            'flores_nuevas_sin_polinizar','aplicacion_2','aplicacion_3','labor','error_registro','supervision','check'
         ];
         $id=$body['ct_polinizacion_flores_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];

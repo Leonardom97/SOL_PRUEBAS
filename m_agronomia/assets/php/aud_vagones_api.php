@@ -91,7 +91,7 @@ try {
             'aud_vagones_id','hora','responsable','fecha_actividad','plantacion','contratista_vagon',
             'tipo','numero_remision','racimos_verdes_vagon','racimos_sobremaduro_vagon','racimos_enfermos_vagon',
             'racimos_tusas_vagon','racimos_pedunculo_largo_vagon','total_racimos','racimos_auditados',
-            'tipo_1','tipo_2','tipo_3','tipo_4','error_registro'
+            'tipo_1','tipo_2','tipo_3','tipo_4','error_registro','supervision','check'
         ];
         $id=$body['aud_vagones_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
