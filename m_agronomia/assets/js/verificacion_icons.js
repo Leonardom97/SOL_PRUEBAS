@@ -3,31 +3,33 @@
 
   // MAPEA todas las tablas y sus columnas de ID y entidad
   var MAP = {
-    'tabla-capacitaciones':       { entidad: 'cosecha_fruta',          idCol: 'cosecha_fruta_id' },
-    'tabla-reuniones':            { entidad: 'mantenimientos',         idCol: 'mantenimientos_id' },
-    'tabla-asistencias':          { entidad: 'oficios_varios_palma',   idCol: 'oficios_varios_palma_id' },
-    'tabla-inventarios':          { entidad: 'fertilizacion_organica', idCol: 'fertilizacion_organica_id' },
-    'tabla-monitoreos-generales': { entidad: 'monitoreos_generales',   idCol: 'monitoreos_generales_id' },
-    'tabla-ct-cal-sanidad':       { entidad: 'ct_cal_sanidad',         idCol: 'ct_cal_sanidad_id' },
-    'tabla-monitoreo-trampas':    { entidad: 'monitoreo_trampas',      idCol: 'monitoreo_trampas_id' },
-    'tabla-nivel-freatico':       { entidad: 'nivel_freatico',         idCol: 'nivel_freatico_id' },
-    'tabla-ct-cal-labores':       { entidad: 'ct_cal_labores',         idCol: 'ct_cal_labores_id' },
+    'tabla-capacitaciones':         { entidad: 'cosecha_fruta',          idCol: 'cosecha_fruta_id' },
+    'tabla-reuniones':              { entidad: 'mantenimientos',         idCol: 'mantenimientos_id' },
+    'tabla-asistencias':            { entidad: 'oficios_varios_palma',   idCol: 'oficios_varios_palma_id' },
+    'tabla-inventarios':            { entidad: 'fertilizacion_organica', idCol: 'fertilizacion_organica_id' },
+    'tabla-monitoreos-generales':   { entidad: 'monitoreos_generales',   idCol: 'monitoreos_generales_id' },
+    'tabla-ct-cal-sanidad':         { entidad: 'ct_cal_sanidad',         idCol: 'ct_cal_sanidad_id' },
+    'tabla-monitoreo-trampas':      { entidad: 'monitoreo_trampas',      idCol: 'monitoreo_trampas_id' },
+    'tabla-nivel-freatico':         { entidad: 'nivel_freatico',         idCol: 'nivel_freatico_id' },
+    'tabla-ct-cal-labores':         { entidad: 'ct_cal_labores',         idCol: 'ct_cal_labores_id' },
     'tabla-reporte-lote-monitoreo': { entidad: 'reporte_lote_monitoreo', idCol: 'reporte_lote_monitoreo_id' },
-    'tabla-ct-cal-trampas':       { entidad: 'ct_cal_trampas',         idCol: 'ct_cal_trampas_id' },
-    'tabla-compactacion':         { entidad: 'compactacion',           idCol: 'compactacion_id' },
-    'tabla-plagas':               { entidad: 'plagas',                 idCol: 'plagas_id' },
-    'tabla-coberturas':           { entidad: 'coberturas',             idCol: 'coberturas_id' },
+    'tabla-ct-cal-trampas':         { entidad: 'ct_cal_trampas',         idCol: 'ct_cal_trampas_id' },
+    'tabla-compactacion':           { entidad: 'compactacion',           idCol: 'compactacion_id' },
+    'tabla-plagas':                 { entidad: 'plagas',                 idCol: 'plagas_id' },
+
+    // --- Tablas añadidas / verificadas ---
+    'tabla-coberturas':             { entidad: 'coberturas',             idCol: 'coberturas_id' },
     'tabla-ct-polinizacion-flores': { entidad: 'ct_polinizacion_flores', idCol: 'ct_polinizacion_flores_id' },
-    'tabla-aud-cosecha':          { entidad: 'aud_cosecha',            idCol: 'aud_cosecha_id' },
-    'tabla-aud-fertilizacion':    { entidad: 'aud_fertilizacion',      idCol: 'aud_fertilizacion_id' },
-    'tabla-aud-mantenimiento':    { entidad: 'aud_mantenimiento',      idCol: 'aud_mantenimiento_id' },
-    'tabla-aud-perdidas':         { entidad: 'aud_perdidas',           idCol: 'aud_perdidas_id' },
-    'tabla-aud-vagones':          { entidad: 'aud_vagones',            idCol: 'aud_vagones_id' },
-    'tabla-labores-diarias':      { entidad: 'labores_diarias',        idCol: 'labores_diarias_id' },
-    'tabla-polinizacion':         { entidad: 'polinizacion',           idCol: 'polinizacion_id' },
-    'tabla-resiembra':            { entidad: 'resiembra',              idCol: 'resiembra_id' },
-    'tabla-salida-vivero':        { entidad: 'salida_vivero',          idCol: 'salida_vivero_id' },
-    'tabla-siembra-nueva':        { entidad: 'siembra_nueva',          idCol: 'siembra_nueva_id' }
+    'tabla-aud-cosecha':            { entidad: 'aud_cosecha',            idCol: 'aud_cosecha_id' },
+    'tabla-aud-fertilizacion':      { entidad: 'aud_fertilizacion',      idCol: 'aud_fertilizacion_id' },
+    'tabla-aud-mantenimiento':      { entidad: 'aud_mantenimiento',      idCol: 'aud_mantenimiento_id' },
+    'tabla-aud-perdidas':           { entidad: 'aud_perdidas',           idCol: 'aud_perdidas_id' },
+    'tabla-aud-vagones':            { entidad: 'aud_vagones',            idCol: 'aud_vagones_id' },
+    'tabla-labores-diarias':        { entidad: 'labores_diarias',        idCol: 'labores_diarias_id' },
+    'tabla-polinizacion':           { entidad: 'polinizacion',           idCol: 'polinizacion_id' },
+    'tabla-resiembra':              { entidad: 'resiembra',              idCol: 'resiembra_id' },
+    'tabla-salida-vivero':          { entidad: 'salida_vivero',          idCol: 'salida_vivero_id' },
+    'tabla-siembra-nueva':          { entidad: 'siembra_nueva',          idCol: 'siembra_nueva_id' }
   };
 
   var TTL_MS = 5000; // cache para pendientes
@@ -45,7 +47,7 @@
     }
     td.style.textAlign = 'center';
     td.style.verticalAlign = 'middle';
-    td.innerHTML = `<i class="${meta.cls} supervision-icon" title="${meta.title}" aria-label="${meta.title}"></i>`;
+    td.innerHTML = '<i class="' + meta.cls + ' supervision-icon" title="' + meta.title + '" aria-label="' + meta.title + '"></i>';
     var verIcon = td.querySelector('.supervision-icon');
     if (verIcon) {
       verIcon.style.display = 'inline-flex';

@@ -69,6 +69,8 @@
     'tab-content-ct-cal-trampas': 'ct_cal_trampas',
     'tab-content-compactacion': 'compactacion',
     'tab-content-plagas': 'plagas',
+
+    // --- Nuevas secciones solicitadas ---
     'tab-content-coberturas': 'coberturas',
     'tab-content-ct-polinizacion-flores': 'ct_polinizacion_flores',
     'tab-content-aud-cosecha': 'aud_cosecha',
