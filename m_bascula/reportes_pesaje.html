@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="es-419">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Reportes de Pesaje - OSM</title>
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="../assets/css/bs-theme-overrides.css">
+    <style>
+        body { visibility: hidden; }
+    </style>
+</head>
+<body id="page-top" data-role="Administrador,Operador_Bascula,Supervisor">
+    <script src="../assets/js/auth_guard.js"></script>
+
+    <div id="wrapper">
+        <div id="sidebar"></div>
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div id="navbar"></div>
+
+                <div class="container-fluid">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="text-dark mb-0">
+                            <i class="fas fa-chart-bar"></i> Reportes de Pesaje
+                        </h3>
+                        <div>
+                            <button class="btn btn-success btn-sm" id="btnExportExcel">
+                                <i class="fas fa-file-excel"></i> Exportar a Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Filtros de Búsqueda</h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="formFilters" class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Fecha Inicio</label>
+                                    <input type="date" class="form-control" id="fechaInicio" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Fecha Fin</label>
+                                    <input type="date" class="form-control" id="fechaFin" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-search"></i> Buscar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Results Table -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Resultados</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover table-sm" id="tableReporte">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>F. Entrada</th>
+                                            <th>F. Salida</th>
+                                            <th>Placa</th>
+                                            <th>Conductor</th>
+                                            <th>Procedencia</th>
+                                            <th>Producto SAP</th>
+                                            <th>Producto</th>
+                                            <th>Peso Bruto (kg)</th>
+                                            <th>Peso Tara (kg)</th>
+                                            <th>Peso Neto (kg)</th>
+                                            <th>Usuario</th>
+                                            <th>Doc. Origen</th>
+                                            <th>Núm. Doc.</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyReporte">
+                                        <tr>
+                                            <td colspan="15" class="text-center">Seleccione un rango de fechas y haga clic en "Buscar"</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="row">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Total Pesadas
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statTotal">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-weight fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Peso Total (kg)
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statPesoTotal">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-balance-scale fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Peso Promedio (kg)
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statPesoPromedio">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Vehículos Únicos
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statVehiculos">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-truck fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="bg-white sticky-footer">
+                <div class="container my-auto">
+                    <div class="text-center my-auto copyright">
+                        <span>Copyright © OSM 2024</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../assets/js/theme.js"></script>
+    <script src="assets/js/reportes_pesaje.js"></script>
+</body>
+</html>
