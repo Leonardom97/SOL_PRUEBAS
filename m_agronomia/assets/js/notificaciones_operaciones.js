@@ -40,7 +40,19 @@
     reporte_lote_monitoreo: 'Reporte Lote Monitoreo',
     ct_cal_trampas: 'Calidad Trampas',
     compactacion: 'Compactación',
-    plagas: 'Plagas'
+    plagas: 'Plagas',
+    coberturas: 'Coberturas',
+    ct_polinizacion_flores: 'CT Polinización Flores',
+    aud_cosecha: 'Auditoría Cosecha',
+    aud_fertilizacion: 'Auditoría Fertilización',
+    aud_mantenimiento: 'Auditoría Mantenimiento',
+    aud_perdidas: 'Auditoría Pérdidas',
+    aud_vagones: 'Auditoría Vagones',
+    labores_diarias: 'Labores Diarias',
+    polinizacion: 'Polinización',
+    resiembra: 'Resiembra',
+    salida_vivero: 'Salida Vivero',
+    siembra_nueva: 'Siembra Nueva'
   };
 
   const sectionToEntity = {
@@ -56,7 +68,19 @@
     'tab-content-reporte-lote-monitoreo': 'reporte_lote_monitoreo',
     'tab-content-ct-cal-trampas': 'ct_cal_trampas',
     'tab-content-compactacion': 'compactacion',
-    'tab-content-plagas': 'plagas'
+    'tab-content-plagas': 'plagas',
+    'tab-content-coberturas': 'coberturas',
+    'tab-content-ct-polinizacion-flores': 'ct_polinizacion_flores',
+    'tab-content-aud-cosecha': 'aud_cosecha',
+    'tab-content-aud-fertilizacion': 'aud_fertilizacion',
+    'tab-content-aud-mantenimiento': 'aud_mantenimiento',
+    'tab-content-aud-perdidas': 'aud_perdidas',
+    'tab-content-aud-vagones': 'aud_vagones',
+    'tab-content-labores-diarias': 'labores_diarias',
+    'tab-content-polinizacion': 'polinizacion',
+    'tab-content-resiembra': 'resiembra',
+    'tab-content-salida-vivero': 'salida_vivero',
+    'tab-content-siembra-nueva': 'siembra_nueva'
   };
 
   // DOM
@@ -91,6 +115,18 @@
       case 'ct_cal_trampas': return 'ct_cal_trampas_id';
       case 'compactacion': return 'compactacion_id';
       case 'plagas': return 'plagas_id';
+      case 'coberturas': return 'coberturas_id';
+      case 'ct_polinizacion_flores': return 'ct_polinizacion_flores_id';
+      case 'aud_cosecha': return 'aud_cosecha_id';
+      case 'aud_fertilizacion': return 'aud_fertilizacion_id';
+      case 'aud_mantenimiento': return 'aud_mantenimiento_id';
+      case 'aud_perdidas': return 'aud_perdidas_id';
+      case 'aud_vagones': return 'aud_vagones_id';
+      case 'labores_diarias': return 'labores_diarias_id';
+      case 'polinizacion': return 'polinizacion_id';
+      case 'resiembra': return 'resiembra_id';
+      case 'salida_vivero': return 'salida_vivero_id';
+      case 'siembra_nueva': return 'siembra_nueva_id';
       default: return (entidad||'') + '_id';
     }
   }
