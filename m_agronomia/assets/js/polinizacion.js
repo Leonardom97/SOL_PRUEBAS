@@ -74,17 +74,17 @@
         if(col==='supervision'){ td.dataset.estado = est; td.innerHTML = icono(est); }
         else if(col==='observaciones'){
           const inact = (row.observaciones||'').toLowerCase() === 'inactivo';
-          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' : `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
+          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' : (row.observaciones ?? '');
         } else td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
       const fecha=row[DATE_COL]||'', inactivo=(row.observaciones||'').toLowerCase()==='inactivo';
-      let edit='', lock='';
+      let edit='', lock='', inactivarBtn='';
       if(inactivo) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>';
-      else if(corte && fecha){ if(fecha < corte) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>'; else edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; }
-      else { edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; lock = '<button class="md-btn md-btn-icon" disabled title="Sin fecha corte"><i class="fa fa-question-circle"></i></button>'; }
+      else if(corte && fecha){ if(fecha < corte) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>'; else { edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; inactivarBtn = `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`; } }
+      else { edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; inactivarBtn = `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`; lock = '<button class="md-btn md-btn-icon" disabled title="Sin fecha corte"><i class="fa fa-question-circle"></i></button>'; }
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
-      tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
+      tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + inactivarBtn + lock;
       tr.appendChild(tdAcc);
       tbody.appendChild(tr);
     });
