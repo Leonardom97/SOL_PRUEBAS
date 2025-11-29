@@ -141,7 +141,8 @@
       return;
     }
     const rol=(document.body.getAttribute('data-role')||'').toLowerCase();
-    if(!/administrador|aux_agronomico/.test(rol)) obj.supervision='pendiente';
+    if(/administrador|aux_agronomico/.test(rol)) obj.supervision='aprobado';
+    else obj.supervision='pendiente';
     try{
       const r = await fetch(`${API}?action=${ACTIONS.save}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj)});
       const j = await r.json();
