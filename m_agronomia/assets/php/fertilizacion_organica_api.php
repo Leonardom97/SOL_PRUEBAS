@@ -88,7 +88,11 @@ try {
         $pg = getTemporal();
         if(!is_array($body)) throw new RuntimeException('JSON inválido');
         $cols=[
-            'fertilizacion_organica_id','fecha_actividad','responsable','plantacion','finca','siembra','lote','parcela','linea_entrada','linea_salida','hora_entrada','hora_salida','labor_especifica','producto_aplicado','dosis_kg','unidad_aplicacion','contratista_colaborador','n_colaboradores','colaboradores','tipo_labor','contratista_maquinaria','n_operadores','tipo_maquina','nombre_operadores','bultos_aplicados','n_traslado','kg_aplicados','error_registro','supervision','check'
+            'fertilizacion_organica_id','fecha_actividad','responsable','plantacion','finca',
+            'siembra','lote','parcela','linea_entrada','linea_salida','hora_entrada','hora_salida',
+            'labor_especifica','producto_aplicado','dosis_kg','unidad_aplicacion','contratista_colaborador',
+            'n_colaboradores','colaboradores','tipo_labor','contratista_maquinaria','n_operadores','tipo_maquina',
+            'nombre_operadores','bultos_aplicados','n_traslado','kg_aplicados','error_registro','supervision','check'
         ];
         $id=$body['fertilizacion_organica_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
