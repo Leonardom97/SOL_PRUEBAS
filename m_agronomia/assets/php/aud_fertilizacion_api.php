@@ -144,6 +144,7 @@ try {
 
         $updatedMain = 0;
         $updatedTemp = 0;
+        $warnings = [];
 
         // Update MAIN
         try {
@@ -153,6 +154,7 @@ try {
             $st->execute([$id]);
             $updatedMain = $st->rowCount();
         } catch(Throwable $e){
+            $warnings[] = 'main_error: '.$e->getMessage();
             $updatedMain = 0;
         }
 
@@ -164,11 +166,12 @@ try {
             $stTemp->execute([$id]);
             $updatedTemp = $stTemp->rowCount();
         } catch(Throwable $e){
+            $warnings[] = 'temp_error: '.$e->getMessage();
             $updatedTemp = 0;
         }
 
         $success = ($updatedMain + $updatedTemp) > 0;
-        respond(['success'=>$success,'action'=>'inactivar','id'=>$id,'estado'=>'inactivo']);
+        respond(['success'=>$success,'action'=>'inactivar','id'=>$id,'estado'=>'inactivo','warnings'=>$warnings]);
     }
 
     if ($action==='rechazar'){
