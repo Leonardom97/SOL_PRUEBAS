@@ -1,15 +1,26 @@
 (function(){
   'use strict';
+  // --- override alert para suprimir solo 'exception' y 'id_required' ---
   (function(){
     const __orig_alert = window.alert && window.alert.bind(window);
     if(__orig_alert){
       const IGNORED = new Set(['exception','id_required']);
       window.alert = function(message){
-        try { const s = (message === undefined || message === null) ? '' : String(message); const norm = s.trim().toLowerCase(); if (IGNORED.has(norm)) { console.warn('[suppress_alerts] alert suprimido:', s); return; } } catch(e) { console.error('[suppress_alerts] error al evaluar alert:', e); }
+        try {
+          const s = (message === undefined || message === null) ? '' : String(message);
+          const norm = s.trim().toLowerCase();
+          if (IGNORED.has(norm)) {
+            console.warn('[suppress_alerts] alert suprimido:', s);
+            return;
+          }
+        } catch(e) {
+          console.error('[suppress_alerts] error al evaluar alert:', e);
+        }
         return __orig_alert(message);
       };
     }
   })();
+  // ---------------------------------------------------------------
 
   const DOM={
     tbody:'tbody-polinizacion',
@@ -34,8 +45,15 @@
   const DATE_COL='fecha';
   const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivar',reject:'rechazar'};
 
+  // Debounce for filter inputs
   const FILTER_DEBOUNCE_MS = 300;
-  function debounce(fn, ms){ let t; return function(...args){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,args), ms); }; }
+  function debounce(fn, ms){
+    let t;
+    return function(...args){
+      clearTimeout(t);
+      t = setTimeout(()=>fn.apply(this,args), ms);
+    };
+  }
 
   let data=[], page=1, pageSize=25, total=0, filters={}, sortCol=null, sortAsc=true;
 
@@ -47,7 +65,17 @@
       try{
         const qs=new URLSearchParams({action:act,page,pageSize});
         if(sortCol){ qs.append('ordenColumna',sortCol); qs.append('ordenAsc',sortAsc?'1':'0'); }
-        for(const k in filters){ const v = filters[k]; if(v == null) continue; const tv = String(v).trim(); if(tv !== '') qs.append('filtro_'+k, tv); }
+        // add normalized non-empty filters
+        for(const k in filters){
+          const v = filters[k];
+          if(v == null) continue;
+          const tv = String(v).trim();
+          if(tv !== '') {
+            qs.append('filtro_'+k, tv);
+          }
+        }
+        // debug: show request url in console
+        console.debug('[polinizacion] request ->', `${API}?${qs.toString()}`);
         const r = await fetch(`${API}?${qs.toString()}`, {cache:'no-store'});
         if(!r.ok){ last = `${act}: HTTP ${r.status}`; continue; }
         const txt = await r.text();
@@ -81,8 +109,13 @@
       const fecha=row[DATE_COL]||'', inactivo=(row.observaciones||'').toLowerCase()==='inactivo';
       let edit='', lock='';
       if(inactivo) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>';
-      else if(corte && fecha){ if(fecha < corte) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>'; else edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; }
-      else { edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; lock = '<button class="md-btn md-btn-icon" disabled title="Sin fecha corte"><i class="fa fa-question-circle"></i></button>'; }
+      else if(corte && fecha){
+        if(fecha < corte) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>';
+        else edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`;
+      } else {
+        edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`;
+        lock = '<button class="md-btn md-btn-icon" disabled title="Sin fecha corte"><i class="fa fa-question-circle"></i></button>';
+      }
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
@@ -101,7 +134,10 @@
     const row = data.find(r=>r[ID_KEY]==id); if(!row) return;
     const cont = document.getElementById('campos-formulario');
     cont.innerHTML = COLUMNAS.filter(c=>c!=='supervision').map(c=>
-      `<div class="col-md-6 mb-3"><label class="form-label">${c.replace(/_/g,' ')}</label><input class="form-control" name="${c}" value="${row[c]??''}" ${(c===ID_KEY||readonly)?'readonly':''}></div>`).join('');
+      `<div class="col-md-6 mb-3">
+        <label class="form-label">${c.replace(/_/g,' ')}</label>
+        <input class="form-control" name="${c}" value="${row[c]??''}" ${(c===ID_KEY||readonly)?'readonly':''}>
+      </div>`).join('');
     const footer = document.querySelector('#modal-editar .modal-footer');
     if(footer){
       footer.querySelectorAll('.icon-repeat-supervision').forEach(x=>x.remove());
@@ -120,9 +156,19 @@
     try{
       const r = await fetch(`${API}?action=${ACTIONS.reject}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({[ID_KEY]:id})});
       const j = await r.json();
-      if(!j.success){ const err = j.error || 'No revertido'; if(err.toLowerCase()!=='exception' && err.toLowerCase()!=='id_required') alert(err); return; }
+      if(!j.success){
+        const err = j.error || 'No revertido';
+        const norm = (err===null||err===undefined)?'':String(err).trim().toLowerCase();
+        if(norm==='exception' || norm==='id_required'){ console.warn('[polinizacion] error suprimido:', err); return; }
+        alert(err); return;
+      }
       await load(); openModal(id, false);
-    }catch(err){ const msg = err?.message || 'Error revertir'; if(msg.toLowerCase()!=='exception' && msg.toLowerCase()!=='id_required') alert(msg); }
+    }catch(err){
+      const msg = err?.message || 'Error revertir';
+      const norm = (msg===null||msg===undefined)?'':String(msg).trim().toLowerCase();
+      if(norm==='exception' || norm==='id_required'){ console.warn('[polinizacion] error suprimido:', msg); return; }
+      alert(msg);
+    }
   }
 
   async function save(e){
@@ -139,8 +185,18 @@
       const r = await fetch(`${API}?action=${ACTIONS.save}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj)});
       const j = await r.json();
       if(j.success){ alert('Guardado'); load(); setTimeout(()=>bootstrap.Modal.getInstance(document.getElementById(DOM.modal))?.hide(),150); }
-      else { const err = j.error || 'Error guardando'; if(err.toLowerCase()!=='exception' && err.toLowerCase()!=='id_required') alert(err); }
-    }catch(err){ const msg = err?.message || 'Error guardando'; if(msg.toLowerCase()!=='exception' && msg.toLowerCase()!=='id_required') alert(msg); }
+      else {
+        const err = j.error || 'Error guardando';
+        const norm = (err===null||err===undefined)?'':String(err).trim().toLowerCase();
+        if(norm==='exception' || norm==='id_required'){ console.warn('[polinizacion] fallo guardar suprimido:', err); }
+        else { alert(err); }
+      }
+    }catch(err){
+      const msg = err?.message || 'Error guardando';
+      const norm = (msg===null||msg===undefined)?'':String(msg).trim().toLowerCase();
+      if(norm==='exception' || norm==='id_required'){ console.warn('[polinizacion] error guardando suprimido:', msg); }
+      else { alert(msg); }
+    }
   }
 
   function buildXLSX(rows,name){
@@ -152,64 +208,181 @@
   }
 
   function exportar(t){
-    if(t==='todo'){ const qs = new URLSearchParams({action:ACTIONS.listFallback[0], page:1, pageSize:100000}); fetch(`${API}?${qs}`).then(r=>r.json()).then(j=>buildXLSX((j.datos||j.data||[]),'polinizacion_todo')); return; }
+    if(t==='todo'){
+      const qs = new URLSearchParams({action:ACTIONS.listFallback[0], page:1, pageSize:100000});
+      fetch(`${API}?${qs}`).then(r=>r.json()).then(j=>buildXLSX((j.datos||j.data||[]),'polinizacion_todo')); return;
+    }
     let rows = data;
-    if(t==='seleccion'){ rows = []; document.querySelectorAll(`#${DOM.tbody} .row-check`).forEach(ch=>{ if(ch.checked) rows.push(data[+ch.dataset.index]); }); }
+    if(t==='seleccion'){
+      rows = []; document.querySelectorAll(`#${DOM.tbody} .row-check`).forEach(ch=>{ if(ch.checked) rows.push(data[+ch.dataset.index]); });
+    }
     buildXLSX(rows, 'polinizacion_'+t);
   }
 
+  // Export menu style restored
   function showExportMenu(){
     const btn=document.getElementById(DOM.exportBtn); if(!btn) return;
     const id='exportMenuPolinizacion'; document.getElementById(id)?.remove();
     const menu=document.createElement('div'); menu.id=id;
     Object.assign(menu.style,{position:'absolute', top:'40px', right:'0', background:'#fff', boxShadow:'0 4px 16px rgba(0,0,0,.15)', borderRadius:'12px', padding:'8px', zIndex:1000, minWidth:'170px'});
-    menu.innerHTML = ['todo','filtrado','seleccion'].map(t=>`<button class="exp" data-t="${t}" style="display:block;width:100%;text-align:left;padding:8px 10px;margin:6px 0;border:2px solid #000;background:#fff;border-radius:6px;cursor:pointer">${t.toUpperCase()} (.xlsx)</button>`).join('');
-    btn.parentNode.style.position='relative'; btn.parentNode.appendChild(menu);
-    menu.querySelectorAll('.exp').forEach(b=>b.addEventListener('click',()=>{ exportar(b.dataset.t); menu.remove(); }));
-    setTimeout(()=>document.addEventListener('mousedown',function out(ev){ if(!menu.contains(ev.target) && ev.target!==btn){ menu.remove(); document.removeEventListener('mousedown',out); } }),50);
+    const items=['todo','filtrado','seleccion'];
+    menu.innerHTML = items.map(t=>{
+      const label = t==='todo'?'TODO': t==='filtrado'?'FILTRADO':'SELECCION';
+      return `<button class="exp" data-t="${t}" style="display:block;width:100%;text-align:left;padding:8px 10px;margin:6px 0;border:2px solid #000;background:#fff;border-radius:6px;cursor:pointer">${label} (.xlsx)</button>`;
+    }).join('');
+    btn.parentNode.style.position='relative';
+    btn.parentNode.appendChild(menu);
+    menu.querySelectorAll('.exp').forEach(b=>b.addEventListener('click',()=>{
+      exportar(b.dataset.t); menu.remove();
+    }));
+    setTimeout(()=>document.addEventListener('mousedown',function out(ev){
+      if(!menu.contains(ev.target) && ev.target!==btn){ menu.remove(); document.removeEventListener('mousedown',out); }
+    }),50);
   }
 
   function renderPagination(){
     const nav=document.getElementById(DOM.pagination); if(!nav) return;
     const ul = nav.querySelector('.md-pagination-list'); if(!ul) return; ul.innerHTML='';
     const pages = Math.max(1, Math.ceil(total/pageSize));
-    function item(t,p,dis,act){ const li=document.createElement('li'); li.className = dis ? 'disabled' : (act ? 'active' : ''); const b=document.createElement('button'); b.className='page-link'; b.textContent=t; b.disabled=dis; b.onclick = ()=>{ if(!dis && p!==page){ page=p; load(); } }; li.appendChild(b); return li; }
+    function item(t,p,dis,act){
+      const li=document.createElement('li'); li.className = dis ? 'disabled' : (act ? 'active' : '');
+      const b=document.createElement('button'); b.className='page-link'; b.textContent=t; b.disabled=dis;
+      b.onclick = ()=>{ if(!dis && p!==page){ page=p; load(); } };
+      li.appendChild(b); return li;
+    }
     ul.appendChild(item('«', Math.max(1,page-1), page===1, false));
     let start=Math.max(1,page-1), end=Math.min(pages, start+3); if(end-start<3) start=Math.max(1,end-3);
     for(let i=start;i<=end;i++) ul.appendChild(item(String(i), i, false, i===page));
     ul.appendChild(item('»', Math.min(pages, page+1), page===pages, false));
   }
 
+  // Robust initFilters: map inputs using data-col/name or th.dataset; ignore checkboxes; add debounce + Enter
   function initFilters(){
-    const table = document.getElementById(DOM.table); if(!table) return;
-    const thead = table.querySelector('thead'); if(!thead) return;
+    const table = document.getElementById(DOM.table);
+    if(!table) { console.warn('[polinizacion] tabla no encontrada:', DOM.table); return; }
+    const thead = table.querySelector('thead');
+    if(!thead) { console.warn('[polinizacion] thead no encontrado'); return; }
+
     const inputs = Array.from(thead.querySelectorAll('input, select, textarea'));
+    if(!inputs.length) { console.warn('[polinizacion] no se encontraron inputs en thead'); return; }
+
     inputs.forEach(inp=>{
+      // ignore checkboxes (selection column)
       if(inp.type && inp.type.toLowerCase() === 'checkbox') return;
+
+      // determine column name
       let col = (inp.dataset && inp.dataset.col) ? inp.dataset.col : (inp.name || '');
-      if(!col){ const th = inp.closest('th'); if(th) col = (th.dataset && (th.dataset.col || th.dataset.field)) || ''; }
-      if(!col) return;
+      if(!col){
+        const th = inp.closest('th');
+        if(th){
+          col = (th.dataset && (th.dataset.col || th.dataset.field)) ? (th.dataset.col || th.dataset.field) : '';
+          if(!col){
+            // try matching header text -> COLUMNAS
+            const headerText = (th.innerText || th.textContent || '').trim();
+            const key = headerText.replace(/\s+/g,' ').trim().toLowerCase();
+            if(key){
+              const found = COLUMNAS.find(c=> c.toLowerCase().includes(key) || key.includes(c.toLowerCase()));
+              if(found) col = found;
+            }
+          }
+        }
+      }
+
+      if(!col) {
+        // nothing mapped, skip
+        console.debug('[polinizacion] input ignored (no col found):', inp);
+        return;
+      }
+
+      // store mapping
       inp.dataset._col = col;
-      const v = (inp.value == null) ? '' : String(inp.value); if(v.trim() !== '') filters[col] = v;
-      const handlerDeb = debounce(function(evt){ filters[col] = evt.target.value || ''; page = 1; load(); }, FILTER_DEBOUNCE_MS);
-      function handlerKey(e){ if(e.key === 'Enter'){ e.preventDefault(); filters[col] = e.target.value || ''; page = 1; load(); } }
-      inp.addEventListener('input', handlerDeb); inp.addEventListener('change', handlerDeb); inp.addEventListener('keydown', handlerKey);
+
+      // initialize filter from existing value
+      const v = (inp.value == null) ? '' : String(inp.value);
+      if(v.trim() !== '') filters[col] = v;
+
+      // Debounced handler
+      const handlerDeb = debounce(function(evt){
+        const val = (evt.target.value == null) ? '' : String(evt.target.value);
+        filters[col] = val;
+        page = 1;
+        console.debug('[polinizacion] aplicar filtro (debounce):', col, val);
+        load();
+      }, FILTER_DEBOUNCE_MS);
+
+      // Immediate on Enter
+      function handlerKey(e){
+        if(e.key === 'Enter'){
+          e.preventDefault();
+          const val = (e.target.value == null) ? '' : String(e.target.value);
+          filters[col] = val;
+          page = 1;
+          console.debug('[polinizacion] aplicar filtro (Enter):', col, val);
+          load();
+        }
+      }
+
+      inp.removeEventListener('input', handlerDeb);
+      inp.addEventListener('input', handlerDeb);
+      inp.removeEventListener('change', handlerDeb);
+      inp.addEventListener('change', handlerDeb);
+      inp.removeEventListener('keydown', handlerKey);
+      inp.addEventListener('keydown', handlerKey);
     });
+
+    console.debug('[polinizacion] filtros inicializados. columnas mapeadas:', Object.keys(filters).length ? Object.keys(filters) : 'none');
   }
 
   async function load(){
-    try{ const res = await fetchData(); data = res.datos || []; total = res.total || data.length; render(); }catch(e){ console.warn('[polinizacion] error cargar', e); }
+    try{
+      const res = await fetchData();
+      data = res.datos || []; total = res.total || data.length;
+      render();
+
+      // after render, sync thead inputs with filters (so UI reflects current filter state)
+      const table = document.getElementById(DOM.table);
+      if(table){
+        const thead = table.querySelector('thead');
+        if(thead){
+          Array.from(thead.querySelectorAll('input, select, textarea')).forEach(inp=>{
+            const col = inp.dataset && inp.dataset._col ? inp.dataset._col : (inp.dataset && inp.dataset.col ? inp.dataset.col : (inp.name || ''));
+            if(col && filters[col] !== undefined){
+              const cur = filters[col] == null ? '' : String(filters[col]);
+              if(inp.value !== cur) inp.value = cur;
+            }
+          });
+        }
+      }
+    }catch(e){
+      console.warn('[polinizacion] error cargar', e);
+    }
   }
 
   function init(){
     document.getElementById(DOM.form)?.addEventListener('submit', save);
-    document.getElementById(DOM.clearBtn)?.addEventListener('click', ()=>{ filters={}; page=1; const table = document.getElementById(DOM.table); if(table){ const thead = table.querySelector('thead'); if(thead) thead.querySelectorAll('input, select, textarea').forEach(i=> i.value = ''); } load(); });
+    document.getElementById(DOM.clearBtn)?.addEventListener('click', ()=>{
+      filters={}; page=1;
+      const table = document.getElementById(DOM.table);
+      if(table){
+        const thead = table.querySelector('thead');
+        if(thead) thead.querySelectorAll('input, select, textarea').forEach(i=> i.value = '');
+      }
+      load();
+    });
     document.getElementById(DOM.limitSelect)?.addEventListener('change', e=>{ pageSize = parseInt(e.target.value,10) || 25; page = 1; load(); });
-    document.getElementById(DOM.selectAll)?.addEventListener('change', e=>{ document.querySelectorAll(`#${DOM.tbody} .row-check`).forEach(ch=>ch.checked = e.target.checked); });
-    document.querySelectorAll(`#${DOM.table} thead .icon-sort`).forEach(icon=>{ icon.addEventListener('click', ()=>{ if(sortCol===icon.dataset.col) sortAsc = !sortAsc; else { sortCol = icon.dataset.col; sortAsc = true; } page = 1; load(); }); });
+    document.getElementById(DOM.selectAll)?.addEventListener('change', e=>{
+      document.querySelectorAll(`#${DOM.tbody} .row-check`).forEach(ch=>ch.checked = e.target.checked);
+    });
+    document.querySelectorAll(`#${DOM.table} thead .icon-sort`).forEach(icon=>{
+      icon.addEventListener('click', ()=>{ if(sortCol===icon.dataset.col) sortAsc = !sortAsc; else { sortCol = icon.dataset.col; sortAsc = true; } page = 1; load(); });
+    });
     document.getElementById(DOM.exportBtn)?.addEventListener('click', e=>{ e.stopPropagation(); showExportMenu(); });
-    initFilters(); load();
+
+    // init filters and load data
+    initFilters();
+    load();
   }
 
   document.addEventListener('DOMContentLoaded', init);
+
 })();
