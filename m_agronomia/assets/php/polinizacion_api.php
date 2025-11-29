@@ -145,7 +145,7 @@ try {
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
         if(!$id) respond(['success'=>false,'error'=>'id_invalid'],400);
         $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-        $st=$pg->prepare("UPDATE polinizacion SET observaciones='inactivo' WHERE polinizacion_id=?");
+        $st=$pg->prepare("UPDATE polinizacion SET error_registro='inactivo' WHERE polinizacion_id=?");
         $st->execute([$id]);
         $success = $st->rowCount() > 0;
         respond(['success'=>$success,'action'=>'inactivar','id'=>$id,'estado'=>'inactivo']);
