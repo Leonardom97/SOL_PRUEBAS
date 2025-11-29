@@ -91,7 +91,7 @@ try {
             'labores_diarias_id','fecha_actividad','hora','responsable','colaborador','tipo_labor','labor',
             'contratista','plantacion','finca','siembra','lote','parcela','linea','palma','linea_entrada',
             'linea_salida','unidad','unidad_medida','cant_unidad','herramienta','maquina','horometro_inicial',
-            'horometro_final','hora_inicio','hora_final','cant_colaborador','labor_especifica','error_registro'
+            'horometro_final','hora_inicio','hora_final','cant_colaborador','labor_especifica','error_registro','supervision','check'
         ];
         $id=$body['labores_diarias_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
