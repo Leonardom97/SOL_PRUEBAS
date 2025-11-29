@@ -100,13 +100,13 @@
       COLUMNAS.forEach(col=>{
         const td = document.createElement('td');
         if(col==='supervision'){ td.dataset.estado = est; td.innerHTML = icono(est); }
-        else if(col==='observaciones'){
-          const inact = (row.observaciones||'').toLowerCase() === 'inactivo';
-          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' : (row.observaciones ?? '');
+        else if(col==='error_registro'){
+          const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
+          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' : (row.error_registro ?? '');
         } else td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
-      const fecha=row[DATE_COL]||'', inactivo=(row.observaciones||'').toLowerCase()==='inactivo';
+      const fecha=row[DATE_COL]||'', inactivo=(row.error_registro||'').toLowerCase()==='inactivo';
       let edit='', lock='';
       if(inactivo) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>';
       else if(corte && fecha){
