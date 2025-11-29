@@ -115,6 +115,9 @@ try {
         $exists=(bool)$stC->fetchColumn();
 
         if($exists){
+            if(empty($updatePairs)){
+                respond(['success'=>true,'message'=>'guardado correctamente']);
+            }
             $sql="UPDATE plagas SET ".implode(', ',$updatePairs)." WHERE plagas_id = ?";
             $valsToExecute = array_merge($updateVals, [$id]);
             $ok = $pg->prepare($sql)->execute($valsToExecute);

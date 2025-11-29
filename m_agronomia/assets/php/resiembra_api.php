@@ -138,14 +138,36 @@ try {
     }
 
     if ($action==='inactivar'){
-        $pg = getMain();
         $id=$body['resiembra_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
         if(!$id) respond(['success'=>false,'error'=>'id_invalid'],400);
-        $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-        $st=$pg->prepare("UPDATE resiembra SET error_registro='inactivo' WHERE resiembra_id=?");
-        $st->execute([$id]);
-        $success = $st->rowCount() > 0;
+
+        $updatedMain = 0;
+        $updatedTemp = 0;
+
+        // Update MAIN
+        try {
+            $pgMain = getMain();
+            $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $st=$pgMain->prepare("UPDATE resiembra SET error_registro='inactivo' WHERE resiembra_id=?");
+            $st->execute([$id]);
+            $updatedMain = $st->rowCount();
+        } catch(Throwable $e){
+            $updatedMain = 0;
+        }
+
+        // Update TEMP
+        try {
+            $pgTemp = getTemporal();
+            $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $stTemp=$pgTemp->prepare("UPDATE resiembra SET error_registro='inactivo' WHERE resiembra_id=?");
+            $stTemp->execute([$id]);
+            $updatedTemp = $stTemp->rowCount();
+        } catch(Throwable $e){
+            $updatedTemp = 0;
+        }
+
+        $success = ($updatedMain + $updatedTemp) > 0;
         respond(['success'=>$success,'action'=>'inactivar','id'=>$id,'estado'=>'inactivo']);
     }
 
