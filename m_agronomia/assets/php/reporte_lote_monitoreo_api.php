@@ -225,10 +225,12 @@ try {
         $updatedTemp = 0;
         $deletedTemp = 0;
 
+        // Get database connections
+        $pgMain = getMain();
+        $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+
         // 1) intentar actualizar MAIN
         try {
-            $pgMain = getMain();
-            $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
             $stMain = $pgMain->prepare("UPDATE public.reporte_lote_monitoreo SET supervision='aprobado', \"check\"=1 WHERE reporte_lote_monitoreo_id=:id");
             $stMain->execute(['id'=>$id]);
             $updatedMain = $stMain->rowCount();
