@@ -646,6 +646,13 @@ body[data-role*="aux_agronomico"]:not([data-role*="administrador"]):not([data-ro
   display: none !important;
 }
 
+/* Ocultar botones de edición y eliminación para Asist_Agronómico (solo lectura) */
+body[data-role*="Asist_Agronómico"] .btn-editar,
+body[data-role*="Asist_Agronómico"] .btn-inactivar,
+body[data-role*="Asist_Agronómico"] .btn-aprobar,
+body[data-role*="Asist_Agronómico"] .btn-rechazar {
+  display: none !important;
+}
 
 /* ...otros estilos previos... */
 
