@@ -1,0 +1,2 @@
+[03-Dec-2025 14:57:55 Europe/Berlin] Error creating role: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «adm_roles_pkey»
+DETAIL:  Ya existe la llave (id)=(22).
