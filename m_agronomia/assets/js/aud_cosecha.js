@@ -27,7 +27,7 @@
     'finca','lote','parcela','linea','palma','contratista','codigo','colaborador','tipo_labor',
     'racimos_optimos','racimos_verdes','racimos_sobremaduro','racimos_enfermos','racimos_pedunculo_largo',
     'palmas_hojas_mal_encalladas','palmas_hojas_picadas','racimo_sin_cosechar','corte_estrella',
-    'palmas_sin_alistar','pepas_frescas_plato','pepas_frescas_fuera_plato','nuevo_colaborador','error_registro','supervision'
+    'palmas_sin_alistar','pepas_frescas_plato','pepas_frescas_fuera_plato','nuevo_colaborador','supervision'
   ];
   const API='assets/php/aud_cosecha_api.php';
   const ID_KEY='aud_cosecha_id';
@@ -72,10 +72,7 @@
       COLUMNAS.forEach(col=>{
         const td = document.createElement('td');
         if(col==='supervision'){ td.dataset.estado = est; td.innerHTML = icono(est); }
-        else if(col==='error_registro'){
-          const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
-          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' : `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
-        } else td.textContent = row[col] ?? '';
+        else td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
       const fecha=row[DATE_COL]||'', inactivo=(row.error_registro||'').toLowerCase()==='inactivo';
@@ -86,6 +83,10 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
+      const tdErr = document.createElement('td');
+      const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
+      tdErr.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' : `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
+      tr.appendChild(tdErr);
       tbody.appendChild(tr);
     });
     bindRowEvents(); renderPagination();
