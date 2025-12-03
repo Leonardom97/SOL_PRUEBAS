@@ -26,7 +26,7 @@
     'aud_vagones_id','hora','responsable','fecha_actividad','plantacion','contratista_vagon',
     'tipo','numero_remision','racimos_verdes_vagon','racimos_sobremaduro_vagon','racimos_enfermos_vagon',
     'racimos_tusas_vagon','racimos_pedunculo_largo_vagon','total_racimos','racimos_auditados',
-    'tipo_1','tipo_2','tipo_3','tipo_4','error_registro','supervision'
+    'tipo_1','tipo_2','tipo_3','tipo_4','supervision'
   ];
   const API='assets/php/aud_vagones_api.php';
   const ID_KEY='aud_vagones_id';
@@ -71,10 +71,7 @@
       COLUMNAS.forEach(col=>{
         const td = document.createElement('td');
         if(col==='supervision'){ td.dataset.estado = est; td.innerHTML = icono(est); }
-        else if(col==='error_registro'){
-          const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
-          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' : `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
-        } else td.textContent = row[col] ?? '';
+        else td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
       const fecha=row[DATE_COL]||'', inactivo=(row.error_registro||'').toLowerCase()==='inactivo';
@@ -85,6 +82,10 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
+      const tdErr = document.createElement('td');
+      const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
+      tdErr.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' : `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
+      tr.appendChild(tdErr);
       tbody.appendChild(tr);
     });
     bindRowEvents(); renderPagination();

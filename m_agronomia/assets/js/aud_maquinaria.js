@@ -38,7 +38,7 @@
     'aud_maquinaria_id','fecha','hora','id','responsable','labor_especifica',
     'fecha_actividad','plantacion','siembra','finca','lote','parcela',
     'tipo_labor','linea_entrada','linea_salida','calificacion','observacion',
-    'tipo_auditoria','error_registro','supervision'
+    'tipo_auditoria','supervision'
   ];
 
   const API = 'assets/php/aud_maquinaria_api.php';
@@ -107,11 +107,7 @@
       COLUMNAS.forEach(col=>{
         const td = document.createElement('td');
         if(col === 'supervision'){ td.dataset.estado = est; td.innerHTML = icono(est); }
-        else if(col === 'error_registro'){
-          const inact = (row.error_registro || '').toLowerCase() === 'inactivo';
-          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' :
-            `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
-        } else td.textContent = row[col] ?? '';
+        else td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
 
@@ -129,6 +125,11 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
+      const tdErr = document.createElement('td');
+      const inact = (row.error_registro || '').toLowerCase() === 'inactivo';
+      tdErr.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' :
+        `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
+      tr.appendChild(tdErr);
       tbody.appendChild(tr);
     });
     bindRowEvents(); renderPagination();

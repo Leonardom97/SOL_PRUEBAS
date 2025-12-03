@@ -30,7 +30,7 @@
     'ct_polinizacion_flores_id','fecha','hora','responsable','colaborador','auditoria','plantacion',
     'finca','siembra','lote','parcela','linea_entrada','linea_salida','calificacion','verificacion',
     'validacion','flores_dobles','flores_buenas','flores_ayudadas','flores_anteriores_sin_polinizar',
-    'flores_nuevas_sin_polinizar','aplicacion_2','aplicacion_3','labor','error_registro','supervision'
+    'flores_nuevas_sin_polinizar','aplicacion_2','aplicacion_3','labor','supervision'
   ];
   const API='assets/php/ct_polinizacion_flores_api.php';
   const ID_KEY='ct_polinizacion_flores_id';
@@ -74,11 +74,7 @@
       tr.innerHTML = `<td><input type="checkbox" class="row-check" data-index="${i}"></td>`;
       COLUMNAS.forEach(col=>{
         const td = document.createElement('td');
-        if(col==='supervision'){ td.dataset.estado = est; td.innerHTML = icono(est); }
-        else if(col==='error_registro'){
-          const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
-          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' : `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
-        } else td.textContent = row[col] ?? '';
+        if(col==='supervision'){ td.dataset.estado = est; td.innerHTML = icono(est); } else td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
       const fecha=row[DATE_COL]||'', inactivo=(row.error_registro||'').toLowerCase()==='inactivo';
@@ -89,6 +85,11 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
+      const tdErr = document.createElement('td');
+      const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
+      tdErr.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' : `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
+      tr.appendChild(tdErr);
+
       tbody.appendChild(tr);
     });
     bindRowEvents(); renderPagination();
@@ -157,7 +158,7 @@
   }
 
   function buildXLSX(rows,name){
-    const cols = COLUMNAS.filter(c=>!['error_registro','supervision'].includes(c));
+    const cols = COLUMNAS.filter(c=>!['supervision'].includes(c));
     const head = cols.map(c=>c.toUpperCase());
     const body = rows.map(r=>cols.map(c=>r[c]??''));
     const ws = XLSX.utils.aoa_to_sheet([head, ...body]);

@@ -34,7 +34,7 @@
     modal:'modal-editar'
   };
     const COLUMNAS=[
-    'compactacion_id','fecha','hora','colaborador','plantacion','finca','siembra','lote','parcela','linea','palma','ubicacion','presion','profundidad','error_registro','supervision'
+    'compactacion_id','fecha','hora','colaborador','plantacion','finca','siembra','lote','parcela','linea','palma','ubicacion','presion','profundidad','supervision'
   ];
   const API='assets/php/compactacion_api.php';
   const ID_KEY='compactacion_id';
@@ -96,11 +96,7 @@
       COLUMNAS.forEach(col=>{
         const td = document.createElement('td');
         if(col==='supervision'){ td.dataset.estado = est; td.innerHTML = icono(est); }
-        else if(col==='error_registro'){
-          const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
-          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' :
-            `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
-        } else td.textContent = row[col] ?? '';
+        else td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
       const fecha=row[DATE_COL]||'', inactivo=(row.error_registro||'').toLowerCase()==='inactivo';
@@ -116,6 +112,11 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
+      const tdErr = document.createElement('td');
+      const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
+      tdErr.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' :
+        `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
+      tr.appendChild(tdErr);
       tbody.appendChild(tr);
     });
     bindRowEvents(); renderPagination();
