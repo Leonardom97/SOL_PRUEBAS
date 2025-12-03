@@ -56,6 +56,10 @@ try {
         require_once __DIR__ . '/require_admin.php';
         require_admin_only();
     }
+    if (in_array($action,['actualizar','inactivar'],true)) {
+        require_once __DIR__ . '/require_admin.php';
+        require_edit_permission();
+    }
 
     if ($action === 'conexion') {
         $pg = getMain();
