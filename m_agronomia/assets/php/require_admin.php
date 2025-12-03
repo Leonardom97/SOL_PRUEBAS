@@ -57,13 +57,14 @@ function require_admin(): void {
              in_array('administrator', $roles, true) ||
              in_array('supervisor_agronomico', $roles, true);
   $isAux = false;
+  $isAsistAgronomico = in_array('asist_agronómico', $roles, true);
   foreach ($roles as $r) { if (strpos($r, 'aux') !== false) { $isAux = true; break; } }
-  if (!($isAdmin || $isAux)) {
+  if (!($isAdmin || $isAux || $isAsistAgronomico)) {
     http_response_code(403);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
       'success' => false,
-      'error'   => 'Acceso denegado. Se requiere rol administrador, supervisor agronómico o auxiliar.',
+      'error'   => 'Acceso denegado. Se requiere rol administrador, supervisor agronómico, auxiliar o asistente agronómico.',
       'roles_detectados' => $roles
     ]);
     exit;
@@ -82,6 +83,21 @@ function require_admin_only(): void {
     echo json_encode([
       'success' => false,
       'error'   => 'Acceso denegado. Sólo el rol administrador o supervisor agronómico puede realizar esta acción.',
+      'roles_detectados' => $roles
+    ]);
+    exit;
+  }
+}
+
+function require_edit_permission(): void {
+  $roles = collect_roles();
+  // Asist_Agronómico can only view, not edit
+  if (in_array('asist_agronómico', $roles, true)) {
+    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+      'success' => false,
+      'error'   => 'Acceso denegado. El rol Asist_Agronómico no tiene permisos de edición.',
       'roles_detectados' => $roles
     ]);
     exit;

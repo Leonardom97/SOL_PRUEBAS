@@ -74,8 +74,11 @@
         tr.appendChild(td);
       });
       const fecha=row[DATE_COL]||'', inactivo=(row.error_registro||'').toLowerCase()==='inactivo';
+      const rol=(document.body.getAttribute('data-role')||'').toLowerCase();
+      const isAsistAgronomico=/asist_agronómico/i.test(rol);
       let edit='', lock='';
       if(inactivo) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>';
+      else if(isAsistAgronomico) { /* No edit button for Asist_Agronómico */ }
       else if(corte && fecha){ if(fecha < corte) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>'; else edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; }
       else { edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`; lock = '<button class="md-btn md-btn-icon" disabled title="Sin fecha corte"><i class="fa fa-question-circle"></i></button>'; }
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
