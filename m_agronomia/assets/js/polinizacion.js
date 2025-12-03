@@ -38,7 +38,7 @@
     'labor','linea_entrada','linea_salida','hora_entrada','hora_salida','polen_g','talco_g',
     'poliniza_6_g','ana_98_g','acadian_cc','cosmoagua_g','agua_cc','cosmoflux','stimplex_cc',
     'oleorganic_cc','cosmo_oil_cc','etanol_cc','flores_dobles','flores_buenas','flores_ayudadas',
-    'aplicacion_2','aplicacion_3','observaciones','error_registro','supervision'
+    'aplicacion_2','aplicacion_3','observaciones','supervision'
   ];
   const API='assets/php/polinizacion_api.php';
   const ID_KEY='polinizacion_id';
@@ -114,12 +114,6 @@
             td.textContent = obs;
           }
         }
-        else if(col==='error_registro'){
-          // keep the error_registro column responsible for showing Inactivo badge / Inactivar button
-          const inact = (((row.error_registro||'') + '|' + (row.observaciones||'')).toLowerCase()).includes('inactivo');
-          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' :
-            `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
-        }
         else td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
@@ -137,6 +131,11 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
+      const tdErr = document.createElement('td');
+      const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
+      tdErr.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' : `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
+      tr.appendChild(tdErr);
+
       tbody.appendChild(tr);
     });
     bindRowEvents(); renderPagination();
