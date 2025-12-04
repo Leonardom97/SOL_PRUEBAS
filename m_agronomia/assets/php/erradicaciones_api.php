@@ -166,6 +166,19 @@ try {
         respond(['success'=>$success,'action'=>'inactivar','id'=>$id,'estado'=>'inactivo']);
     }
 
+    // --- ACTIVAR: quita flag error_registro en MAIN (pone NULL) ---
+    if ($action === 'activar') {
+        $pg = getMain();
+        $id = $body['erradicaciones_id'] ?? null;
+        if((!$id || trim($id)==='') && isset($body['id'])) $id = $body['id'];
+        if(!$id) respond(['success'=>false,'error'=>'id_invalid'],400);
+        $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+        $st = $pg->prepare("UPDATE erradicaciones SET error_registro = NULL WHERE erradicaciones_id = :id");
+        $st->execute(['id'=>$id]);
+        $success = $st->rowCount() > 0;
+        respond(['success'=>$success,'action'=>'activar','id'=>$id,'estado'=>'activo']);
+    }
+
     if ($action === 'rechazar') {
         if($_SERVER['REQUEST_METHOD'] !== 'POST'){
             respond(['success'=>false,'error'=>'method_not_allowed','allowed'=>'POST'],405);
