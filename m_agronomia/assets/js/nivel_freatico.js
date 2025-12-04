@@ -201,6 +201,45 @@
 
   }
 
+
+  // Toggle error_registro state: if switch is checked => activate, else => inactivate
+  async function toggleErrorRegistro(id, prevWasActive, switchElement){
+    // prevWasActive indicates whether the record WAS active before the change
+    // desired new state is based on switchElement.checked
+    const desiredActive = !!switchElement.checked;
+    const action = desiredActive ? ACTIONS.activate : ACTIONS.inactivate;
+    const prompt = desiredActive ? '¿Activar registro?' : '¿Inactivar registro?';
+    if(!confirm(prompt)){
+      // user cancelled; revert switch to previous state
+      switchElement.checked = !!prevWasActive;
+      return;
+    }
+
+    try{
+      const r = await fetch(`${API}?action=${action}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({[ID_KEY]:id})});
+      const j = await r.json();
+      if(j.success){
+        console.log('[nivel_freatico] toggle error_registro ok', {id, action, result:j});
+        // reload data to reflect badge and other UI changes
+        await load();
+      } else {
+        const err = j.error || 'Fallo acción';
+        const norm = (err===null||err===undefined)?'':String(err).trim().toLowerCase();
+        if(norm==='exception' || norm==='id_required'){ console.warn('[nivel_freatico] error suprimido:', err); }
+        else { alert(err); }
+        // revert UI on failure
+        switchElement.checked = !!prevWasActive;
+      }
+    }catch(err){
+      const msg = err?.message || 'Error al cambiar estado';
+      const norm = (msg===null||msg===undefined)?'':String(msg).trim().toLowerCase();
+      if(norm==='exception' || norm==='id_required'){ console.warn('[nivel_freatico] error suprimido:', msg); }
+      else { alert(msg); }
+      // revert UI on error
+      switchElement.checked = !!prevWasActive;
+    }
+  }
+
   async function inactivar(id){
     if(!confirm('¿Inactivar registro?')) return;
     try{
@@ -221,6 +260,27 @@
     }
   }
 
+
+  async function activar(id){
+    // kept for backwards compatibility but not directly bound now
+    if(!confirm('¿Activar registro?')) return;
+    try{
+      const r = await fetch(`${API}?action=${ACTIONS.activate}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({[ID_KEY]:id})});
+      const j = await r.json();
+      if(j.success){ console.log('[nivel_freatico] activar ok', {id, result:j}); load(); }
+      else {
+        const err = j.error || 'Fallo activar';
+        const norm = (err===null||err===undefined)?'':String(err).trim().toLowerCase();
+        if(norm==='exception' || norm==='id_required'){ console.warn('[nivel_freatico] error suprimido:', err); }
+        else { alert(err); }
+      }
+    }catch(err){
+      const msg = err?.message || 'Error activar';
+      const norm = (msg===null||msg===undefined)?'':String(msg).trim().toLowerCase();
+      if(norm==='exception' || norm==='id_required'){ console.warn('[nivel_freatico] error suprimido:', msg); }
+      else { alert(msg); }
+    }
+  }
   function openModal(id,readonly){
     const row = data.find(r=>r[ID_KEY]==id); if(!row) return;
     const cont = document.getElementById('campos-formulario');
