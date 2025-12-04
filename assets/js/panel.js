@@ -484,18 +484,20 @@
       fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), getPeriodPesadasChart());
     }, 60 * 1000);
 
-    // Listener para cambios en fecha de corte desde f_cortes.html (misma página/tab)
-    window.addEventListener('fechaCorteChanged', (event) => {
-      console.log('[panel.js] Fecha de corte actualizada (evento), refrescando datos...', event.detail);
-      fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), getPeriodPesadasChart());
-    });
-
     // Listener para cambios en localStorage desde otras páginas/tabs (e.g. f_cortes.html)
+    // Este es el mecanismo principal para detectar cambios en fecha_corte desde f_cortes.html
     window.addEventListener('storage', (event) => {
       if (event.key === 'fecha_corte') {
         console.log('[panel.js] Fecha de corte actualizada (storage), refrescando datos...', event.newValue);
         fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), getPeriodPesadasChart());
       }
+    });
+
+    // Listener para cambios en fecha de corte (custom event)
+    // Backup: solo funciona si ambos scripts están en la misma página
+    window.addEventListener('fechaCorteChanged', (event) => {
+      console.log('[panel.js] Fecha de corte actualizada (evento), refrescando datos...', event.detail);
+      fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), getPeriodPesadasChart());
     });
   });
 })();
