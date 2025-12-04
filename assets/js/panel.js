@@ -483,5 +483,11 @@
     setInterval(() => {
       fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), getPeriodPesadasChart());
     }, 60 * 1000);
+
+    // Listener para cambios en fecha de corte desde f_cortes.html
+    window.addEventListener('fechaCorteChanged', (event) => {
+      console.log('[panel.js] Fecha de corte actualizada, refrescando datos...', event.detail);
+      fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), getPeriodPesadasChart());
+    });
   });
 })();
