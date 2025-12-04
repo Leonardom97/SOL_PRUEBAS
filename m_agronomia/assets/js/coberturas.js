@@ -39,7 +39,7 @@
   const API='assets/php/coberturas_api.php';
   const ID_KEY='coberturas_id';
   const DATE_COL='fecha';
-  const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivar',reject:'rechazar'};
+  const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivar',reject:'rechazar', activate:'activar'};
 
   // Debounce for filter inputs
   const FILTER_DEBOUNCE_MS = 300;
@@ -111,11 +111,50 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
-      // Add error_registro column after actions
+      // New: render error_registro as a switch + badge styled via CSS (.error-reg-badge)
+
       const tdError = document.createElement('td');
-      const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
-      tdError.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' :
-        `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
+
+      const inactLower = (row.error_registro||'').toLowerCase();
+
+      const isActive = inactLower !== 'inactivo';
+
+      const switchId = 'errorSwitch' + row[ID_KEY];
+
+      tdError.innerHTML = `
+
+        <div class="form-check form-switch d-inline-block">
+
+          <input class="form-check-input error-reg-switch" 
+
+                 type="checkbox" 
+
+                 role="switch"
+
+                 id="${switchId}"
+
+                 data-id="${row[ID_KEY]}"
+
+                 ${isActive ? 'checked' : ''}
+
+                 title="${isActive ? 'Inactivar registro' : 'Activar registro'}"
+
+                 aria-label="${isActive ? 'Inactivar' : 'Activar'} registro ${row[ID_KEY]}">
+
+          <label class="form-check-label small" for="${switchId}">
+
+            <span class="error-reg-badge ${isActive ? 'active' : 'inactive'}">
+
+              ${isActive ? 'Activo' : 'Inactivo'}
+
+            </span>
+
+          </label>
+
+        </div>
+
+      `;
+
       tr.appendChild(tdError);
       tbody.appendChild(tr);
     });
@@ -123,10 +162,41 @@
   }
 
   function bindRowEvents(){
-    const t = document.getElementById(DOM.tbody); if(!t) return;
-    t.querySelectorAll('.btn-editar').forEach(b=>b.onclick = ()=>openModal(b.dataset.id, false));
-    t.querySelectorAll('.btn-ver').forEach(b=>b.onclick = ()=>openModal(b.dataset.id, true));
-    t.querySelectorAll('.btn-inactivar').forEach(b=>b.onclick = ()=>inactivar(b.dataset.id));
+
+
+  const t = document.getElementById(DOM.tbody); if(!t) return;
+
+
+  t.querySelectorAll('.btn-editar').forEach(b=>b.onclick = ()=>openModal(b.dataset.id, false));
+
+
+  t.querySelectorAll('.btn-ver').forEach(b=>b.onclick = ()=>openModal(b.dataset.id, true));
+
+
+  // bind switches
+
+
+  t.querySelectorAll('.error-reg-switch').forEach(input=>{
+
+
+    input.onchange = (e)=>{
+
+
+      const id = input.dataset.id;
+
+
+      const prevState = !input.checked; // previous state (before change)
+
+
+      toggleErrorRegistro(id, prevState, input);
+
+
+    };
+
+
+  });
+
+
   }
 
   async function inactivar(id){
