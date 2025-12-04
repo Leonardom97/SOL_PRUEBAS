@@ -1,7 +1,7 @@
 # Verificación de Acceso Completo del Rol Administrador en m_agronomia
 
-**Fecha:** 2025-12-04  
-**Análisis:** Módulo m_agronomia  
+**Date:** 2025-12-04  
+**Analysis:** Módulo m_agronomia  
 **Resultado:** ✅ **EL ROL ADMINISTRADOR YA TIENE ACCESO TOTAL**
 
 ## Resumen Ejecutivo
@@ -122,7 +122,7 @@ const isAsistAgronomico = /asist_agronómico/i.test(rol);
 if (inactivo) {
   lock = '<button disabled><i class="fa fa-lock"></i></button>';
 } else if (isAsistAgronomico) { 
-  /* ❌ No edit button for Asist_Agronómico */
+  /* ❌ No edit button for Asist_Agronomico */
 } else {
   edit = `<button class="btn-editar" data-id="${row[ID_KEY]}">
             <i class="fa fa-pen"></i>
@@ -131,7 +131,7 @@ if (inactivo) {
 ```
 
 **Resultado:** 
-- ❌ `asist_agronómico` NO ve botones de editar
+- ❌ `asist_agronomico` NO ve botones de editar
 - ✅ `administrador` SÍ ve todos los botones de editar
 - ✅ `aux_agronomico` SÍ ve todos los botones de editar
 
@@ -242,7 +242,7 @@ El rol administrador tiene acceso a las 30 secciones:
 
 ## Comparación con Otros Roles
 
-| Funcionalidad | Administrador | Aux_Agronomico | Asist_Agronómico | Supervisor_Agronomico |
+| Funcionalidad | Administrador | Aux_Agronomico | Asist_Agronomico | Supervisor_Agronomico |
 |--------------|---------------|----------------|------------------|----------------------|
 | Ver datos | ✅ | ✅ | ✅ | ✅ |
 | Editar registros | ✅ | ✅ | ❌ | ✅ |
@@ -254,7 +254,7 @@ El rol administrador tiene acceso a las 30 secciones:
 | Cambiar fecha corte | ✅ | ❌ | ❌ | ✅ |
 | Acceso a todas las tabs | ✅ | ✅ | ✅* | ✅ |
 
-*Asist_Agronómico puede ver tabs pero no editar
+*Asist_Agronomico puede ver tabs pero no editar
 
 ## Verificación de Casos Edge
 
@@ -284,7 +284,7 @@ La jerarquía de roles es:
 1. `administrador` - ✅ Máximo privilegio
 2. `supervisor_agronomico` - ✅ Equivalente a administrador
 3. `aux_agronomico` - ✅ Casi todos los permisos
-4. `asist_agronómico` - ❌ Solo lectura
+4. `asist_agronomico` - ❌ Solo lectura
 
 ## Conclusión
 
