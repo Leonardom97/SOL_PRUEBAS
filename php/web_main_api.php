@@ -74,9 +74,15 @@ function handleGet($pg) {
                     'footer_text' => '© OSM 2025',
                     'favicon_path' => 'assets/img/Sin título-2.png',
                     'login_image_path' => 'assets/img/ico.jpg',
+                    'login_image_day_path' => 'assets/img/ico.jpg',
+                    'login_image_night_path' => 'assets/img/ico.jpg',
+                    'effect_type' => 'oil',
+                    'effect_speed' => 5,
                     'primary_color' => '#772e22',
                     'is_active' => true,
-                    'theme_name' => 'Default'
+                    'theme_name' => 'Default',
+                    'custom_leaf_path' => null,
+                    'custom_snow_path' => null
                 ];
             }
             
@@ -144,8 +150,8 @@ function handlePost($pg) {
     
     $stmt = $pg->prepare("
         INSERT INTO adm_webmain 
-        (site_title, footer_text, favicon_path, login_image_path, primary_color, is_active, theme_name) 
-        VALUES (:site_title, :footer_text, :favicon_path, :login_image_path, :primary_color, :is_active, :theme_name)
+        (site_title, footer_text, favicon_path, login_image_path, login_image_day_path, login_image_night_path, effect_type, effect_speed, primary_color, is_active, theme_name) 
+        VALUES (:site_title, :footer_text, :favicon_path, :login_image_path, :login_image_day_path, :login_image_night_path, :effect_type, :effect_speed, :primary_color, :is_active, :theme_name)
         RETURNING id
     ");
     
@@ -154,9 +160,15 @@ function handlePost($pg) {
         'footer_text' => $data['footer_text'] ?? '© OSM 2025',
         'favicon_path' => $data['favicon_path'] ?? 'assets/img/Sin título-2.png',
         'login_image_path' => $data['login_image_path'] ?? 'assets/img/ico.jpg',
+        'login_image_day_path' => $data['login_image_day_path'] ?? 'assets/img/ico.jpg',
+        'login_image_night_path' => $data['login_image_night_path'] ?? 'assets/img/ico.jpg',
+        'effect_type' => $data['effect_type'] ?? 'oil',
+        'effect_speed' => $data['effect_speed'] ?? 5,
         'primary_color' => $data['primary_color'] ?? '#772e22',
         'is_active' => $data['is_active'] ?? false,
-        'theme_name' => $data['theme_name'] ?? 'Nuevo Tema'
+        'theme_name' => $data['theme_name'] ?? 'Nuevo Tema',
+        'custom_leaf_path' => $data['custom_leaf_path'] ?? null,
+        'custom_snow_path' => $data['custom_snow_path'] ?? null
     ]);
     
     $result = $stmt->fetch();
@@ -188,6 +200,10 @@ function handlePut($pg) {
             footer_text = :footer_text,
             favicon_path = :favicon_path,
             login_image_path = :login_image_path,
+            login_image_day_path = :login_image_day_path,
+            login_image_night_path = :login_image_night_path,
+            effect_type = :effect_type,
+            effect_speed = :effect_speed,
             primary_color = :primary_color,
             is_active = :is_active,
             theme_name = :theme_name,
@@ -201,6 +217,10 @@ function handlePut($pg) {
         'footer_text' => $data['footer_text'],
         'favicon_path' => $data['favicon_path'],
         'login_image_path' => $data['login_image_path'],
+        'login_image_day_path' => $data['login_image_day_path'],
+        'login_image_night_path' => $data['login_image_night_path'],
+        'effect_type' => $data['effect_type'],
+        'effect_speed' => $data['effect_speed'],
         'primary_color' => $data['primary_color'],
         'is_active' => $data['is_active'],
         'theme_name' => $data['theme_name']

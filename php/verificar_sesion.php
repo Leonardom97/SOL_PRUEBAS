@@ -130,9 +130,10 @@ try {
         $rolPrincipal = $_SESSION['rol'] ?? 'usuario';
 
         // Estandariza la estructura para el frontend: siempre enviar 'roles' como arreglo de objetos {id, nombre}
+        // FIX: Asignar ID 2 (Usuario) por defecto para que coincida con los permisos de base de datos
         $roles = [
             [
-                'id'     => 0,
+                'id'     => 2, // ID 2 corresponde al rol 'Usuario' en la BD
                 'nombre' => $rolPrincipal
             ]
         ];
@@ -140,7 +141,6 @@ try {
         // Opcional: guarda roles en sesión para consistencia
         $_SESSION['roles'] = $roles;
 
-        // Obtener información completa del colaborador
         $cedula = $_SESSION['usuario'];
         $stmtColab = $pg->prepare("
             SELECT 

@@ -1,22 +1,13 @@
-// assets/js/dashboard.js
-// Manages training dashboard and reporting interface
-
-(function() {
+(function () {
     'use strict';
 
     let dashboardData = [];
-    let filters = {
-        cargos: [],
-        sub_areas: [],
-        temas: [],
-        roles: []
-    };
+    let filters = { cargos: [], sub_areas: [], temas: [], roles: [] };
     let currentFilters = {};
     let currentPage = 1;
     let recordsPerPage = 10;
     let currentFilteredData = [];
 
-    // Load HTML components
     async function includeComponent(file, selector) {
         try {
             const res = await fetch(file, { cache: 'no-store' });
@@ -29,32 +20,65 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', async function () {
         try {
-            console.log('Dashboard initializing...');
-            
-            // Check if XLSX library is loaded
             if (typeof XLSX === 'undefined') {
                 console.error('XLSX library not loaded!');
-                showAlert('Advertencia: Biblioteca de Excel no cargada. Las exportaciones podrían no funcionar.', 'warning');
-            } else {
-                console.log('XLSX library loaded successfully');
+                showAlert('Advertencia: Biblioteca de Excel no cargada.', 'warning');
             }
-            
+
             await includeComponent('../includes/navbar.html', '#navbar');
             await includeComponent('../includes/sidebar.html', '#sidebar');
-            
             document.body.style.visibility = 'visible';
-            
+
             await loadData();
+            loadEvaluationStats();
             setupEventListeners();
-            
-            console.log('Dashboard initialized successfully');
         } catch (error) {
-            console.error('Error initializing page:', error);
-            showAlert('Error al cargar la página: ' + error.message, 'danger');
+            console.error('Error initializing:', error);
+            showAlert('Error: ' + error.message, 'danger');
         }
     });
+
+    function loadEvaluationStats() {
+        fetch('assets/php/malla_api.php?action=get_evaluation_dashboard_stats')
+            .then(res => res.json())
+            .then(resp => {
+                if (resp.success) {
+                    if (document.getElementById('cardTotalRealizadas')) document.getElementById('cardTotalRealizadas').textContent = resp.cards.realizadas;
+                    if (document.getElementById('cardTotalAsistentes')) document.getElementById('cardTotalAsistentes').textContent = resp.cards.asistentes;
+                    if (document.getElementById('cardTotalPendientes')) document.getElementById('cardTotalPendientes').textContent = resp.cards.pendientes;
+
+                    const ctx = document.getElementById('chartEvaluacionesTema');
+                    if (ctx && resp.chartData.length > 0) {
+                        const labels = resp.chartData.map(d => d.tema);
+                        const data = resp.chartData.map(d => d.total);
+
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Evaluaciones Programadas',
+                                    data: data,
+                                    backgroundColor: '#4e73df',
+                                    borderColor: '#4e73df',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                                },
+                                plugins: { legend: { display: false } }
+                            }
+                        });
+                    }
+                }
+            })
+            .catch(err => console.error('Error loading stats:', err));
+    }
 
     async function loadData() {
         try {
@@ -87,7 +111,7 @@
             } else {
                 console.error('Data loading failed:', dataResult.error);
                 const errorMsg = dataResult.error || 'Error desconocido';
-                
+
                 // Check for authentication error
                 if (errorMsg.includes('autorizado') || errorMsg.includes('sesión')) {
                     showAlert('Su sesión ha expirado. Por favor, inicie sesión nuevamente.', 'danger');
@@ -97,7 +121,7 @@
                 } else {
                     showAlert('Error al cargar datos: ' + errorMsg, 'danger');
                 }
-                
+
                 // Show empty state
                 renderTable([]);
             }
@@ -121,12 +145,12 @@
         try {
             // Get unique employees
             const uniqueEmployees = [...new Set(data.map(r => r.ac_id).filter(id => id))];
-            
+
             // Count trainings by status
             const alDiaCount = data.filter(r => r.estado === 'al_dia').length;
             const pendientesCount = data.filter(r => r.estado === 'pendiente' || r.estado === 'proximo_vencer').length;
             const vencidasCount = data.filter(r => r.estado === 'vencida').length;
-            
+
             console.log('Statistics:', {
                 uniqueEmployees: uniqueEmployees.length,
                 alDiaCount,
@@ -134,7 +158,7 @@
                 vencidasCount,
                 totalRecords: data.length
             });
-            
+
             document.getElementById('statTotalColaboradores').textContent = uniqueEmployees.length;
             document.getElementById('statCapacitados').textContent = alDiaCount;
             document.getElementById('statPendientes').textContent = pendientesCount;
@@ -149,19 +173,19 @@
             // Top cargos with pending trainings (includes pendiente, vencida, and proximo_vencer)
             const pendingData = data.filter(r => r.estado === 'pendiente' || r.estado === 'vencida' || r.estado === 'proximo_vencer');
             const cargoCount = {};
-            
+
             pendingData.forEach(r => {
                 if (r.cargo_nombre) {
                     cargoCount[r.cargo_nombre] = (cargoCount[r.cargo_nombre] || 0) + 1;
                 }
             });
-            
+
             const topCargos = Object.entries(cargoCount)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 10);
-            
+
             console.log('Top cargos with pending trainings:', topCargos);
-            
+
             const cargosContainer = document.getElementById('topCargosPendientes');
             if (topCargos.length > 0) {
                 cargosContainer.innerHTML = `
@@ -185,22 +209,22 @@
             } else {
                 cargosContainer.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-check-circle"></i> No hay capacitaciones pendientes</p>';
             }
-            
+
             // Top temas with pending trainings
             const temaCount = {};
-            
+
             pendingData.forEach(r => {
                 if (r.tema_nombre) {
                     temaCount[r.tema_nombre] = (temaCount[r.tema_nombre] || 0) + 1;
                 }
             });
-            
+
             const topTemas = Object.entries(temaCount)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 10);
-            
+
             console.log('Top temas with pending trainings:', topTemas);
-            
+
             const temasContainer = document.getElementById('topTemasPendientes');
             if (topTemas.length > 0) {
                 temasContainer.innerHTML = `
@@ -288,8 +312,8 @@
             const estado = record.estado || 'pendiente';
             let estadoBadge = '';
             let rowClass = '';
-            
-            switch(estado) {
+
+            switch (estado) {
                 case 'al_dia':
                     estadoBadge = '<span class="badge bg-success">Al Día</span>';
                     break;
@@ -309,17 +333,17 @@
             // Get situacion badge
             const situacion = `<span class="badge bg-info">${record.situacion || 'N/A'}</span>`;
 
-            const ultimaCapacitacion = record.ultima_capacitacion 
-                ? parseLocalDate(record.ultima_capacitacion).toLocaleDateString('es-CO') 
+            const ultimaCapacitacion = record.ultima_capacitacion
+                ? parseLocalDate(record.ultima_capacitacion).toLocaleDateString('es-CO')
                 : '<span class="text-muted">Sin registro</span>';
-            
-            const proximaCapacitacion = record.proxima_capacitacion 
-                ? parseLocalDate(record.proxima_capacitacion).toLocaleDateString('es-CO') 
+
+            const proximaCapacitacion = record.proxima_capacitacion
+                ? parseLocalDate(record.proxima_capacitacion).toLocaleDateString('es-CO')
                 : '<span class="text-muted">-</span>';
 
             const diasRestantes = record.dias_restantes !== null ? record.dias_restantes : '-';
             let diasDisplay = '-';
-            
+
             if (diasRestantes !== '-') {
                 const dias = parseInt(diasRestantes);
                 if (dias < 0) {
@@ -375,7 +399,7 @@
         // Calculate page numbers to show (max 7)
         let startPage = 1;
         let endPage = totalPages;
-        
+
         if (totalPages > 7) {
             if (currentPage <= 4) {
                 // Near the beginning
@@ -399,7 +423,7 @@
                     <a class="page-link" href="#" data-page="1">1</a>
                 </li>
             `;
-            
+
             // Add ellipsis if there's a gap
             if (startPage > 2) {
                 paginationHTML += `
@@ -429,7 +453,7 @@
                     </li>
                 `;
             }
-            
+
             paginationHTML += `
                 <li class="page-item">
                     <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
@@ -513,21 +537,21 @@
                 // Note: Records without ultima_capacitacion (no training yet) are excluded
                 // This is intentional as date range filtering only applies to completed trainings
                 if (!r.ultima_capacitacion) return false;
-                
+
                 const recordDate = parseLocalDate(r.ultima_capacitacion);
                 let passes = true;
-                
+
                 if (fechaDesde) {
                     const desde = parseLocalDate(fechaDesde);
                     passes = passes && recordDate >= desde;
                 }
-                
+
                 if (fechaHasta) {
                     const hasta = parseLocalDate(fechaHasta);
                     hasta.setHours(23, 59, 59, 999); // Include the entire end date
                     passes = passes && recordDate <= hasta;
                 }
-                
+
                 return passes;
             });
         }
@@ -549,7 +573,7 @@
         document.getElementById('filterRol').value = '';
         document.getElementById('filterFechaDesde').value = '';
         document.getElementById('filterFechaHasta').value = '';
-        
+
         currentPage = 1; // Reset to first page when filters are cleared
         updateStatistics(dashboardData);
         updateTopSummaries(dashboardData);
@@ -558,7 +582,7 @@
 
     function exportDetailedExcel() {
         console.log('Exporting detailed Excel...');
-        
+
         if (typeof XLSX === 'undefined') {
             console.error('XLSX library not loaded');
             alert('Error: Biblioteca de Excel no cargada. Por favor, recargue la página.');
@@ -583,11 +607,11 @@
                 'Sub Área': record.sub_area_nombre || '-',
                 'Tema': record.tema_nombre,
                 'Frecuencia (meses)': record.frecuencia_meses,
-                'Última Capacitación': record.ultima_capacitacion 
-                    ? parseLocalDate(record.ultima_capacitacion).toLocaleDateString('es-CO') 
+                'Última Capacitación': record.ultima_capacitacion
+                    ? parseLocalDate(record.ultima_capacitacion).toLocaleDateString('es-CO')
                     : '-',
-                'Próxima Capacitación': record.proxima_capacitacion 
-                    ? parseLocalDate(record.proxima_capacitacion).toLocaleDateString('es-CO') 
+                'Próxima Capacitación': record.proxima_capacitacion
+                    ? parseLocalDate(record.proxima_capacitacion).toLocaleDateString('es-CO')
                     : '-',
                 'Días Restantes': record.dias_restantes !== null ? record.dias_restantes : '-',
                 'Rol Capacitador': record.rol_capacitador_nombre
@@ -601,7 +625,7 @@
 
             const filename = `Dashboard_Capacitaciones_Detallado_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(wb, filename);
-            
+
             console.log('Excel file generated successfully');
             showAlert('Archivo Excel generado exitosamente', 'success');
         } catch (error) {
@@ -612,7 +636,7 @@
 
     function exportSummaryExcel() {
         console.log('Exporting summary Excel...');
-        
+
         if (typeof XLSX === 'undefined') {
             console.error('XLSX library not loaded');
             alert('Error: Biblioteca de Excel no cargada. Por favor, recargue la página.');
@@ -627,7 +651,7 @@
         try {
             // Create summary by employee
             const employeeSummary = {};
-            
+
             dashboardData.forEach(record => {
                 const key = record.ac_id;
                 if (!employeeSummary[key]) {
@@ -643,7 +667,7 @@
                         vencida: 0
                     };
                 }
-                
+
                 employeeSummary[key][record.estado] = (employeeSummary[key][record.estado] || 0) + 1;
             });
 
@@ -668,7 +692,7 @@
 
             const filename = `Dashboard_Capacitaciones_Resumen_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(wb, filename);
-            
+
             console.log('Summary Excel file generated successfully');
             showAlert('Archivo Excel de resumen generado exitosamente', 'success');
         } catch (error) {
@@ -678,7 +702,7 @@
     }
 
     function getEstadoText(estado) {
-        switch(estado) {
+        switch (estado) {
             case 'al_dia': return 'Al Día';
             case 'proximo_vencer': return 'Próximo a Vencer';
             case 'vencida': return 'Vencida';
@@ -691,12 +715,12 @@
         document.getElementById('btnExportSummaryExcel').addEventListener('click', exportSummaryExcel);
         document.getElementById('btnApplyFilters').addEventListener('click', applyFilters);
         document.getElementById('btnClearFilters').addEventListener('click', clearFilters);
-        document.getElementById('recordsPerPage').addEventListener('change', function(e) {
+        document.getElementById('recordsPerPage').addEventListener('change', function (e) {
             changeRecordsPerPage(e.target.value);
         });
-        
+
         // Event delegation for pagination links
-        document.getElementById('tablePagination').addEventListener('click', function(e) {
+        document.getElementById('tablePagination').addEventListener('click', function (e) {
             e.preventDefault();
             const link = e.target.closest('.page-link');
             if (link && link.hasAttribute('data-page')) {
@@ -715,7 +739,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
         document.body.appendChild(alert);
-        
+
         setTimeout(() => alert.remove(), 5000);
     }
 })();

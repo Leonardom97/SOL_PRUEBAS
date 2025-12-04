@@ -7,9 +7,96 @@
     <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/fonts/fontawesome-all.min.css">
     <link rel="stylesheet" href="../assets/css/bs-theme-overrides.css">
-    <style>body { visibility: hidden; }</style>
+    <style>
+        body { visibility: hidden; }
+        
+        /* Mobile responsive styles for programacion table */
+        @media (max-width: 991px) {
+            #tableProgramaciones {
+                font-size: 0.8rem;
+            }
+            
+            #tableProgramaciones th,
+            #tableProgramaciones td {
+                padding: 0.4rem 0.3rem;
+            }
+            
+            /* Hide some columns on tablets */
+            #tableProgramaciones th:nth-child(3),
+            #tableProgramaciones td:nth-child(3),
+            #tableProgramaciones th:nth-child(8),
+            #tableProgramaciones td:nth-child(8) {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            /* Card-based view for mobile */
+            #tableProgramaciones thead {
+                display: none;
+            }
+            
+            #tableProgramaciones tbody tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                padding: 0.75rem;
+                background: #fff;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            #tableProgramaciones tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding: 0.35rem 0;
+                border: none;
+            }
+            
+            #tableProgramaciones tbody td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #6c757d;
+                font-size: 0.75rem;
+                flex: 0 0 35%;
+                text-align: left;
+            }
+            
+            /* Show all columns on mobile */
+            #tableProgramaciones th,
+            #tableProgramaciones td {
+                display: flex !important;
+            }
+            
+            /* Actions column */
+            #tableProgramaciones tbody td:last-child {
+                justify-content: flex-end;
+                padding-top: 0.5rem;
+                margin-top: 0.5rem;
+                border-top: 1px solid #eee;
+            }
+            
+            #tableProgramaciones tbody td:last-child:before {
+                display: none;
+            }
+        }
+        
+        /* Improve badge readability */
+        #tableProgramaciones .badge {
+            font-size: 0.7rem;
+            padding: 0.35em 0.5em;
+        }
+        
+        /* Filter section mobile improvements */
+        @media (max-width: 576px) {
+            .card-body .row.g-3 > div {
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
 </head>
-<body id="page-top" data-role="Administrador,Capacitador,Aux_Capacitador,Capacitador_SIE,Capacitador_GH,Capacitador_TI,Capacitador_MT,Capacitador_ADM,Capacitador_IND,Capacitador_AGR">
+<body id="page-top">
     <script src="../assets/js/auth_guard.js"></script>
 
     <div id="wrapper">

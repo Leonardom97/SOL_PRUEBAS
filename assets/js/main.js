@@ -1,15 +1,15 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    // Cargar navbar y sidebar
-    await includeComponent("includes/navbar.html", "#navbar");
-    await includeComponent("includes/sidebar.html", "#sidebar");
+    // Cargar navbar y sidebar using absolute paths
+    await includeComponent("/includes/navbar.html", "#navbar");
+    await includeComponent("/includes/sidebar.html", "#sidebar");
 
     // Verificar sesión
     try {
-        const res = await fetch("php/verificar_sesion.php");
+        const res = await fetch("/php/verificar_sesion.php");
         const data = await res.json();
 
         if (!data.success) {
-            window.location.href = "index.html";
+            window.location.href = "/index.html";
             return;
         }
 
@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Note: Logout button is now handled by navbar.js
     } catch (error) {
         console.error("Error al verificar sesión:", error);
-        window.location.href = "index.html";
+        window.location.href = "/index.html";
     }
 });
 

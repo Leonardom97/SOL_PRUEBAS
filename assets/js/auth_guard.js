@@ -1,214 +1,195 @@
 /**
- * Auth Guard - Sistema de Autenticación y Permisos MEJORADO
+ * Auth Guard - Sistema de Autenticación y Permisos OPTIMIZADO
  * 
- * Este script maneja:
- * 1. Verificación de sesión del usuario
- * 2. Permisos basados en data-role (compatibilidad hacia atrás)
- * 3. Permisos basados en páginas/recursos (nuevo sistema)
- * 4. Redirección automática si no tiene acceso
+ * Características:
+ * 1. Ocultamiento inmediato del contenido (anti-flash)
+ * 2. Caché de permisos en sessionStorage (anti-delay)
+ * 3. Verificación local de acceso
  */
 
 (function () {
   'use strict';
-  
-  const DEBUG = false; // Set to true only for debugging permission issues
-  
-  // Normaliza roles: minúsculas, quita acentos, espacios -> guion_bajo
-  const normalize = (str) =>
-    String(str || '')
-      .trim()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/\s+/g, '_');
-  
-  document.addEventListener('DOMContentLoaded', async () => {
 
-    try {
-      // Verificar sesión
-      const response = await fetch('/php/verificar_sesion.php');
-      const data = await response.json();
-      
-      if (DEBUG) console.log('[auth_guard] verificar_sesion:', data);
+  // ==========================================
+  // 1. ANTI-FLASH: Ocultar contenido inmediatamente
+  // ==========================================
+  // Inyectar estilo para ocultar body antes de que se renderice nada
+  const style = document.createElement('style');
+  style.id = 'auth-guard-style';
+  style.innerHTML = 'body { visibility: hidden !important; opacity: 0 !important; transition: opacity 0.3s ease; }';
+  document.head.appendChild(style);
 
-      if (!data.success) {
-        if (DEBUG) console.warn('[auth_guard] sin sesión => /index.html');
-        window.location.href = '/index.html';
-        return;
-      }
+  const DEBUG = false;
+  const log = window.Logger || {
+    debug: DEBUG ? console.log.bind(console) : () => { },
+    warn: console.warn.bind(console),
+    error: console.error.bind(console)
+  };
 
-      // Construir array de roles del usuario
-      const roleArray = Array.isArray(data.roles) && data.roles.length > 0
-        ? data.roles.map(r => r.nombre)
-        : [data.rol || 'usuario'];
+  // Normaliza strings
+  const normalize = (str) => String(str || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_');
 
-      const userRoles = roleArray.map(normalize);
-      if (DEBUG) console.log('[auth_guard] userRoles:', userRoles);
-
-      // Guardar roles en sessionStorage para uso posterior
-      sessionStorage.setItem('userRoles', JSON.stringify(userRoles));
-      sessionStorage.setItem('userData', JSON.stringify(data));
-
-      // ===================================
-      // 1. CONTROL DE ACCESO A LA PÁGINA
-      // ===================================
-      const currentPath = window.location.pathname;
-      if (DEBUG) console.log('[auth_guard] Current page path:', currentPath);
-      
-      // Verificar si el usuario es administrador
-      const isAdmin = userRoles.includes('administrador');
-      
-      // Verificar permiso a nivel de página usando el nuevo sistema
-      const hasPageAccess = await checkPageAccess(currentPath, userRoles, isAdmin);
-      
-      if (!hasPageAccess) {
-        if (DEBUG) console.warn('[auth_guard] acceso denegado a página:', currentPath, '=> checking data-role fallback');
-        
-        // Si no tiene acceso, verificar si es por data-role en body (compatibilidad)
-        const pageRolesAttr = document.body.getAttribute('data-role');
-        if (DEBUG) console.log('[auth_guard] data-role attribute:', pageRolesAttr);
-        
-        if (pageRolesAttr) {
-          const allowed = pageRolesAttr.split(',').map(r => normalize(r));
-          const accessGrantedByDataRole = userRoles.some(role => allowed.includes(role));
-          
-          if (DEBUG) console.log('[auth_guard] data-role check result:', accessGrantedByDataRole);
-          
-          if (!accessGrantedByDataRole) {
-            if (DEBUG) console.warn('[auth_guard] Access denied by both systems, redirecting to /panel.html');
-            window.location.href = '/panel.html';
-            return;
-          } else {
-            if (DEBUG) console.log('[auth_guard] Access granted by data-role fallback');
-          }
-        } else {
-          // No tiene data-role en body, usar nuevo sistema
-          if (DEBUG) console.warn('[auth_guard] No data-role found and database denied, redirecting to /panel.html');
-          window.location.href = '/panel.html';
-          return;
-        }
-      } else {
-        if (DEBUG) console.log('[auth_guard] Access granted by database permissions');
-      }
-
-      // ===================================
-      // 2. CONTROL DE ELEMENTOS VISIBLES
-      // ===================================
-      // Ocultar elementos basados en data-role (compatibilidad hacia atrás)
-      document.querySelectorAll('[data-role]').forEach(el => {
-        const requiredRoles = el.getAttribute('data-role')
-          .split(',')
-          .map(r => normalize(r));
-        const hasPermission = userRoles.some(role => requiredRoles.includes(role));
-        if (!hasPermission) {
-          el.style.display = 'none';
-        }
-      });
-
-      // ===================================
-      // 3. MOSTRAR PÁGINA
-      // ===================================
-      document.body.style.visibility = 'visible';
-      
-    } catch (error) {
-      console.error('[auth_guard] error verificar_sesion:', error);
-      window.location.href = '/index.html';
-    }
-  });
+  // Páginas públicas
+  const PUBLIC_PAGES = ['/panel.html', '/', '/index.html'];
 
   /**
-   * Verificar si el usuario tiene acceso a una página específica
-   * @param {string} pagePath - Ruta de la página actual
-   * @param {Array} userRoles - Roles del usuario
-   * @param {boolean} isAdmin - Si el usuario es administrador
-   * @returns {Promise<boolean>}
+   * Mostrar el contenido de la página
    */
-  async function checkPageAccess(pagePath, userRoles, isAdmin) {
-    if (DEBUG) console.log('[auth_guard] Checking access for page:', pagePath, 'Roles:', userRoles, 'IsAdmin:', isAdmin);
-    
-    // Páginas de perfil siempre accesibles para usuarios autenticados
-    const userProfilePages = ['/Usuarios.html'];
-    if (userProfilePages.includes(pagePath)) {
-      if (DEBUG) console.log('[auth_guard] Access granted (user profile page)');
-      return true;
-    }
-    
-    // Administradores tienen acceso especial a páginas administrativas
-    if (isAdmin) {
-      // NOTA: Esta lista también existe en php/permissions_api.php
-      // Mantener ambas listas sincronizadas al agregar/remover páginas administrativas
-      const adminPaths = [
-        '/includes/roles.html',      // Gestión de roles
-        '/includes/web_main.html',   // Configuración web
-        '/sesiones.html',             // Gestión de sesiones
-        '/m_admin/',                  // Módulo administrativo
-        '/Usuarios.html'              // Gestión de usuarios (también accesible por check anterior)
-      ];
-      
-      // Si la ruta coincide con alguna página administrativa, permitir acceso
-      for (const adminPath of adminPaths) {
-        if (pagePath === adminPath || pagePath.startsWith(adminPath)) {
-          if (DEBUG) console.log('[auth_guard] Acceso de administrador permitido a:', pagePath);
-          return true;
-        }
-      }
-    }
-    
-    try {
-      // Verificar si el usuario tiene permiso usando el sistema de base de datos
-      const url = `/php/permissions_api.php?check_access=1&page=${encodeURIComponent(pagePath)}`;
-      if (DEBUG) console.log('[auth_guard] Fetching permissions from:', url);
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        // En caso de error HTTP, denegar acceso (fail-secure)
-        console.warn('[auth_guard] HTTP error checking access:', response.status);
-        return false;
-      }
-      
-      const data = await response.json();
-      if (DEBUG) console.log('[auth_guard] Permission check response:', data);
-      
-      if (data.success) {
-        if (DEBUG) console.log('[auth_guard] Access result:', data.has_access ? 'GRANTED' : 'DENIED');
-        return data.has_access;
-      }
-      
-      // Si hay error en la respuesta, denegar acceso (fail-secure)
-      console.warn('[auth_guard] Error in response:', data.message);
-      return false;
-      
-    } catch (error) {
-      console.error('[auth_guard] exception checking page access:', error);
-      // En caso de excepción, denegar acceso (fail-secure)
-      return false;
+  function showContent() {
+    const styleEl = document.getElementById('auth-guard-style');
+    if (styleEl) {
+      // Usar requestAnimationFrame para asegurar que el navegador ha procesado los cambios del DOM (ej. ocultar sidebar items)
+      requestAnimationFrame(() => {
+        document.body.style.visibility = 'visible';
+        document.body.style.opacity = '1';
+        // Remover el estilo después de la transición para no interferir
+        setTimeout(() => styleEl.remove(), 350);
+      });
+    } else {
+      document.body.style.visibility = 'visible';
     }
   }
 
   /**
-   * Función global para verificar permisos en runtime
-   * Útil para verificaciones dinámicas desde otros scripts
+   * Inicializar Auth Guard
    */
-  window.hasPagePermission = async function(pagePath) {
-    const userRoles = JSON.parse(sessionStorage.getItem('userRoles') || '[]');
-    const isAdmin = userRoles.includes(normalize('administrador'));
-    return await checkPageAccess(pagePath, userRoles, isAdmin);
-  };
+  async function init() {
+    try {
+      // 1. Verificar Sesión Básica
+      // Intentar obtener datos de sessionStorage primero para velocidad
+      let userData = JSON.parse(sessionStorage.getItem('userData'));
+      let userPermissions = JSON.parse(sessionStorage.getItem('userPermissions'));
+
+      // Si no hay datos en caché, o forzamos recarga, consultar al servidor
+      if (!userData || !userPermissions) {
+        log.debug('[auth_guard] No cache found, fetching from server...');
+
+        // Fetch paralelo para velocidad
+        const [sessionRes, permRes] = await Promise.all([
+          fetch('/php/verificar_sesion.php'),
+          fetch('/php/permissions_api.php?my_permissions=1')
+        ]);
+
+        const sessionData = await sessionRes.json();
+
+        if (!sessionData.success) {
+          log.warn('[auth_guard] Session invalid, redirecting...');
+          window.location.href = '/index.html';
+          return;
+        }
+
+        const permData = await permRes.json();
+
+        userData = sessionData;
+        userPermissions = permData; // { is_admin: bool, permissions: [], roles: [] }
+
+        // Guardar en caché
+        sessionStorage.setItem('userData', JSON.stringify(userData));
+        sessionStorage.setItem('userPermissions', JSON.stringify(userPermissions));
+      }
+
+      // Normalizar roles
+      const userRoles = (userPermissions.roles || []).map(normalize);
+      const isAdmin = userPermissions.is_admin;
+
+      log.debug('[auth_guard] User loaded:', { roles: userRoles, isAdmin });
+
+      // Notificar a otros scripts (sidebar.js)
+      window.currentUserRoles = userRoles;
+      window.currentUserPermissions = userPermissions;
+      document.dispatchEvent(new CustomEvent('auth_checked', {
+        detail: { userData, userPermissions }
+      }));
+
+      // 2. Verificar Acceso a la Página Actual
+      const currentPath = window.location.pathname;
+
+      if (!PUBLIC_PAGES.includes(currentPath)) {
+        const hasAccess = checkLocalAccess(currentPath, userPermissions);
+
+        if (!hasAccess) {
+          log.warn('[auth_guard] Access denied to:', currentPath);
+          // Redirección inmediata
+          window.location.replace('/panel.html');
+          return; // Detener ejecución, no mostrar contenido
+        }
+      }
+
+      // 3. Filtrar Elementos UI (data-role)
+      // Esto debe hacerse ANTES de mostrar el contenido
+      filterUiElements(userRoles, isAdmin);
+
+      // 4. Mostrar Contenido
+      showContent();
+
+    } catch (error) {
+      console.error('[auth_guard] Critical error:', error);
+      // En caso de error crítico, redirigir al login por seguridad
+      window.location.href = '/index.html';
+    }
+  }
 
   /**
-   * Función global para obtener datos del usuario actual
+   * Verificar acceso localmente usando los permisos cacheados
    */
-  window.getCurrentUser = function() {
+  function checkLocalAccess(path, permissionsData) {
+    if (permissionsData.is_admin) return true;
+
+    // Páginas de perfil siempre permitidas
+    if (path === '/Usuarios.html' || path.includes('mis_evaluaciones.html') || path.includes('realizar_evaluacion.html')) return true;
+
+    // Normalizar path actual (quitar query params)
+    const cleanPath = path.split('?')[0];
+
+    // Buscar coincidencia en permisos
+    // Los permisos vienen como resource_path
+    const allowedPaths = (permissionsData.permissions || []).map(p => p.resource_path);
+
+    // 1. Coincidencia exacta
+    if (allowedPaths.includes(cleanPath)) return true;
+
+    // 2. Coincidencia por módulo (si el permiso es de tipo módulo)
+    // Esto requiere que el backend devuelva resource_type, o inferirlo
+    const moduleMatch = (permissionsData.permissions || []).some(p => {
+      return p.resource_type === 'module' && cleanPath.startsWith(p.resource_path);
+    });
+    if (moduleMatch) return true;
+
+    return false;
+  }
+
+  /**
+   * Filtrar elementos del DOM basados en data-role
+   */
+  function filterUiElements(userRoles, isAdmin) {
+    if (isAdmin) return; // Admin ve todo
+
+    document.querySelectorAll('[data-role]').forEach(el => {
+      const requiredRoles = el.getAttribute('data-role').split(',').map(normalize);
+      const hasPermission = userRoles.some(role => requiredRoles.includes(role));
+
+      if (!hasPermission) {
+        el.remove(); // Remover del DOM es más seguro que ocultar
+      }
+    });
+  }
+
+  // Ejecutar al cargar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // Exponer funciones globales
+  window.hasRole = (role) => {
+    const perms = JSON.parse(sessionStorage.getItem('userPermissions') || '{}');
+    if (perms.is_admin) return true;
+    return (perms.roles || []).map(normalize).includes(normalize(role));
+  };
+
+  window.getCurrentUser = () => {
     return JSON.parse(sessionStorage.getItem('userData') || '{}');
-  };
-
-  /**
-   * Función global para verificar si tiene un rol específico
-   */
-  window.hasRole = function(roleName) {
-    const userRoles = JSON.parse(sessionStorage.getItem('userRoles') || '[]');
-    return userRoles.includes(normalize(roleName));
   };
 
 })();

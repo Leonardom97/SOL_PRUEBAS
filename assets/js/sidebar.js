@@ -1,4 +1,12 @@
 (function () {
+  // Sistema de logging - usar Logger si está disponible
+  const log = window.Logger || {
+    debug: console.log.bind(console),
+    info: console.info.bind(console),
+    warn: console.warn.bind(console),
+    error: console.error.bind(console)
+  };
+
   function isSM() { return window.innerWidth < 992; }
 
   function showSidebar() {
@@ -14,7 +22,11 @@
   function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
     if (!sidebar) return;
-    if (getComputedStyle(sidebar).display === 'none') {
+
+    // Si no tiene display inline, asumimos block (visible)
+    const display = sidebar.style.display || getComputedStyle(sidebar).display;
+
+    if (display === 'none') {
       showSidebar();
     } else {
       hideSidebar();
@@ -24,9 +36,12 @@
   function setInitialSidebar() {
     const sidebar = document.querySelector('.sidebar');
     if (!sidebar) return;
+
     if (isSM()) {
+      // En móvil: ocultar por defecto
       hideSidebar();
     } else {
+      // En escritorio: mostrar por defecto (comportamiento nativo)
       sidebar.style.display = 'block';
     }
   }
@@ -40,139 +55,96 @@
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/\s+/g, '_');
 
-  // Pages that are always accessible (public)
-  const PUBLIC_PAGES = ['/panel.html', '/', '/index.html'];
-
-  /**
-   * Verifica si el usuario tiene permiso para acceder a una página usando el sistema de base de datos
-   * @param {string} pagePath - Ruta de la página a verificar
-   * @returns {Promise<boolean>}
-   */
-  async function checkPagePermission(pagePath) {
-    try {
-      const url = `/php/permissions_api.php?check_access=1&page=${encodeURIComponent(pagePath)}`;
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        console.error(`[sidebar] HTTP error checking permission for ${pagePath}: ${response.status}`);
-        return false;
-      }
-      
-      const data = await response.json();
-      return data.success && data.has_access;
-    } catch (error) {
-      console.error(`[sidebar] Error checking page permission for ${pagePath}:`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Verifica y muestra solo los menús del sidebar permitidos por rol
-   * MEJORADO: Ahora usa el sistema de permisos de base de datos además de data-role
-   */
   async function filtrarSidebarPorRol() {
     try {
-      const res = await fetch('/php/verificar_sesion.php');
-      const data = await res.json();
-      if (!data.success) return;
+      // Obtener permisos de la caché (auth_guard ya los debió haber cargado)
+      const userPermissions = JSON.parse(sessionStorage.getItem('userPermissions'));
 
-      const rolesUsuario = Array.isArray(data.roles) && data.roles.length > 0
-        ? data.roles.map(r => normalize(r.nombre))
-        : [normalize(data.rol || 'usuario')];
+      if (!userPermissions) {
+        // Si no hay caché, esperar evento auth_checked
+        document.addEventListener('auth_checked', () => filtrarSidebarPorRol());
+        return;
+      }
 
-      // Verificar si el usuario es administrador
-      const isAdmin = rolesUsuario.includes('administrador');
+      const isAdmin = userPermissions.is_admin;
+      const userRoles = (userPermissions.roles || []).map(normalize);
 
-      // Obtener todos los elementos con data-role o enlaces en el sidebar
+      // If admin, show everything (skip filtering)
+      if (isAdmin) {
+        return;
+      }
+
+      // Paso 1: Filtrar por data-role (compatibilidad)
       const elementosConRol = document.querySelectorAll('[data-role]');
-      const enlacesSidebar = document.querySelectorAll('#accordionSidebar a[href]');
-
-      // Paso 1: Filtrar por data-role (compatibilidad hacia atrás)
       for (const elemento of elementosConRol) {
-        // Verificar que el atributo data-role existe
-        if (!elemento.dataset.role) {
-          continue;
-        }
-        
         const rolesPermitidos = elemento.dataset.role
           .split(',')
           .map(r => normalize(r));
-        const tieneAccesoPorRol = rolesUsuario.some(rol => rolesPermitidos.includes(rol));
-        
+        const tieneAccesoPorRol = userRoles.some(rol => rolesPermitidos.includes(rol));
+
         if (!tieneAccesoPorRol) {
-          elemento.remove();
+          elemento.remove(); // Remover es mejor que ocultar
         }
       }
 
-      // Paso 2: Verificar permisos de base de datos para los enlaces individuales
-      for (const enlace of enlacesSidebar) {
-        // Saltar enlaces sin href válido o que ya fueron eliminados
-        if (!enlace.href || enlace.href === '#' || !enlace.parentNode) {
-          continue;
+      // Limpieza final: Ocultar dropdowns vacíos
+      document.querySelectorAll('.nav-item.dropdown').forEach(dropdown => {
+        const visibleChildren = Array.from(dropdown.querySelectorAll('.dropdown-item'))
+          .filter(item => item.style.display !== 'none' && item.offsetParent !== null); // Check visibility
+
+        // Si todos los hijos fueron removidos o están ocultos
+        if (dropdown.querySelectorAll('.dropdown-item').length === 0) {
+          dropdown.style.display = 'none';
         }
+      });
 
-        try {
-          // Extraer la ruta del enlace
-          const url = new URL(enlace.href);
-          const pagePath = url.pathname;
-
-          // No verificar páginas públicas (siempre accesibles)
-          if (PUBLIC_PAGES.includes(pagePath)) {
-            continue;
-          }
-
-          // Los administradores pueden ver todos los enlaces
-          if (isAdmin) {
-            continue;
-          }
-
-          // Verificar permiso en la base de datos
-          const tienePermiso = await checkPagePermission(pagePath);
-          
-          if (!tienePermiso) {
-            // Remover el enlace si no tiene permiso
-            enlace.remove();
-            
-            // Si es un item de dropdown, verificar si el dropdown padre quedó vacío
-            const dropdownMenu = enlace.closest('.dropdown-menu');
-            if (dropdownMenu) {
-              // Verificar enlaces que están realmente en el DOM
-              const enlacesRestantes = Array.from(dropdownMenu.querySelectorAll('a[href]'))
-                .filter(link => link.parentNode !== null);
-              // Si no quedan enlaces en el dropdown, remover el dropdown completo
-              if (enlacesRestantes.length === 0) {
-                const dropdownParent = dropdownMenu.closest('.nav-item.dropdown');
-                if (dropdownParent) {
-                  dropdownParent.remove();
-                }
-              }
-            }
-          }
-        } catch (error) {
-          // En caso de error de red/API, mantener el enlace (fail-open para evitar bloquear accesos válidos)
-          // pero registrar el error para auditoría de seguridad
-          console.error('[sidebar] Error verifying link:', enlace.href, error);
-          console.warn('[sidebar] SECURITY: Permission check failed, allowing access by default. Manual review recommended.');
-        }
-      }
     } catch (error) {
-      console.error('[sidebar] Error verifying roles for sidebar:', error);
+      console.error('Error en filtrarSidebarPorRol:', error);
     }
   }
 
-  window.addEventListener('resize', setInitialSidebar);
+  // Inicialización
+  document.addEventListener('DOMContentLoaded', () => {
+    // Intentar inicializar inmediatamente por si el contenido ya está
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+      setInitialSidebar();
+      filtrarSidebarPorRol();
+    } else {
+      // Si no está, esperar a que se inyecte (MutationObserver)
+      const container = document.getElementById('sidebar') || document.body;
 
-  document.addEventListener('DOMContentLoaded', function () {
-    setInitialSidebar();
+      const observer = new MutationObserver((mutations, obs) => {
+        const sidebarAdded = document.querySelector('.sidebar');
+        if (sidebarAdded) {
+          setInitialSidebar();
+          filtrarSidebarPorRol();
+          obs.disconnect(); // Dejar de observar una vez encontrado
+        }
+      });
 
+      observer.observe(container, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    // Toggle button logic (delegado)
     document.body.addEventListener('click', function (e) {
       const btn = e.target.closest('#sidebarToggleTop');
-      if (btn && isSM()) {
+      if (btn) {
         toggleSidebar();
         e.preventDefault();
       }
     });
 
-    filtrarSidebarPorRol();
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      if (isSM()) {
+        hideSidebar();
+      } else {
+        showSidebar();
+      }
+    });
   });
 })();

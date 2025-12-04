@@ -7,87 +7,11 @@
 	<link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" href="assets/fonts/fontawesome-all.min.css">
 	<link rel="stylesheet" href="assets/css/bs-theme-overrides.css">
-	<style>
-		body { visibility: hidden; }
-		
-		/* Training modal table styling */
-		#allTrainingsTable {
-			font-size: 0.85rem;
-		}
-		
-		#allTrainingsTable thead th {
-			font-size: 0.8rem;
-			font-weight: 600;
-			white-space: nowrap;
-			vertical-align: middle;
-			text-align: center;
-			padding: 0.5rem 0.3rem;
-			background-color: #f8f9fa;
-			position: sticky;
-			top: 0;
-			z-index: 10;
-		}
-		
-		#allTrainingsTable tbody td {
-			vertical-align: middle;
-			padding: 0.4rem 0.3rem;
-			text-align: center;
-		}
-		
-		#allTrainingsTable .sortable {
-			cursor: pointer;
-			user-select: none;
-		}
-		
-		#allTrainingsTable .sortable:hover {
-			background-color: #e9ecef;
-		}
-		
-		#allTrainingsTable .sortable i {
-			margin-left: 4px;
-			font-size: 0.7rem;
-		}
-		
-		/* Session modal table styling */
-		#allSessionsTable {
-			font-size: 0.85rem;
-		}
-		
-		#allSessionsTable thead th {
-			font-size: 0.8rem;
-			font-weight: 600;
-			white-space: nowrap;
-			vertical-align: middle;
-			text-align: center;
-			padding: 0.5rem 0.3rem;
-			background-color: #f8f9fa;
-			position: sticky;
-			top: 0;
-			z-index: 10;
-		}
-		
-		#allSessionsTable tbody td {
-			vertical-align: middle;
-			padding: 0.4rem 0.3rem;
-			text-align: center;
-		}
-		
-		#allSessionsTable .sortable-session {
-			cursor: pointer;
-			user-select: none;
-		}
-		
-		#allSessionsTable .sortable-session:hover {
-			background-color: #e9ecef;
-		}
-		
-		#allSessionsTable .sortable-session i {
-			margin-left: 4px;
-			font-size: 0.7rem;
-		}
-	</style>
+	<style>body { visibility: hidden; }</style>
 </head>
 <body id="page-top">
+	<!-- Logger debe cargarse primero para que esté disponible para otros scripts -->
+	<script src="assets/js/logger.js"></script>
 	<script src="assets/js/auth_guard.js"></script>
 	<div id="wrapper" class="d-flex">
 		<!-- Sidebar dinámico -->

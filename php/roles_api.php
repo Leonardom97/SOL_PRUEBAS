@@ -5,13 +5,11 @@ require_once __DIR__ . '/security_headers.php';
 session_start();
 require_once __DIR__ . '/db_postgres.php';
 require_once __DIR__ . '/role_check.php';
+require_once __DIR__ . '/error_handler.php';
 
 // Validar que existe una sesión activa
 if (!isset($_SESSION['usuario_id'])) {
-    header('Content-Type: application/json');
-    http_response_code(401);
-    echo json_encode(['error' => 'Sesión no iniciada. Por favor inicie sesión.']);
-    exit;
+    ErrorResponse::unauthorized();
 }
 
 // Validar que el usuario es administrador
@@ -28,15 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo json_encode(['success' => true, 'roles' => $roles]);
         exit;
     } catch (PDOException $e) {
-        error_log("Error fetching roles: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error al obtener roles. Por favor intente nuevamente.']);
-        exit;
+        ErrorResponse::log('roles_api', 'Error fetching roles', $e);
+        ErrorResponse::database('Error al obtener roles.', $e->getMessage());
     } catch (Exception $e) {
-        error_log("Unexpected error fetching roles: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error inesperado. Por favor intente nuevamente.']);
-        exit;
+        ErrorResponse::log('roles_api', 'Unexpected error fetching roles', $e);
+        ErrorResponse::unknown('Error inesperado al obtener roles.', $e->getMessage());
     }
 }
 
@@ -45,31 +39,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     
     if (!$input || !isset($input['nombre']) || trim($input['nombre']) === '') {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'El nombre del rol es obligatorio.']);
-        exit;
+        ErrorResponse::validation('El nombre del rol es obligatorio.');
     }
     
     $nombre = trim($input['nombre']);
     
     // Validar longitud del nombre
     if (strlen($nombre) < 3) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'El nombre del rol debe tener al menos 3 caracteres.']);
-        exit;
+        ErrorResponse::validation('El nombre del rol debe tener al menos 3 caracteres.');
     }
     
     if (strlen($nombre) > 50) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'El nombre del rol no puede exceder 50 caracteres.']);
-        exit;
+        ErrorResponse::validation('El nombre del rol no puede exceder 50 caracteres.');
     }
     
     // Validar caracteres permitidos (letras, números, espacios, guiones bajos y guiones medios)
     if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s_-]+$/', $nombre)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'El nombre del rol contiene caracteres no permitidos. Use solo letras, números, espacios y guiones.']);
-        exit;
+        ErrorResponse::validation('El nombre del rol contiene caracteres no permitidos. Use solo letras, números, espacios y guiones.');
     }
     
     try {
@@ -80,9 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $exists = $stmt_check->fetch(PDO::FETCH_ASSOC)['count'] > 0;
         
         if ($exists) {
-            http_response_code(409);
-            echo json_encode(['success' => false, 'message' => 'Ya existe un rol con ese nombre.']);
-            exit;
+            ErrorResponse::duplicate('rol');
         }
         
         // Insertar el nuevo rol
@@ -91,23 +75,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([':nombre' => $nombre]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => true,
-            'message' => 'Rol creado exitosamente.',
-            'id' => $result['id']
-        ]);
-        exit;
+        ErrorResponse::success('Rol creado exitosamente.', ['id' => $result['id']]);
     } catch (PDOException $e) {
-        error_log("Error creating role: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error al crear rol. Por favor intente nuevamente.']);
-        exit;
+        ErrorResponse::log('roles_api', 'Error creating role', $e);
+        ErrorResponse::database('Error al crear rol.', $e->getMessage());
     } catch (Exception $e) {
-        error_log("Unexpected error creating role: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error inesperado. Por favor intente nuevamente.']);
-        exit;
+        ErrorResponse::log('roles_api', 'Unexpected error creating role', $e);
+        ErrorResponse::unknown('Error inesperado al crear rol.', $e->getMessage());
     }
 }
 
@@ -116,9 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $input = json_decode(file_get_contents('php://input'), true);
     
     if (!$input || !isset($input['id']) || !isset($input['nombre']) || trim($input['nombre']) === '') {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'ID y nombre del rol son obligatorios.']);
-        exit;
+        ErrorResponse::validation('ID y nombre del rol son obligatorios.');
     }
     
     $id = intval($input['id']);
@@ -126,36 +98,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     
     // Validar que el ID sea válido
     if ($id <= 0) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'ID de rol inválido.']);
-        exit;
+        ErrorResponse::validation('ID de rol inválido.');
     }
     
     // Prevent editing the Administrator role (ID=1)
     if ($id === 1) {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'No se puede modificar el rol de Administrador.']);
-        exit;
+        ErrorResponse::forbidden('No se puede modificar el rol de Administrador.');
     }
     
     // Validar longitud del nombre
     if (strlen($nombre) < 3) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'El nombre del rol debe tener al menos 3 caracteres.']);
-        exit;
+        ErrorResponse::validation('El nombre del rol debe tener al menos 3 caracteres.');
     }
     
     if (strlen($nombre) > 50) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'El nombre del rol no puede exceder 50 caracteres.']);
-        exit;
+        ErrorResponse::validation('El nombre del rol no puede exceder 50 caracteres.');
     }
     
     // Validar caracteres permitidos
     if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s_-]+$/', $nombre)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'El nombre del rol contiene caracteres no permitidos. Use solo letras, números, espacios y guiones.']);
-        exit;
+        ErrorResponse::validation('El nombre del rol contiene caracteres no permitidos. Use solo letras, números, espacios y guiones.');
     }
     
     try {
@@ -164,9 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
         $stmt_exists = $pg->prepare($sql_exists);
         $stmt_exists->execute([':id' => $id]);
         if ($stmt_exists->fetch(PDO::FETCH_ASSOC)['count'] == 0) {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'El rol especificado no existe.']);
-            exit;
+            ErrorResponse::notFound('rol');
         }
         
         // Verificar si otro rol ya usa ese nombre
@@ -176,9 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
         $exists = $stmt_check->fetch(PDO::FETCH_ASSOC)['count'] > 0;
         
         if ($exists) {
-            http_response_code(409);
-            echo json_encode(['success' => false, 'message' => 'Ya existe otro rol con ese nombre.']);
-            exit;
+            ErrorResponse::duplicate('rol');
         }
         
         // Actualizar el rol
@@ -186,19 +144,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
         $stmt = $pg->prepare($sql);
         $stmt->execute([':nombre' => $nombre, ':id' => $id]);
         
-        header('Content-Type: application/json');
-        echo json_encode(['success' => true, 'message' => 'Rol actualizado exitosamente.']);
-        exit;
+        ErrorResponse::success('Rol actualizado exitosamente.');
     } catch (PDOException $e) {
-        error_log("Error updating role: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error al actualizar rol. Por favor intente nuevamente.']);
-        exit;
+        ErrorResponse::log('roles_api', 'Error updating role', $e);
+        ErrorResponse::database('Error al actualizar rol.', $e->getMessage());
     } catch (Exception $e) {
-        error_log("Unexpected error updating role: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error inesperado. Por favor intente nuevamente.']);
-        exit;
+        ErrorResponse::log('roles_api', 'Unexpected error updating role', $e);
+        ErrorResponse::unknown('Error inesperado al actualizar rol.', $e->getMessage());
     }
 }
 
@@ -207,9 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
     $input = json_decode(file_get_contents('php://input'), true);
     
     if (!$input || !isset($input['id']) || !isset($input['estado'])) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'ID y estado son obligatorios.']);
-        exit;
+        ErrorResponse::validation('ID y estado son obligatorios.');
     }
     
     $id = intval($input['id']);
@@ -217,23 +167,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
     
     // Validar que el ID sea válido
     if ($id <= 0) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'ID de rol inválido.']);
-        exit;
+        ErrorResponse::validation('ID de rol inválido.');
     }
     
     // Prevent modifying the Administrator role status (ID=1)
     if ($id === 1) {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'No se puede modificar el estado del rol de Administrador.']);
-        exit;
+        ErrorResponse::forbidden('No se puede modificar el estado del rol de Administrador.');
     }
     
     // Validar que el estado sea válido (0 o 1)
     if ($estado !== 0 && $estado !== 1) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Estado inválido. Debe ser 0 (activo) o 1 (inactivo).']);
-        exit;
+        ErrorResponse::validation('Estado inválido. Debe ser 0 (activo) o 1 (inactivo).');
     }
     
     try {
@@ -242,28 +186,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
         $stmt_exists = $pg->prepare($sql_exists);
         $stmt_exists->execute([':id' => $id]);
         if ($stmt_exists->fetch(PDO::FETCH_ASSOC)['count'] == 0) {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'El rol especificado no existe.']);
-            exit;
+            ErrorResponse::notFound('rol');
         }
         
         $sql = "UPDATE adm_roles SET estado = :estado WHERE id = :id";
         $stmt = $pg->prepare($sql);
         $stmt->execute([':estado' => $estado, ':id' => $id]);
         
-        header('Content-Type: application/json');
-        echo json_encode(['success' => true, 'message' => 'Estado del rol actualizado exitosamente.']);
-        exit;
+        ErrorResponse::success('Estado del rol actualizado exitosamente.');
     } catch (PDOException $e) {
-        error_log("Error updating role status: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error al actualizar estado. Por favor intente nuevamente.']);
-        exit;
+        ErrorResponse::log('roles_api', 'Error updating role status', $e);
+        ErrorResponse::database('Error al actualizar estado.', $e->getMessage());
     } catch (Exception $e) {
-        error_log("Unexpected error updating role status: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error inesperado. Por favor intente nuevamente.']);
-        exit;
+        ErrorResponse::log('roles_api', 'Unexpected error updating role status', $e);
+        ErrorResponse::unknown('Error inesperado al actualizar estado.', $e->getMessage());
     }
 }
 
@@ -272,25 +208,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $input = json_decode(file_get_contents('php://input'), true);
     
     if (!$input || !isset($input['id'])) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'ID del rol es obligatorio.']);
-        exit;
+        ErrorResponse::validation('ID del rol es obligatorio.');
     }
     
     $id = intval($input['id']);
     
     // Validar que el ID sea válido
     if ($id <= 0) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'ID de rol inválido.']);
-        exit;
+        ErrorResponse::validation('ID de rol inválido.');
     }
     
     // Prevent deleting the Administrator role (ID=1)
     if ($id === 1) {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'No se puede eliminar el rol de Administrador.']);
-        exit;
+        ErrorResponse::forbidden('No se puede eliminar el rol de Administrador.');
     }
     
     try {
@@ -299,9 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         $stmt_exists = $pg->prepare($sql_exists);
         $stmt_exists->execute([':id' => $id]);
         if ($stmt_exists->fetch(PDO::FETCH_ASSOC)['count'] == 0) {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'El rol especificado no existe.']);
-            exit;
+            ErrorResponse::notFound('rol');
         }
         
         // Verificar si el rol está en uso (tiene usuarios asignados)
@@ -311,9 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         $in_use = $stmt_check->fetch(PDO::FETCH_ASSOC)['count'] > 0;
         
         if ($in_use) {
-            http_response_code(409);
-            echo json_encode(['success' => false, 'message' => 'No se puede eliminar el rol porque tiene usuarios asignados.']);
-            exit;
+            ErrorResponse::inUse('rol', 'usuarios');
         }
         
         // Iniciar transacción para asegurar atomicidad
@@ -332,27 +258,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         // Confirmar transacción
         $pg->commit();
         
-        header('Content-Type: application/json');
-        echo json_encode(['success' => true, 'message' => 'Rol eliminado exitosamente.']);
-        exit;
+        ErrorResponse::success('Rol eliminado exitosamente.');
     } catch (PDOException $e) {
         // Revertir transacción en caso de error
         if ($pg->inTransaction()) {
             $pg->rollBack();
         }
-        error_log("Error deleting role: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error al eliminar rol. Por favor intente nuevamente.']);
-        exit;
+        ErrorResponse::log('roles_api', 'Error deleting role', $e);
+        ErrorResponse::database('Error al eliminar rol.', $e->getMessage());
     } catch (Exception $e) {
         // Revertir transacción en caso de error
         if ($pg->inTransaction()) {
             $pg->rollBack();
         }
-        error_log("Unexpected error deleting role: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error inesperado. Por favor intente nuevamente.']);
-        exit;
+        ErrorResponse::log('roles_api', 'Unexpected error deleting role', $e);
+        ErrorResponse::unknown('Error inesperado al eliminar rol.', $e->getMessage());
     }
 }
 

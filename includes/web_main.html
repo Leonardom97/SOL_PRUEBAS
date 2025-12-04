@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html data-bs-theme="light" lang="es-419">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
@@ -8,49 +9,24 @@
     <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/assets/fonts/fontawesome-all.min.css">
     <link rel="stylesheet" href="/assets/css/bs-theme-overrides.css">
-    <style>
-        body { visibility: hidden; }
-        .color-preview {
-            width: 50px;
-            height: 50px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .theme-card {
-            transition: all 0.3s ease;
-        }
-        .theme-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .theme-card.active {
-            border: 3px solid var(--bs-primary);
-        }
-        .image-preview {
-            max-width: 200px;
-            max-height: 200px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-    </style>
+    <style>body { visibility: hidden; }</style>
 </head>
+
 <body id="page-top" data-role="administrador">
     <div id="wrapper">
         <div id="sidebar"></div>
         <div class="d-flex flex-column" id="content-wrapper">
             <div id="content">
                 <div id="navbar"></div>
-                
+
                 <div class="container-fluid">
                     <div class="d-sm-flex justify-content-between align-items-center mb-4">
                         <h2 class="text-primary mb-0">Configuración Web Principal</h2>
                     </div>
-                    
+
                     <!-- Alert messages -->
                     <div id="alertContainer"></div>
-                    
+
                     <!-- Current Configuration -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
@@ -59,53 +35,113 @@
                         <div class="card-body">
                             <form id="configForm">
                                 <input type="hidden" id="configId" name="id">
-                                
+
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label for="siteTitle" class="form-label fw-bold">Título del Sitio</label>
-                                        <input type="text" class="form-control" id="siteTitle" name="site_title" required maxlength="100">
+                                        <input type="text" class="form-control" id="siteTitle" name="site_title"
+                                            required maxlength="100">
                                         <small class="form-text text-muted">Aparece en la pestaña del navegador</small>
                                     </div>
-                                    
+
                                     <div class="col-md-6">
                                         <label for="footerText" class="form-label fw-bold">Texto del Footer</label>
-                                        <input type="text" class="form-control" id="footerText" name="footer_text" required maxlength="200">
-                                        <small class="form-text text-muted">Aparece en el pie de página de todas las páginas</small>
+                                        <input type="text" class="form-control" id="footerText" name="footer_text"
+                                            required maxlength="200">
+                                        <small class="form-text text-muted">Aparece en el pie de página de todas las
+                                            páginas</small>
                                     </div>
                                 </div>
-                                
+
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label for="faviconFile" class="form-label fw-bold">Icono del Sitio (Favicon)</label>
+                                        <label for="faviconFile" class="form-label fw-bold">Icono del Sitio
+                                            (Favicon)</label>
                                         <div class="input-group mb-2">
                                             <input type="file" class="form-control" id="faviconFile" accept="image/*">
                                             <button class="btn btn-primary" type="button" id="uploadFavicon">
                                                 <i class="fas fa-upload"></i> Subir
                                             </button>
                                         </div>
-                                        <input type="text" class="form-control" id="faviconPath" name="favicon_path" readonly>
+                                        <input type="text" class="form-control" id="faviconPath" name="favicon_path"
+                                            readonly>
                                         <img id="faviconPreview" class="image-preview" style="display: none;">
-                                        <small class="form-text text-muted">Icono que aparece en la pestaña del navegador</small>
+                                        <small class="form-text text-muted">Icono que aparece en la pestaña del
+                                            navegador</small>
                                     </div>
-                                    
+
                                     <div class="col-md-6">
-                                        <label for="loginImageFile" class="form-label fw-bold">Imagen de Inicio de Sesión</label>
-                                        <div class="input-group mb-2">
-                                            <input type="file" class="form-control" id="loginImageFile" accept="image/*">
-                                            <button class="btn btn-primary" type="button" id="uploadLoginImage">
-                                                <i class="fas fa-upload"></i> Subir
-                                            </button>
+                                        <label class="form-label fw-bold">Imágenes de Fondo (Día/Noche)</label>
+
+                                        <!-- Day Image -->
+                                        <div class="mb-3">
+                                            <label for="loginImageDayFile" class="form-label small">Imagen de Día (6:00
+                                                AM - 6:00 PM)</label>
+                                            <div class="input-group mb-2">
+                                                <input type="file" class="form-control form-control-sm"
+                                                    id="loginImageDayFile" accept="image/*">
+                                                <button class="btn btn-primary btn-sm" type="button"
+                                                    id="uploadLoginImageDay">
+                                                    <i class="fas fa-upload"></i> Subir
+                                                </button>
+                                            </div>
+                                            <input type="hidden" id="loginImageDayPath" name="login_image_day_path">
+                                            <img id="loginImageDayPreview" class="image-preview"
+                                                style="display: none; height: 100px;">
                                         </div>
-                                        <input type="text" class="form-control" id="loginImagePath" name="login_image_path" readonly>
-                                        <img id="loginImagePreview" class="image-preview" style="display: none;">
-                                        <small class="form-text text-muted">Imagen que aparece en la página de inicio de sesión</small>
+
+                                        <!-- Night Image -->
+                                        <div class="mb-3">
+                                            <label for="loginImageNightFile" class="form-label small">Imagen de Noche
+                                                (6:00 PM - 6:00 AM)</label>
+                                            <div class="input-group mb-2">
+                                                <input type="file" class="form-control form-control-sm"
+                                                    id="loginImageNightFile" accept="image/*">
+                                                <button class="btn btn-primary btn-sm" type="button"
+                                                    id="uploadLoginImageNight">
+                                                    <i class="fas fa-upload"></i> Subir
+                                                </button>
+                                            </div>
+                                            <input type="hidden" id="loginImageNightPath" name="login_image_night_path">
+                                            <img id="loginImageNightPreview" class="image-preview"
+                                                style="display: none; height: 100px;">
+                                        </div>
+
+                                        <!-- Legacy field for compatibility -->
+                                        <input type="hidden" id="loginImagePath" name="login_image_path">
                                     </div>
                                 </div>
-                                
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="effectType" class="form-label fw-bold">Efecto Visual</label>
+                                        <select class="form-select" id="effectType" name="effect_type">
+                                            <option value="none">Ninguno</option>
+                                            <option value="oil">Aceite (Gotas)</option>
+                                            <option value="snow">Copos de Nieve</option>
+                                            <option value="lights">Luces Navideñas</option>
+                                            <option value="rain">Lluvia</option>
+                                            <option value="leaves">Hojas de Palma</option>
+                                        </select>
+                                        <small class="form-text text-muted">Efecto animado en la pantalla de
+                                            login</small>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="effectSpeed" class="form-label fw-bold">Velocidad del Efecto</label>
+                                        <div class="d-flex align-items-center">
+                                            <input type="range" class="form-range flex-grow-1 me-2" id="effectSpeed"
+                                                name="effect_speed" min="1" max="10" step="1">
+                                            <span id="effectSpeedValue" class="badge bg-secondary">5</span>
+                                        </div>
+                                        <small class="form-text text-muted">1 = Lento, 10 = Rápido</small>
+                                    </div>
+                                </div>
+
                                 <!-- Hidden fields for color configuration (maintained but not editable by user) -->
                                 <input type="hidden" id="primaryColor" name="primary_color">
                                 <input type="hidden" id="themeName" name="theme_name">
-                                
+
                                 <div class="row">
                                     <div class="col-12">
                                         <button type="submit" class="btn btn-primary">
@@ -119,7 +155,7 @@
                             </form>
                         </div>
                     </div>
-                    
+
                     <!-- Saved Themes section - HIDDEN as per requirements -->
                     <div class="card shadow mb-4" style="display: none;">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
@@ -138,10 +174,10 @@
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
-            
+
             <footer class="bg-white sticky-footer">
                 <div class="container my-auto">
                     <div class="text-center my-auto copyright"><span>© OSM 2025</span></div>
@@ -149,7 +185,7 @@
             </footer>
         </div>
     </div>
-    
+
     <script src="/assets/js/auth_guard.js"></script>
     <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="/assets/js/sidebar.js"></script>
@@ -157,4 +193,5 @@
     <script src="/assets/js/web_main_manager.js"></script>
     <script src="/assets/js/web_config.js"></script>
 </body>
+
 </html>

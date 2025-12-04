@@ -313,6 +313,60 @@ try {
             ]);
             break;
 
+        case 'get_evaluation_dashboard_stats':
+            // 1. Chart Data: Scheduled Evaluations per Topic (Configured Evaluations)
+            $stmtChart = $pg->query("
+                SELECT t.nombre as tema, COUNT(eh.id) as total
+                FROM cap_eval_header eh
+                JOIN cap_formulario cf ON eh.id_formulario = cf.id
+                JOIN cap_tema t ON cf.id_tema = t.id
+                GROUP BY t.nombre
+                ORDER BY total DESC
+            ");
+            $chartData = $stmtChart->fetchAll(PDO::FETCH_ASSOC);
+
+            // 2. Cards Data
+            // Total Realizadas (Approved responses)
+            $stmtRealizadas = $pg->query("SELECT COUNT(*) FROM cap_eval_respuestas WHERE estado = 'aprobado'");
+            $totalRealizadas = $stmtRealizadas->fetchColumn();
+
+            // Asistentes que realizaron (Distinct users who have approved at least one)
+            $stmtAsistentes = $pg->query("SELECT COUNT(DISTINCT id_colaborador) FROM cap_eval_respuestas WHERE estado = 'aprobado'");
+            $totalAsistentesRealizaron = $stmtAsistentes->fetchColumn();
+
+            // Pendientes (Assistants assigned to a session who haven't approved it yet)
+            // Logic: Count rows in cap_formulario_asistente where no corresponding approved cap_eval_respuestas exists
+            // matching by id_formulario and (id_colaborador OR cedula)
+            $stmtPendientes = $pg->query("
+                SELECT COUNT(*)
+                FROM cap_formulario_asistente ca
+                JOIN cap_eval_header eh ON ca.id_formulario = eh.id_formulario
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM cap_eval_respuestas cer 
+                    WHERE cer.id_header = eh.id 
+                    AND cer.estado = 'aprobado'
+                    AND (
+                        cer.id_colaborador = ca.id_colaborador 
+                        OR 
+                        cer.id_colaborador IN (SELECT id FROM adm_usuarios WHERE cedula = ca.cedula)
+                        OR
+                        cer.id_colaborador IN (SELECT ac_id FROM adm_colaboradores WHERE ac_cedula = ca.cedula)
+                    )
+                )
+            ");
+            $totalPendientes = $stmtPendientes->fetchColumn();
+
+            jsonResponse([
+                'success' => true,
+                'chartData' => $chartData,
+                'cards' => [
+                    'realizadas' => $totalRealizadas,
+                    'asistentes' => $totalAsistentesRealizaron,
+                    'pendientes' => $totalPendientes
+                ]
+            ]);
+            break;
+
         default:
             jsonResponse(['success' => false, 'error' => 'Acción no válida']);
     }

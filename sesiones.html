@@ -7,13 +7,19 @@
     <title>Gestión de Sesiones - OSM</title>
     <link rel="icon" type="image/png" sizes="697x475" href="assets/img/Sin%20título-2.png">
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+    <link rel="stylesheet" href="assets/css/google-fonts.css">
     <link rel="stylesheet" href="assets/fonts/fontawesome-all.min.css">
     <link rel="stylesheet" href="assets/css/bs-theme-overrides.css">
-    <style>body { visibility: hidden; }</style>
+    <style>
+        body {
+            visibility: hidden;
+        }
+    </style>
 </head>
 
-<body id="page-top" data-role="Administrador">
+<body id="page-top">
+    <!-- Logger debe cargarse primero para que esté disponible para otros scripts -->
+    <script src="assets/js/logger.js"></script>
     <script src="assets/js/auth_guard.js"></script>
 
     <div id="wrapper">
@@ -28,17 +34,20 @@
                     <!-- Tabs for different views -->
                     <ul class="nav nav-tabs" id="sessionTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab">
+                            <button class="nav-link active" id="active-tab" data-bs-toggle="tab"
+                                data-bs-target="#active" type="button" role="tab">
                                 <i class="fas fa-users"></i> Sesiones Activas
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="attempts-tab" data-bs-toggle="tab" data-bs-target="#attempts" type="button" role="tab">
+                            <button class="nav-link" id="attempts-tab" data-bs-toggle="tab" data-bs-target="#attempts"
+                                type="button" role="tab">
                                 <i class="fas fa-shield-alt"></i> Intentos de Acceso
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                            <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history"
+                                type="button" role="tab">
                                 <i class="fas fa-history"></i> Mi Historial
                             </button>
                         </li>
@@ -90,7 +99,8 @@
                                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                                     <h6 class="text-primary m-0 fw-bold">Intentos de Acceso</h6>
                                     <div>
-                                        <select class="form-select form-select-sm d-inline-block w-auto" id="attemptFilter">
+                                        <select class="form-select form-select-sm d-inline-block w-auto"
+                                            id="attemptFilter">
                                             <option value="">Todos</option>
                                             <option value="true">Exitosos</option>
                                             <option value="false">Fallidos</option>
@@ -169,7 +179,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <footer class="bg-white sticky-footer">
                 <div class="container my-auto">
                     <div class="text-center my-auto copyright"><span>© OSM 2025</span></div>
@@ -204,4 +214,5 @@
     <script src="assets/js/navbar.js"></script>
     <script src="assets/js/web_config.js"></script>
 </body>
+
 </html>

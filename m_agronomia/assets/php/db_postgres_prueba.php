@@ -15,7 +15,7 @@ if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
 }
 
 $host = 'localhost';
-$db   = 'Prueba_agronomia';
+$db   = 'prueba_agronomia';
 $user = 'postgres';
 $pass = '12345';
 $port = '5432';

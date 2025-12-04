@@ -120,6 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Normaliza nombres a los que ya usan los scripts
       if (raw.includes('admin')) roles.add('administrador');
       if (raw.includes('aux')) roles.add('aux_agronomico'); // ajusta si tu back devuelve otro nombre
+      if (raw.includes('asist')) roles.add('Asist_agronómico'); // ajusta si tu back devuelve otro nombre
 
       // Si tu backend devuelve un array data.roles, puedes añadirlo aquí:
       if (Array.isArray(data.roles)) {
@@ -128,6 +129,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (s) roles.add(s);
           if (s.includes('admin')) roles.add('administrador');
           if (s.includes('aux')) roles.add('aux_agronomico');
+          if (s.includes('asist')) roles.add('Asist_agronómico');
         });
       }
 

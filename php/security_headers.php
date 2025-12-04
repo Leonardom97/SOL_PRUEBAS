@@ -29,9 +29,9 @@ function apply_security_headers() {
     // Content Security Policy
     // Adjust this policy based on your application needs
     $csp = "default-src 'self'; " .
-           "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " .
-           "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; " .
-           "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " .
+           "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " .
+           "style-src 'self' 'unsafe-inline'; " .
+           "font-src 'self'; " .
            "img-src 'self' data: https:; " .
            "connect-src 'self'; " .
            "frame-ancestors 'self'; " .

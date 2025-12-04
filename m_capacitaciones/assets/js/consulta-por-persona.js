@@ -47,17 +47,17 @@ function renderTablaPersona() {
   tbody.innerHTML = '';
   const filtrados = filtrarDatosPersona();
   const total = filtrados.length;
-  const inicio = (paginaPersona-1)*porPaginaPersona;
-  const fin = Math.min(inicio+porPaginaPersona, total);
+  const inicio = (paginaPersona - 1) * porPaginaPersona;
+  const fin = Math.min(inicio + porPaginaPersona, total);
 
-  for (let i=inicio; i<fin; i++) {
+  for (let i = inicio; i < fin; i++) {
     const row = filtrados[i];
     const idStr = String(row.id);
     const tr = document.createElement('tr');
     if (seleccionadosPersona.has(idStr)) tr.classList.add('selected');
-    
+
     tr.innerHTML = `
-      <td><input type="checkbox" class="selectRowPersona md-checkbox" value="${idStr}" ${seleccionadosPersona.has(idStr)?'checked':''}></td>
+      <td><input type="checkbox" class="selectRowPersona md-checkbox" value="${idStr}" ${seleccionadosPersona.has(idStr) ? 'checked' : ''}></td>
       <td>${row.id}</td>
       <td>${row.cedula || ''}</td>
       <td>${row.nombres_apellidos || ''}</td>
@@ -66,6 +66,7 @@ function renderTablaPersona() {
       <td>${row.capacitaciones_realizadas || 0}</td>
       <td>${row.capacitaciones_pendientes || 0}</td>
       <td>${row.total_esperadas || 0}</td>
+      <td>${row.evaluaciones_realizadas || 0} / ${row.evaluaciones_asignadas || 0}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -80,7 +81,7 @@ function renderPaginacionPersona(total) {
   if (!ul) return;
   ul.innerHTML = '';
   const totalPaginas = Math.max(1, Math.ceil(total / porPaginaPersona));
-  
+
   if (totalPaginas <= 1) {
     return;
   }
@@ -93,9 +94,9 @@ function renderPaginacionPersona(total) {
   prevA.href = '#';
   prevA.setAttribute('aria-label', 'Previous');
   prevA.innerHTML = '<span aria-hidden="true">&laquo;</span>';
-  prevA.onclick = function(e){
+  prevA.onclick = function (e) {
     e.preventDefault();
-    if(paginaPersona > 1) { paginaPersona--; renderTablaPersona(); }
+    if (paginaPersona > 1) { paginaPersona--; renderTablaPersona(); }
   };
   prevLi.appendChild(prevA);
   ul.appendChild(prevLi);
@@ -103,7 +104,7 @@ function renderPaginacionPersona(total) {
   // Calculate page numbers to show (max 7)
   let startPage = 1;
   let endPage = totalPaginas;
-  
+
   if (totalPaginas > 7) {
     if (paginaPersona <= 4) {
       startPage = 1;
@@ -125,14 +126,14 @@ function renderPaginacionPersona(total) {
     a.className = 'md-page-link';
     a.href = '#';
     a.textContent = '1';
-    a.onclick = function(e){
+    a.onclick = function (e) {
       e.preventDefault();
       paginaPersona = 1;
       renderTablaPersona();
     };
     li.appendChild(a);
     ul.appendChild(li);
-    
+
     // Add ellipsis if there's a gap
     if (startPage > 2) {
       const ellipsisLi = document.createElement('li');
@@ -147,14 +148,14 @@ function renderPaginacionPersona(total) {
   }
 
   // Page numbers
-  for(let i=startPage; i<=endPage; i++) {
+  for (let i = startPage; i <= endPage; i++) {
     const li = document.createElement('li');
     li.className = 'md-page-item' + (i === paginaPersona ? ' active' : '');
     const a = document.createElement('a');
     a.className = 'md-page-link';
     a.href = '#';
     a.textContent = i;
-    a.onclick = function(e){
+    a.onclick = function (e) {
       e.preventDefault();
       paginaPersona = i;
       renderTablaPersona();
@@ -176,14 +177,14 @@ function renderPaginacionPersona(total) {
       ellipsisLi.appendChild(ellipsisA);
       ul.appendChild(ellipsisLi);
     }
-    
+
     const li = document.createElement('li');
     li.className = 'md-page-item';
     const a = document.createElement('a');
     a.className = 'md-page-link';
     a.href = '#';
     a.textContent = totalPaginas;
-    a.onclick = function(e){
+    a.onclick = function (e) {
       e.preventDefault();
       paginaPersona = totalPaginas;
       renderTablaPersona();
@@ -200,9 +201,9 @@ function renderPaginacionPersona(total) {
   nextA.href = '#';
   nextA.setAttribute('aria-label', 'Next');
   nextA.innerHTML = '<span aria-hidden="true">&raquo;</span>';
-  nextA.onclick = function(e){
+  nextA.onclick = function (e) {
     e.preventDefault();
-    if(paginaPersona < totalPaginas) { paginaPersona++; renderTablaPersona(); }
+    if (paginaPersona < totalPaginas) { paginaPersona++; renderTablaPersona(); }
   };
   nextLi.appendChild(nextA);
   ul.appendChild(nextLi);
@@ -288,7 +289,7 @@ if (exportBtnPersona) {
       alert('Biblioteca XLSX no cargada');
       return;
     }
-    
+
     const dataToExport = filtrarDatosPersona().map(row => ({
       'ID': row.id,
       'Cédula': row.cedula,
@@ -297,13 +298,14 @@ if (exportBtnPersona) {
       'Sub Área': row.sub_area,
       'Realizadas': row.capacitaciones_realizadas,
       'Pendientes': row.capacitaciones_pendientes,
-      'Programadas': row.total_esperadas
+      'Programadas': row.total_esperadas,
+      'Evaluaciones': `${row.evaluaciones_realizadas || 0} / ${row.evaluaciones_asignadas || 0}`
     }));
 
     const ws = XLSX.utils.json_to_sheet(dataToExport);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Consultas por Persona');
-    
+
     const fecha = new Date().toISOString().split('T')[0];
     XLSX.writeFile(wb, `Consultas_Por_Persona_${fecha}.xlsx`);
   });

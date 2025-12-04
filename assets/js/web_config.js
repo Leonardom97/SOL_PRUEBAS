@@ -4,12 +4,12 @@
  * This script should be included in all HTML pages to apply centralized settings
  */
 
-(function() {
+(function () {
     'use strict';
-    
+
     // Cache for configuration
     let webConfig = null;
-    
+
     /**
      * Load web configuration from API
      */
@@ -17,7 +17,7 @@
         try {
             const response = await fetch('/php/web_main_api.php?action=get_active');
             const result = await response.json();
-            
+
             if (result.success && result.data) {
                 webConfig = result.data;
                 applyWebConfig(webConfig);
@@ -30,7 +30,7 @@
             applyDefaultConfig();
         }
     }
-    
+
     /**
      * Apply web configuration to the page
      */
@@ -39,31 +39,48 @@
         if (config.site_title) {
             document.title = config.site_title;
         }
-        
+
         // Update favicon
         if (config.favicon_path) {
             updateFavicon(config.favicon_path);
         }
-        
+
         // Update footer text
         if (config.footer_text) {
             updateFooterText(config.footer_text);
         }
-        
+
         // Update login image (only on login page)
-        if (config.login_image_path && document.querySelector('.bg-login-image')) {
-            updateLoginImage(config.login_image_path);
+        if ((config.login_image_day_path || config.login_image_night_path) && (document.querySelector('.login-container') || document.querySelector('.bg-login-image'))) {
+            updateLoginImage(config);
         }
-        
+
+        // Dispatch event for login effects
+        if (config.effect_type) {
+            const event = new CustomEvent('loginEffectUpdate', {
+                detail: {
+                    type: config.effect_type,
+                    speed: config.effect_speed
+                }
+            });
+            window.dispatchEvent(event);
+
+            // Also store in global for immediate access if script loads later
+            window.loginEffectConfig = {
+                type: config.effect_type,
+                speed: config.effect_speed
+            };
+        }
+
         // Update primary color
         if (config.primary_color) {
             updatePrimaryColor(config.primary_color);
         }
-        
+
         // Make body visible after applying configuration
         document.body.style.visibility = 'visible';
     }
-    
+
     /**
      * Apply default configuration
      */
@@ -79,7 +96,7 @@
         // Ensure body is visible even with defaults
         document.body.style.visibility = 'visible';
     }
-    
+
     /**
      * Update favicon
      */
@@ -87,7 +104,7 @@
         // Remove existing favicon links
         const existingLinks = document.querySelectorAll('link[rel="icon"]');
         existingLinks.forEach(link => link.remove());
-        
+
         // Add new favicon
         const link = document.createElement('link');
         link.rel = 'icon';
@@ -95,7 +112,7 @@
         link.href = getAbsolutePath(path);
         document.head.appendChild(link);
     }
-    
+
     /**
      * Update footer text
      */
@@ -109,7 +126,7 @@
             'footer .copyright',
             '.sticky-footer .copyright'
         ];
-        
+
         let updated = false;
         selectors.forEach(selector => {
             const elements = document.querySelectorAll(selector);
@@ -127,24 +144,42 @@
                 }
             });
         });
-        
+
         if (!updated) {
             console.warn('No se encontraron elementos de footer para actualizar');
         }
     }
-    
+
     /**
-     * Update login image
+     * Update login image based on time of day
      */
-    function updateLoginImage(path) {
+    function updateLoginImage(config) {
+        // Determine if it's day (6 AM - 6 PM) or night
+        const hour = new Date().getHours();
+        const isDay = hour >= 6 && hour < 18;
+
+        let path;
+        if (isDay) {
+            path = config.login_image_day_path || config.login_image_path;
+        } else {
+            path = config.login_image_night_path || config.login_image_path;
+        }
+
+        if (!path) return;
+
+        // Target body for the new full-screen background design
+        const absolutePath = getAbsolutePath(path);
+        document.body.style.background = `url('${absolutePath}') no-repeat center center fixed`;
+        document.body.style.backgroundSize = 'cover';
+
+        // Also update the old selector just in case (backward compatibility)
         const loginImageDiv = document.querySelector('.bg-login-image');
         if (loginImageDiv) {
-            const absolutePath = getAbsolutePath(path);
             loginImageDiv.style.background = `url('${absolutePath}') round`;
             loginImageDiv.style.backgroundSize = 'contain';
         }
     }
-    
+
     /**
      * Update primary color
      */
@@ -152,7 +187,7 @@
         // Calculate derived colors
         const rgb = hexToRgb(color);
         const rgbString = `${rgb.r},${rgb.g},${rgb.b}`;
-        
+
         // Create or update style element for dynamic colors
         let styleElement = document.getElementById('dynamic-theme-colors');
         if (!styleElement) {
@@ -160,11 +195,11 @@
             styleElement.id = 'dynamic-theme-colors';
             document.head.appendChild(styleElement);
         }
-        
+
         // Calculate hover and active colors (slightly darker)
         const hoverColor = adjustBrightness(color, -10);
         const activeColor = adjustBrightness(color, -20);
-        
+
         // Update CSS variables
         styleElement.textContent = `
             :root, [data-bs-theme=light] {
@@ -315,7 +350,7 @@
             }
         `;
     }
-    
+
     /**
      * Convert hex color to RGB
      */
@@ -327,7 +362,7 @@
             b: parseInt(result[3], 16)
         } : { r: 119, g: 46, b: 34 }; // Default color
     }
-    
+
     /**
      * Adjust color brightness
      */
@@ -337,14 +372,14 @@
             const adjusted = Math.round(value + (value * percent / 100));
             return Math.max(0, Math.min(255, adjusted));
         };
-        
+
         const r = adjust(rgb.r).toString(16).padStart(2, '0');
         const g = adjust(rgb.g).toString(16).padStart(2, '0');
         const b = adjust(rgb.b).toString(16).padStart(2, '0');
-        
+
         return `#${r}${g}${b}`;
     }
-    
+
     /**
      * Get absolute path for assets
      */
@@ -353,35 +388,35 @@
         if (path.startsWith('/')) {
             return path;
         }
-        
+
         // Get current page depth
         const currentPath = window.location.pathname;
         const depth = (currentPath.match(/\//g) || []).length - 1;
-        
+
         // If we're in root or path already includes ../, return as is
         if (depth === 0 || path.includes('../')) {
             return path;
         }
-        
+
         // Add ../ prefix based on depth
         const prefix = '../'.repeat(depth);
         return prefix + path;
     }
-    
+
     /**
      * Get current configuration
      */
     function getWebConfig() {
         return webConfig;
     }
-    
+
     // Expose public API
     window.WebConfig = {
         load: loadWebConfig,
         get: getWebConfig,
         apply: applyWebConfig
     };
-    
+
     // Auto-load configuration when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', loadWebConfig);

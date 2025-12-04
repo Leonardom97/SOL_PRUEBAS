@@ -452,25 +452,41 @@ async function loadTodayWeighings() {
         
         if (data.success) {
             const tbody = document.getElementById('bodyPesadas');
+            const countBadge = document.getElementById('countPesadas');
             tbody.innerHTML = '';
             
+            if (countBadge) {
+                countBadge.textContent = data.data.length;
+            }
+            
             if (data.data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="text-center">No hay pesadas registradas hoy</td></tr>';
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-4">
+                            <i class="fas fa-truck fa-2x mb-2 d-block opacity-50"></i>
+                            No hay pesadas registradas hoy
+                        </td>
+                    </tr>
+                `;
                 return;
             }
             
             data.data.forEach(pesada => {
                 const row = document.createElement('tr');
+                const estadoBadge = pesada.Estado === 'Activo' 
+                    ? '<span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Activo</span>' 
+                    : '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Cerrado</span>';
+                
                 row.innerHTML = `
-                    <td>${pesada.codigo}</td>
-                    <td>${pesada.placa}</td>
-                    <td>${pesada.conductor}</td>
-                    <td>${pesada.producto || '-'}</td>
-                    <td>${pesada.peso_bruto}</td>
-                    <td>${pesada.peso_tara}</td>
-                    <td>${pesada.peso_neto}</td>
-                    <td><span class="badge ${pesada.Estado === 'Activo' ? 'bg-warning' : 'bg-success'}">${pesada.Estado}</span></td>
-                    <td>${pesada.fecha_entrada}</td>
+                    <td class="text-center" data-label="Código">${pesada.codigo}</td>
+                    <td data-label="Placa"><strong>${pesada.placa}</strong></td>
+                    <td class="d-none d-md-table-cell" data-label="Conductor">${pesada.conductor}</td>
+                    <td class="d-none d-lg-table-cell" data-label="Producto">${pesada.producto || '-'}</td>
+                    <td class="text-end" data-label="Bruto">${pesada.peso_bruto} kg</td>
+                    <td class="text-end d-none d-md-table-cell" data-label="Tara">${pesada.peso_tara} kg</td>
+                    <td class="text-end fw-bold" data-label="Neto">${pesada.peso_neto} kg</td>
+                    <td class="text-center" data-label="Estado">${estadoBadge}</td>
+                    <td class="d-none d-lg-table-cell" data-label="Entrada"><small>${pesada.fecha_entrada}</small></td>
                 `;
                 tbody.appendChild(row);
             });

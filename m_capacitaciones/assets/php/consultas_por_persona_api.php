@@ -51,6 +51,25 @@ capacitaciones_pendientes AS (
     AND cp.activo = true
     AND fa.id IS NULL
   GROUP BY ac.ac_cedula
+),
+evaluaciones_realizadas_cte AS (
+  -- Contar evaluaciones aprobadas por colaborador
+  SELECT 
+    id_colaborador, 
+    COUNT(*) as total_aprobadas
+  FROM cap_eval_respuestas
+  WHERE estado = 'aprobado'
+  GROUP BY id_colaborador
+),
+evaluaciones_asignadas_cte AS (
+  -- Contar formularios asistidos que tienen evaluación activa
+  SELECT 
+    fa.cedula, 
+    COUNT(DISTINCT fa.id_formulario) as total_asignadas
+  FROM cap_formulario_asistente fa
+  INNER JOIN cap_eval_header eh ON fa.id_formulario = eh.id_formulario
+  WHERE eh.estado_publicacion = 1
+  GROUP BY fa.cedula
 )
 SELECT
   ac.ac_id as id,
@@ -60,13 +79,17 @@ SELECT
   ar.sub_area,
   COALESCE(cr.total_realizadas, 0) as capacitaciones_realizadas,
   COALESCE(cpe.total_pendientes, 0) as capacitaciones_pendientes,
-  COALESCE(cp.total_programadas, 0) as total_esperadas
+  COALESCE(cp.total_programadas, 0) as total_esperadas,
+  COALESCE(erc.total_aprobadas, 0) as evaluaciones_realizadas,
+  COALESCE(eac.total_asignadas, 0) as evaluaciones_asignadas
 FROM adm_colaboradores ac
 LEFT JOIN adm_cargos c ON ac.ac_id_cargo = c.id_cargo
 LEFT JOIN adm_área ar ON ac.ac_sub_area = ar.id_area
 LEFT JOIN capacitaciones_realizadas cr ON ac.ac_cedula = cr.cedula
 LEFT JOIN capacitaciones_programadas cp ON ac.ac_cedula = cp.cedula
 LEFT JOIN capacitaciones_pendientes cpe ON ac.ac_cedula = cpe.cedula
+LEFT JOIN evaluaciones_realizadas_cte erc ON ac.ac_id = erc.id_colaborador
+LEFT JOIN evaluaciones_asignadas_cte eac ON ac.ac_cedula = eac.cedula
 WHERE ac.ac_id_situación IN ('A', 'V', 'P')
 ORDER BY ac.ac_cedula
 ";

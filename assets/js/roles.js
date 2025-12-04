@@ -12,36 +12,46 @@ let currentEditingRole = null;
 const API_ROLES = '/php/roles_api.php';
 const API_PERMISSIONS = '/php/permissions_api.php';
 
+// Sistema de logging - usar Logger si está disponible, sino usar console
+const log = window.Logger || {
+    debug: () => { },  // No-op en producción si Logger no está cargado
+    info: console.info.bind(console),
+    warn: console.warn.bind(console),
+    error: console.error.bind(console)
+};
+
 /**
  * Inicialización
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadRoles();
-    
+
     // Event listeners
     document.getElementById('refreshRolesBtnAdd').addEventListener('click', addNewRole);
     document.getElementById('formEditRolPermisos').addEventListener('submit', saveRoleAndPermissions);
-    
+
     // Enter key en el input de nuevo rol
-    document.getElementById('newRoleInput').addEventListener('keypress', function(e) {
+    document.getElementById('newRoleInput').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             addNewRole();
         }
     });
-    
+
     // Botón para actualizar catálogo de recursos (se agrega dinámicamente cuando se abre el modal)
-    document.addEventListener('click', async function(e) {
+    document.addEventListener('click', async function (e) {
         if (e.target && (e.target.id === 'btnRefreshCatalog' || e.target.closest('#btnRefreshCatalog'))) {
             e.preventDefault();
             await refreshResourcesCatalog();
         }
-        
+
         // Manejar botones de seleccionar/deseleccionar todas las páginas de un módulo
-        const selectAllBtn = e.target.closest('.module-select-all');
-        if (selectAllBtn) {
-            e.preventDefault();
-            toggleModulePermissions(selectAllBtn);
+        // Checkbox change event delegation
+    });
+
+    document.addEventListener('change', function (e) {
+        if (e.target && e.target.classList.contains('module-select-all-check')) {
+            toggleModulePermissions(e.target);
         }
     });
 });
@@ -53,7 +63,7 @@ async function loadRoles() {
     try {
         const response = await fetch(API_ROLES);
         const data = await response.json();
-        
+
         if (data.success) {
             allRoles = data.roles;
             renderRolesTable();
@@ -72,20 +82,20 @@ async function loadRoles() {
 function renderRolesTable() {
     const tbody = document.querySelector('#rolesTable tbody');
     const countSpan = document.getElementById('rolesCount');
-    
+
     tbody.innerHTML = '';
-    
+
     // Filter out Administrator role (ID=1) as it should not be managed here
     const manageableRoles = allRoles.filter(role => role.id !== 1);
     countSpan.textContent = manageableRoles.length;
-    
+
     manageableRoles.forEach(role => {
         const tr = document.createElement('tr');
-        
+
         const estadoClass = role.estado === 0 ? 'success' : 'danger';
         const estadoText = role.estado === 0 ? 'Activo' : 'Inactivo';
         const isActive = role.estado === 0;
-        
+
         tr.innerHTML = `
             <td class="text-center">${role.id}</td>
             <td>${escapeHtml(role.nombre)}</td>
@@ -120,14 +130,14 @@ function renderRolesTable() {
                 </button>
             </td>
         `;
-        
+
         tbody.appendChild(tr);
-        
+
         // Add event listeners to the buttons and switch
         const editBtn = tr.querySelector('.btn-edit-role');
         const statusSwitch = tr.querySelector('.role-status-switch');
         const deleteBtn = tr.querySelector('.btn-delete-role');
-        
+
         editBtn.addEventListener('click', () => editRole(role.id));
         statusSwitch.addEventListener('change', (e) => {
             // Fetch the current role state from allRoles array (source of truth)
@@ -146,49 +156,49 @@ function renderRolesTable() {
 async function addNewRole() {
     const input = document.getElementById('newRoleInput');
     const nombre = input.value.trim();
-    
+
     if (!nombre) {
         showToast('Por favor ingrese un nombre para el rol', 'warning');
         input.focus();
         return;
     }
-    
+
     // Validar longitud mínima
     if (nombre.length < 3) {
         showToast('El nombre del rol debe tener al menos 3 caracteres', 'warning');
         input.focus();
         return;
     }
-    
+
     // Validar longitud máxima
     if (nombre.length > 50) {
         showToast('El nombre del rol no puede exceder 50 caracteres', 'warning');
         input.focus();
         return;
     }
-    
+
     // Validar caracteres permitidos
     if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s_-]+$/.test(nombre)) {
         showToast('El nombre contiene caracteres no permitidos. Use solo letras, números, espacios y guiones', 'warning');
         input.focus();
         return;
     }
-    
+
     // Deshabilitar input mientras se procesa
     const addBtn = document.getElementById('refreshRolesBtnAdd');
     input.disabled = true;
     addBtn.disabled = true;
     addBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Creando...';
-    
+
     try {
         const response = await fetch(API_ROLES, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nombre })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             showToast('Rol creado exitosamente', 'success');
             input.value = '';
@@ -217,48 +227,44 @@ async function editRole(roleId) {
         showToast('Rol no encontrado', 'error');
         return;
     }
-    
+
     currentEditingRole = role;
-    
+
     // Mostrar modal primero con indicador de carga
     const modal = new bootstrap.Modal(document.getElementById('modalEditRolPermisos'));
     modal.show();
-    
+
     // Llenar información básica del rol
     document.getElementById('modalRolId').value = role.id;
     document.getElementById('modalRolNombreInput').value = role.nombre;
-    
-    // Mostrar indicador de carga en la tabla de permisos
-    const tbody = document.querySelector('#pestanasPermisosTable tbody');
-    tbody.innerHTML = `
-        <tr>
-            <td colspan="2" class="text-center py-4">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Cargando...</span>
-                </div>
-                <p class="mt-2 mb-0 text-muted">Cargando páginas disponibles...</p>
-            </td>
-        </tr>
+
+    // Mostrar indicador de carga en el contenedor de permisos
+    const container = document.getElementById('permissionsContainer');
+    container.innerHTML = `
+        <div class="text-center py-5 w-100">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 text-muted">Cargando módulos y permisos...</p>
+        </div>
     `;
-    
+
     try {
         // Cargar recursos disponibles
         await loadAvailableResources();
-        
+
         // Cargar permisos del rol
         await loadRolePermissions(roleId);
     } catch (error) {
         console.error('Error al cargar datos del rol:', error);
         showToast('Error al cargar datos del rol. Por favor intente nuevamente.', 'error');
-        // Mostrar mensaje de error en la tabla
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="2" class="text-center text-danger py-4">
-                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-                    <p class="mb-0">Error al cargar las páginas disponibles.</p>
-                    <small>Por favor cierre este diálogo e intente nuevamente.</small>
-                </td>
-            </tr>
+        // Mostrar mensaje de error en el contenedor
+        container.innerHTML = `
+            <div class="text-center text-danger py-5 w-100">
+                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                <p class="mb-0 fw-bold">Error al cargar las páginas disponibles.</p>
+                <small>Por favor cierre este diálogo e intente nuevamente.</small>
+            </div>
         `;
     }
 }
@@ -269,19 +275,19 @@ async function editRole(roleId) {
 async function loadAvailableResources() {
     try {
         const response = await fetch(API_PERMISSIONS + '?available=1');
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             availableResources = data.modules || {};
-            renderPermissionsTable(data.modules || {});
-            
+            renderPermissionsGrid(data.modules || {});
+
             // Log información para debugging
-            console.log('[roles] Recursos cargados:', Object.keys(availableResources).length, 'módulos');
+            log.debug('[roles]', 'Recursos cargados:', Object.keys(availableResources).length, 'módulos');
         } else {
             const errorMsg = data.message || 'Error desconocido al cargar recursos disponibles';
             showToast(errorMsg, 'error');
@@ -289,8 +295,8 @@ async function loadAvailableResources() {
         }
     } catch (error) {
         console.error('Error al cargar recursos:', error);
-        const userMsg = error.message.includes('HTTP error') 
-            ? 'Error de conexión al cargar recursos. Verifique su sesión.' 
+        const userMsg = error.message.includes('HTTP error')
+            ? 'Error de conexión al cargar recursos. Verifique su sesión.'
             : 'Error al cargar recursos disponibles.';
         showToast(userMsg, 'error');
         throw error; // Re-throw para que editRole pueda manejarlo
@@ -303,25 +309,25 @@ async function loadAvailableResources() {
 async function refreshResourcesCatalog() {
     const btn = document.getElementById('btnRefreshCatalog');
     if (!btn) return;
-    
+
     const originalHtml = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Actualizando...';
-    
+
     try {
         const response = await fetch(API_PERMISSIONS + '?update_catalog=1');
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             const resourceCount = data.updated_count || 0;
             showToast(`Catálogo actualizado: ${resourceCount} recursos escaneados`, 'success');
-            console.log('[roles] Catálogo actualizado:', data);
-            
+            log.info('[roles]', 'Catálogo actualizado:', data);
+
             // Recargar recursos disponibles si estamos en un modal de edición
             if (currentEditingRole) {
                 await loadAvailableResources();
@@ -333,8 +339,8 @@ async function refreshResourcesCatalog() {
         }
     } catch (error) {
         console.error('Error al actualizar catálogo:', error);
-        const userMsg = error.message.includes('HTTP error') 
-            ? 'Error de conexión. Verifique su sesión y que sea administrador.' 
+        const userMsg = error.message.includes('HTTP error')
+            ? 'Error de conexión. Verifique su sesión y que sea administrador.'
             : 'Error al actualizar el catálogo de recursos.';
         showToast(userMsg, 'error');
     } finally {
@@ -346,138 +352,182 @@ async function refreshResourcesCatalog() {
 /**
  * Marcar/Desmarcar todas las páginas de un módulo
  */
-function toggleModulePermissions(button) {
-    const moduleName = button.getAttribute('data-module');
+/**
+ * Marcar/Desmarcar todas las páginas de un módulo
+ */
+function toggleModulePermissions(checkbox) {
+    const moduleName = checkbox.getAttribute('data-module');
     if (!moduleName) return;
-    
-    // Encontrar todas las filas del módulo
-    const moduleRows = document.querySelectorAll('.modulo-row');
-    const moduleCheckboxes = [];
-    
-    // Filtrar checkboxes que pertenecen a este módulo
-    // (están después de la fila del módulo hasta la siguiente fila de módulo)
-    let inTargetModule = false;
-    document.querySelectorAll('#pestanasPermisosTable tbody tr').forEach(tr => {
-        if (tr.classList.contains('modulo-titulo')) {
-            // Verificar si es el módulo objetivo
-            const titleText = (tr.querySelector('strong')?.textContent || '').trim();
-            inTargetModule = titleText === moduleName.trim();
-        } else if (inTargetModule && tr.classList.contains('modulo-row')) {
-            const checkbox = tr.querySelector('.permission-check');
-            if (checkbox) {
-                moduleCheckboxes.push(checkbox);
-            }
-        }
-    });
-    
-    if (moduleCheckboxes.length === 0) return;
-    
-    // Determinar si marcar o desmarcar (si todos están marcados, desmarcar; si no, marcar)
-    const allChecked = moduleCheckboxes.every(cb => cb.checked);
-    const newState = !allChecked;
-    
+
+    // Encontrar la tarjeta del módulo
+    const moduleCard = checkbox.closest('.module-card');
+    if (!moduleCard) return;
+
+    const checkboxes = moduleCard.querySelectorAll('.permission-check');
+    if (checkboxes.length === 0) return;
+
+    // Estado deseado basado en el checkbox "Select All"
+    const newState = checkbox.checked;
+
     // Aplicar el nuevo estado
-    moduleCheckboxes.forEach(cb => {
+    checkboxes.forEach(cb => {
         cb.checked = newState;
     });
-    
-    // Actualizar icono del botón
-    const icon = button.querySelector('i');
-    if (icon) {
-        icon.className = newState ? 'fas fa-check-double' : 'fas fa-square';
-    }
-    
-    console.log(`[roles] ${newState ? 'Marcadas' : 'Desmarcadas'} ${moduleCheckboxes.length} páginas del módulo "${moduleName}"`);
+
+    // Actualizar tooltip
+    checkbox.title = newState ? 'Deseleccionar todo' : 'Seleccionar todo';
+
+    log.debug('[roles]', `${newState ? 'Marcadas' : 'Desmarcadas'} ${checkboxes.length} páginas del módulo "${moduleName}"`);
 }
 
 /**
- * Renderizar tabla de permisos (páginas agrupadas por módulo)
+ * Renderizar GRID de permisos (Cards)
  */
-function renderPermissionsTable(modules) {
-    const tbody = document.querySelector('#pestanasPermisosTable tbody');
-    tbody.innerHTML = '';
-    
+function renderPermissionsGrid(modules) {
+    const container = document.getElementById('permissionsContainer');
+    container.innerHTML = '';
+
     // Si no hay módulos, mostrar mensaje informativo
     if (!modules || Object.keys(modules).length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td colspan="2" class="text-center text-muted py-4">
-                <i class="fas fa-info-circle fa-2x mb-2"></i>
-                <p class="mb-2"><strong>No se encontraron páginas disponibles.</strong></p>
-                <small>El catálogo de recursos puede estar vacío. El sistema escaneará automáticamente las páginas HTML cuando se guarden cambios.</small>
-                <br>
-                <small class="text-info">
-                    <i class="fas fa-lightbulb me-1"></i>
-                    Si es la primera vez usando el sistema, es normal que este mensaje aparezca.
-                </small>
-            </td>
+        container.innerHTML = `
+            <div class="text-center text-muted py-5 w-100">
+                <i class="fas fa-info-circle fa-3x mb-3 text-secondary"></i>
+                <h5 class="fw-bold">No se encontraron módulos</h5>
+                <p class="mb-2">El catálogo de recursos parece estar vacío.</p>
+                <button class="btn btn-outline-primary mt-2" id="btnRefreshCatalogEmpty">
+                    <i class="fas fa-sync-alt me-1"></i> Actualizar Catálogo
+                </button>
+            </div>
         `;
-        tbody.appendChild(tr);
-        console.warn('[roles] No hay módulos disponibles para mostrar. El catálogo puede estar vacío.');
+
+        // Bind refresh button in empty state
+        document.getElementById('btnRefreshCatalogEmpty')?.addEventListener('click', refreshResourcesCatalog);
         return;
     }
-    
-    // Contador de páginas renderizadas
-    let totalPages = 0;
-    
-    // Renderizar cada módulo con sus páginas
+
+    // Renderizar cada módulo como una tarjeta
     for (const [moduleName, pages] of Object.entries(modules)) {
         if (!pages || pages.length === 0) continue;
-        
-        // Fila del módulo (encabezado)
-        const trModule = document.createElement('tr');
-        trModule.className = 'modulo-titulo';
-        trModule.innerHTML = `
-            <td>
-                <i class="fas fa-folder me-2"></i>
-                <strong>${escapeHtml(moduleName)}</strong>
-                <small class="text-muted ms-2">(${pages.length} página${pages.length !== 1 ? 's' : ''})</small>
-            </td>
-            <td class="text-center">
-                <button type="button" class="btn btn-sm btn-outline-secondary module-select-all" 
-                        data-module="${escapeHtml(moduleName)}"
-                        title="Marcar/Desmarcar todas las páginas de este módulo">
-                    <i class="fas fa-check-double"></i>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(trModule);
-        
-        // Filas de páginas
-        pages.forEach((page, index) => {
-            const tr = document.createElement('tr');
-            tr.className = 'modulo-row';
-            
-            const pagePath = page.path;
-            const pageName = page.name;
-            // Use a combination of module, index, and hash of path for uniqueness
-            const uniqueId = 'perm_' + escapeHtml(moduleName).replace(/[^a-zA-Z0-9]/g, '_') + '_' + index + '_' + hashCode(pagePath);
-            
-            tr.innerHTML = `
-                <td class="ps-4">
-                    <div>
-                        <strong>${escapeHtml(pageName)}</strong>
-                        <br>
-                        <small class="text-muted">${escapeHtml(pagePath)}</small>
+
+        // Icono por defecto o mapeado (se podría mejorar con un mapa de iconos)
+        const moduleIcon = getModuleIcon(moduleName);
+
+        const cardCol = document.createElement('div');
+        // cardCol.className = 'col-12 col-md-6 col-lg-4'; // Grid classes handled by CSS grid container
+
+        const pagesHtml = pages.map((page, index) => {
+            const uniqueId = 'perm_' + escapeHtml(moduleName).replace(/[^a-zA-Z0-9]/g, '_') + '_' + index + '_' + hashCode(page.path);
+            return `
+                <div class="permission-item">
+                    <div class="permission-info">
+                        <label class="permission-label fw-bold mb-0 cursor-pointer" for="${uniqueId}">
+                            ${escapeHtml(page.name)}
+                        </label>
+                        <span class="permission-path text-truncate" title="${escapeHtml(page.path)}">
+                            ${escapeHtml(page.path)}
+                        </span>
                     </div>
-                </td>
-                <td class="text-center">
-                    <div class="form-check form-switch d-inline-block">
+                    <div class="form-check form-switch ms-2">
                         <input class="form-check-input permission-check" 
                                type="checkbox" 
                                role="switch"
-                               value="${escapeHtml(pagePath)}" 
-                               id="${uniqueId}"
-                               aria-label="Permitir acceso a ${escapeHtml(pageName)}">
+                               value="${escapeHtml(page.path)}" 
+                               id="${uniqueId}">
                     </div>
-                </td>
+                </div>
             `;
-            tbody.appendChild(tr);
-            totalPages++;
-        });
+        }).join('');
+
+        cardCol.innerHTML = `
+            <div class="module-card h-100">
+                <div class="module-header">
+                    <div class="module-title">
+                        <div class="module-icon">
+                            <i class="${moduleIcon}"></i>
+                        </div>
+                        ${escapeHtml(moduleName)}
+                        <span class="badge bg-light text-secondary ms-2 border">${pages.length}</span>
+                    </div>
+                    <div class="form-check m-0">
+                        <input class="form-check-input module-select-all-check" 
+                               type="checkbox" 
+                               data-module="${escapeHtml(moduleName)}" 
+                               title="Seleccionar todo"
+                               style="width: 1.3em; height: 1.3em; cursor: pointer;">
+                    </div>
+                </div>
+                <div class="module-body">
+                    ${pagesHtml}
+                </div>
+            </div>
+        `;
+
+        container.appendChild(cardCol);
     }
-    
-    console.log(`[roles] Renderizadas ${totalPages} páginas en ${Object.keys(modules).length} módulos`);
+
+    // Implementar búsqueda
+    setupSearchFilter();
+}
+
+function getModuleIcon(moduleName) {
+    const icons = {
+        'Administrador': 'fas fa-cogs',
+        'Usuarios': 'fas fa-users',
+        'Seguridad': 'fas fa-shield-alt',
+        'Configuración': 'fas fa-sliders-h',
+        'Capacitaciones': 'fas fa-chalkboard-teacher',
+        'Agronomía': 'fas fa-leaf',
+        'Báscula': 'fas fa-weight-hanging',
+        'Almacén': 'fas fa-boxes',
+        'Laboratorio': 'fas fa-flask',
+        'Producción': 'fas fa-industry',
+        'Logística': 'fas fa-truck',
+        'Mantenimiento': 'fas fa-tools',
+        'HSE': 'fas fa-hard-hat',
+        'Gestión Humana': 'fas fa-user-tie',
+        'Compras': 'fas fa-shopping-cart',
+        'Ventas': 'fas fa-chart-line',
+        'Finanzas': 'fas fa-coins',
+        'Proyectos': 'fas fa-project-diagram',
+        'Calidad': 'fas fa-check-circle',
+        'Ambiental': 'fas fa-recycle',
+        'TIC': 'fas fa-laptop-code',
+        'Legal': 'fas fa-balance-scale'
+    };
+    return icons[moduleName] || 'fas fa-folder';
+}
+
+function setupSearchFilter() {
+    const searchInput = document.getElementById('searchPermissions');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', function (e) {
+        const term = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.module-card');
+
+        cards.forEach(card => {
+            const moduleName = card.querySelector('.module-title').textContent.toLowerCase();
+            const items = card.querySelectorAll('.permission-item');
+            let hasVisibleItems = false;
+
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(term) || moduleName.includes(term)) {
+                    item.style.display = 'flex';
+                    hasVisibleItems = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Show/Hide card based on items visibility
+            if (hasVisibleItems) {
+                card.parentElement.style.display = 'block';
+            } else {
+                card.parentElement.style.display = 'none';
+            }
+        });
+    });
 }
 
 /**
@@ -486,34 +536,34 @@ function renderPermissionsTable(modules) {
 async function loadRolePermissions(roleId) {
     try {
         const response = await fetch(API_PERMISSIONS + '?rol_id=' + roleId);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             const permissions = data.permissions || [];
-            
-            console.log(`[roles] Loaded ${permissions.length} permissions for role ID ${roleId}:`, permissions);
-            
+
+            log.debug('[roles]', `Loaded ${permissions.length} permissions for role ID ${roleId}:`, permissions);
+
             // Marcar checkboxes según permisos del rol
             const checkboxes = document.querySelectorAll('.permission-check');
-            console.log(`[roles] Aplicando ${permissions.length} permisos a ${checkboxes.length} checkboxes`);
-            
+            log.debug('[roles]', `Aplicando ${permissions.length} permisos a ${checkboxes.length} checkboxes`);
+
             if (checkboxes.length === 0) {
-                console.warn('[roles] No se encontraron checkboxes para marcar. La tabla de permisos puede estar vacía.');
+                log.warn('[roles]', 'No se encontraron checkboxes para marcar. La tabla de permisos puede estar vacía.');
             }
-            
+
             let matched = 0;
             checkboxes.forEach(checkbox => {
                 const isChecked = permissions.includes(checkbox.value);
                 checkbox.checked = isChecked;
                 if (isChecked) matched++;
             });
-            
-            console.log(`[roles] Permisos aplicados correctamente para rol ID ${roleId}. Matched: ${matched}/${permissions.length}`);
+
+            log.debug('[roles]', `Permisos aplicados correctamente para rol ID ${roleId}. Matched: ${matched}/${permissions.length}`);
         } else {
             const errorMsg = data.message || 'Error desconocido al cargar permisos del rol';
             showToast(errorMsg, 'error');
@@ -521,8 +571,8 @@ async function loadRolePermissions(roleId) {
         }
     } catch (error) {
         console.error('Error al cargar permisos del rol:', error);
-        const userMsg = error.message.includes('HTTP error') 
-            ? 'Error de conexión al cargar permisos. Verifique su sesión.' 
+        const userMsg = error.message.includes('HTTP error')
+            ? 'Error de conexión al cargar permisos. Verifique su sesión.'
             : 'Error al cargar permisos del rol.';
         showToast(userMsg, 'error');
         throw error; // Re-throw para que editRole pueda manejarlo
@@ -534,43 +584,43 @@ async function loadRolePermissions(roleId) {
  */
 async function saveRoleAndPermissions(e) {
     e.preventDefault();
-    
+
     const roleId = parseInt(document.getElementById('modalRolId').value);
     const roleName = document.getElementById('modalRolNombreInput').value.trim();
-    
+
     if (!roleName) {
         showToast('El nombre del rol es obligatorio', 'warning');
         document.getElementById('modalRolNombreInput').focus();
         return;
     }
-    
+
     // Validar longitud y caracteres (como en addNewRole)
     if (roleName.length < 3) {
         showToast('El nombre del rol debe tener al menos 3 caracteres', 'warning');
         document.getElementById('modalRolNombreInput').focus();
         return;
     }
-    
+
     if (roleName.length > 50) {
         showToast('El nombre del rol no puede exceder 50 caracteres', 'warning');
         document.getElementById('modalRolNombreInput').focus();
         return;
     }
-    
+
     if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s_-]+$/.test(roleName)) {
         showToast('El nombre contiene caracteres no permitidos', 'warning');
         document.getElementById('modalRolNombreInput').focus();
         return;
     }
-    
+
     // Obtener permisos seleccionados (resource_paths)
     const permissions = [];
     document.querySelectorAll('.permission-check:checked').forEach(checkbox => {
         permissions.push(checkbox.value);
     });
-    
-    console.log(`[roles] Selected permissions:`, permissions);
-    
+
+    log.debug('[roles]', 'Selected permissions:', permissions);
+
     // Validar que al menos se seleccionó un permiso
     if (permissions.length === 0) {
         const confirmNoPerms = confirm(
@@ -582,15 +632,15 @@ async function saveRoleAndPermissions(e) {
             return;
         }
     }
-    
-    console.log(`[roles] Guardando rol ID ${roleId} con ${permissions.length} permisos:`, permissions);
-    
+
+    log.debug('[roles]', `Guardando rol ID ${roleId} con ${permissions.length} permisos:`, permissions);
+
     // Deshabilitar botón de guardar mientras se procesa
     const saveBtn = e.target.querySelector('button[type="submit"]');
     const originalBtnText = saveBtn.innerHTML;
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Guardando...';
-    
+
     try {
         // Actualizar nombre del rol
         const responseRole = await fetch(API_ROLES, {
@@ -598,31 +648,31 @@ async function saveRoleAndPermissions(e) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: roleId, nombre: roleName })
         });
-        
+
         const dataRole = await responseRole.json();
-        
+
         if (!dataRole.success) {
             showToast(dataRole.message || 'Error al actualizar rol', 'error');
             return;
         }
-        
+
         // Actualizar permisos
         const responsePerms = await fetch(API_PERMISSIONS, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ rol_id: roleId, permissions })
         });
-        
+
         const dataPerms = await responsePerms.json();
-        
+
         if (dataPerms.success) {
             const count = dataPerms.count || permissions.length;
             showToast(`Rol actualizado: ${count} página(s) asignada(s)`, 'success');
-            
+
             // Cerrar modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditRolPermisos'));
             modal.hide();
-            
+
             // Recargar roles
             await loadRoles();
         } else {
@@ -644,7 +694,7 @@ async function saveRoleAndPermissions(e) {
 async function toggleRoleStatus(roleId, currentEstado, switchElement) {
     const estadoText = currentEstado === 0 ? 'desactivar' : 'activar';
     const roleName = allRoles.find(r => r.id === roleId)?.nombre || 'este rol';
-    
+
     // Solicitar confirmación al usuario
     if (!confirm(`¿Está seguro de ${estadoText} el rol "${roleName}"?`)) {
         // User cancelled - revert the switch back to its original state
@@ -653,18 +703,18 @@ async function toggleRoleStatus(roleId, currentEstado, switchElement) {
         }
         return;
     }
-    
+
     const newEstado = currentEstado === 0 ? 1 : 0;
-    
+
     try {
         const response = await fetch(API_ROLES, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: roleId, estado: newEstado })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             showToast('Estado del rol actualizado', 'success');
             await loadRoles();
@@ -692,16 +742,16 @@ async function deleteRole(roleId, roleName) {
     if (!confirm(`¿Está seguro de eliminar el rol "${roleName}"?\n\nEsta acción no se puede deshacer y eliminará todos los permisos asociados.`)) {
         return;
     }
-    
+
     try {
         const response = await fetch(API_ROLES, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: roleId })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             showToast('Rol eliminado exitosamente', 'success');
             await loadRoles();
@@ -720,9 +770,9 @@ async function deleteRole(roleId, roleName) {
 function showToast(message, type = 'info') {
     const toast = document.getElementById('notificationToast');
     const toastBody = document.getElementById('notificationToastBody');
-    
+
     toastBody.textContent = message;
-    
+
     // Cambiar color según tipo
     toast.className = 'toast align-items-center border-0';
     switch (type) {
@@ -738,7 +788,7 @@ function showToast(message, type = 'info') {
         default:
             toast.classList.add('text-bg-dark');
     }
-    
+
     const bsToast = new bootstrap.Toast(toast);
     bsToast.show();
 }

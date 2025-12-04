@@ -1,61 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Asignación Roles — Capacitaciones</title>
   <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous" />
   <link rel="stylesheet" href="/assets/fonts/fontawesome-all.min.css" />
   <link rel="stylesheet" href="/assets/css/bs-theme-overrides.css" />
   <link rel="stylesheet" href="/assets/css/checkout.css" />
   <style>
-    body { visibility: hidden; }
-    .btn .fa-lg { vertical-align: middle; }
-    .btn-edit-role, .btn-delete-role { 
-      min-width: 38px; 
-      text-align: center;
-    }
-    /* Ensure buttons are inline */
-    #rolesTable td:last-child { white-space: nowrap; }
-    #modalRolNombreInput { color: #d90000; font-weight: bold; font-size: 1.18em; }
-    #pestanasPermisosTable { margin-bottom:0; }
-    .modulo-titulo { font-weight: bold; background: #f7f7f7; }
-    .modulo-row { background: #fbfbfb;}
-    
-    /* Bootstrap form-switch enhancements */
-    .form-check-input {
-      cursor: pointer;
-      width: 3em;
-      height: 1.5em;
-      transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
-    
-    .form-check-input:checked {
-      background-color: #198754;
-      border-color: #198754;
-    }
-    
-    .form-check-input:focus {
-      border-color: #86b7fe;
-      outline: 0;
-      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    }
-    
-    /* Role status switch in table */
-    .role-status-switch {
-      margin-top: 0;
-    }
-    
-    /* Toast notification positioning */
-    .toast-container-top {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 9999;
+    body {
+      visibility: hidden;
     }
   </style>
 </head>
+
 <body>
   <!-- auth_guard.js se encarga de redirecciones si no hay sesión -->
   <script src="/assets/js/auth_guard.js"></script>
@@ -66,33 +28,11 @@
         <div id="navbar"></div>
         <div class="container-fluid px-4">
           <h3 class="text-dark mb-4">Asignación roles - Capacitaciones</h3>
-          
-          <!-- Instrucciones de uso -->
-          <div class="alert alert-primary mb-4" role="alert">
-            <h5 class="alert-heading">
-              <i class="fas fa-question-circle me-2"></i>¿Cómo usar el módulo de roles?
-            </h5>
-            <hr>
-            <ol class="mb-0 ps-3">
-              <li><strong>Crear un rol:</strong> Escriba el nombre del rol en el campo "Nuevo rol" y haga clic en "Agregar rol".</li>
-              <li><strong>Editar permisos:</strong> Haga clic en el botón <i class="fas fa-pen-to-square text-primary"></i> para editar un rol y asignar qué páginas puede acceder.</li>
-              <li><strong>Activar/Desactivar:</strong> Use el interruptor (switch) en la columna "Estado" para activar o desactivar un rol.</li>
-              <li><strong>Eliminar rol:</strong> Haga clic en el botón <i class="fas fa-trash text-danger"></i> para eliminar un rol (solo si no tiene usuarios asignados).</li>
-            </ol>
-            <hr>
-            <p class="mb-0 small text-muted">
-              <i class="fas fa-info-circle me-1"></i>
-              <strong>Nota:</strong> Si no ve páginas al editar un rol, haga clic en "Actualizar catálogo" dentro del modal de edición.
-            </p>
-            <p class="mb-0 small text-muted mt-2">
-              <i class="fas fa-shield-alt me-1"></i>
-              <strong>Importante:</strong> El rol de Administrador no aparece en esta lista porque tiene acceso completo al sistema y no puede ser modificado.
-            </p>
-          </div>
-          
+
           <ul class="nav nav-tabs mb-3" id="sessionTabs" role="tablist">
             <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="roles-tab" data-bs-toggle="tab" data-bs-target="#roles" type="button" role="tab"><i class="fa-solid fa-layer-group me-1"></i> Roles</button>
+              <button class="nav-link active" id="roles-tab" data-bs-toggle="tab" data-bs-target="#roles" type="button"
+                role="tab"><i class="fa-solid fa-layer-group me-1"></i> Roles</button>
             </li>
           </ul>
           <div class="tab-content" id="sessionTabContent">
@@ -105,8 +45,8 @@
                   <div class="mb-3 row g-2 align-items-end">
                     <div class="col">
                       <label for="newRoleInput" class="form-label small text-muted mb-1">Nuevo rol</label>
-                      <input id="newRoleInput" class="form-control" type="text" placeholder="Escriba nuevo rol" maxlength="50" aria-describedby="newRoleHelp" />
-                      <small id="newRoleHelp" class="form-text text-muted">Mínimo 3 caracteres, máximo 50. Solo letras, números, espacios y guiones.</small>
+                      <input id="newRoleInput" class="form-control" type="text" placeholder="Escriba nuevo rol"
+                        maxlength="50" aria-describedby="newRoleHelp" />
                     </div>
                     <div class="col-auto">
                       <button id="refreshRolesBtnAdd" class="btn btn-primary" aria-label="Agregar nuevo rol">
@@ -151,70 +91,276 @@
   </div>
 
   <!-- Modal edición rol y permisos -->
-  <div class="modal fade" id="modalEditRolPermisos" tabindex="-1" aria-hidden="true">
+  <style>
+    /* Estilos específicos para el modal de roles - Premium & Offline */
+    #modalEditRolPermisos .modal-content {
+      border: none;
+      border-radius: 1rem;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    #modalEditRolPermisos .modal-header {
+      background: linear-gradient(135deg, #772e22 0%, #5a231a 100%);
+      /* Theme Primary Color */
+      color: white;
+      padding: 1.25rem 1.5rem;
+      border-bottom: none;
+    }
+
+    #modalEditRolPermisos .modal-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    #modalEditRolPermisos .btn-close {
+      filter: brightness(0) invert(1);
+      opacity: 0.8;
+    }
+
+    #modalEditRolPermisos .modal-body {
+      background-color: #f8f9fc;
+      padding: 1.5rem;
+    }
+
+    /* Inputs Premium */
+    #modalEditRolPermisos .form-control {
+      border-radius: 0.5rem;
+      padding: 0.6rem 1rem;
+      border: 1px solid #d1d3e2;
+      box-shadow: none;
+      transition: border-color 0.2s;
+      font-size: 0.9rem;
+    }
+
+    #modalEditRolPermisos .form-control:focus {
+      border-color: #772e22;
+      box-shadow: 0 0 0 0.2rem rgba(119, 46, 34, 0.25);
+    }
+
+    #modalEditRolPermisos .input-group-text {
+      background-color: #772e22;
+      /* Theme Primary */
+      border-color: #772e22;
+      border-right: none;
+      border-radius: 0.5rem 0 0 0.5rem;
+      color: white;
+      /* White Icon */
+    }
+
+    #searchPermissions {
+      border-left: none;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+
+    /* Grid Fix for roles.js generated divs */
+    #permissionsContainer {
+      max-height: 50vh;
+      /* Internal scroll */
+      overflow-y: auto;
+      padding: 5px;
+      border: 1px solid #f1f1f1;
+      border-radius: 0.5rem;
+      background: #fff;
+    }
+
+    #permissionsContainer>div {
+      width: 50%;
+      /* Force 2 columns */
+      padding: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      #permissionsContainer>div {
+        width: 100%;
+        /* 1 column on mobile */
+      }
+    }
+
+    /* Cards de Módulos */
+    #permissionsContainer .module-card {
+      background: white;
+      border: 1px solid #f8f9fc;
+      /* Subtle border */
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #permissionsContainer .module-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      border-color: #eaecf4;
+    }
+
+    #permissionsContainer .module-header {
+      background-color: #fff;
+      border-bottom: 1px solid #f1f1f1;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #permissionsContainer .module-title {
+      font-weight: 700;
+      color: #772e22;
+      /* Theme Primary */
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    #permissionsContainer .module-icon {
+      background: #fdecea;
+      /* Light Red */
+      color: #772e22;
+      /* Theme Primary */
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    #permissionsContainer .module-body {
+      flex: 1;
+      /* overflow-y: auto; Removed internal card scroll to let container scroll */
+    }
+
+    #permissionsContainer .permission-item {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid #f8f9fc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    #permissionsContainer .permission-item:hover {
+      background-color: #fff5f5;
+    }
+
+    #permissionsContainer .permission-label {
+      font-weight: 600;
+      color: #5a5c69;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    #permissionsContainer .permission-path {
+      display: block;
+      font-size: 0.7rem;
+      color: #b7b9cc;
+      margin-top: 1px;
+    }
+
+    /* Scrollbar */
+    #permissionsContainer::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #permissionsContainer::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    #permissionsContainer::-webkit-scrollbar-thumb {
+      background: #d1d3e2;
+      border-radius: 3px;
+    }
+
+    #permissionsContainer::-webkit-scrollbar-thumb:hover {
+      background: #858796;
+    }
+
+    /* Custom Switch Color */
+    .form-check-input:checked {
+      background-color: #772e22;
+      border-color: #772e22;
+    }
+
+    /* Toast */
+    .toast-container-top {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1060;
+    }
+  </style>
+
+  <div class="modal fade" id="modalEditRolPermisos" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <form id="formEditRolPermisos">
           <div class="modal-header">
             <h5 class="modal-title">
-              <i class="fas fa-user-shield me-2"></i>
-              Editar rol y permisos de páginas
+              <i class="fas fa-user-shield me-2"></i>Configuración de Rol
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
+
           <div class="modal-body">
             <input type="hidden" id="modalRolId" name="role_id">
-            <div class="mb-3">
-              <label for="modalRolNombreInput" class="form-label fw-bold">
-                <i class="fas fa-tag me-1"></i>
-                Nombre del rol
-              </label>
-              <input type="text" id="modalRolNombreInput" class="form-control fw-bold" required maxlength="50" aria-required="true" aria-describedby="modalRolNombreHelp" placeholder="Ej: Supervisor, Operador, etc.">
-              <small id="modalRolNombreHelp" class="form-text text-muted">Mínimo 3 caracteres, máximo 50.</small>
+
+            <!-- Top Controls Row -->
+            <div class="row g-3 mb-4">
+              <!-- Nombre del Rol -->
+              <div class="col-md-6">
+                <label for="modalRolNombreInput" class="form-label fw-bold text-dark small mb-1">Nombre del Rol</label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                  <input type="text" id="modalRolNombreInput" class="form-control" required maxlength="50"
+                    placeholder="Ej: Supervisor">
+                </div>
+              </div>
+
+              <!-- Search & Refresh -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-dark small mb-1">Filtrar Permisos</label>
+                <div class="d-flex gap-2">
+                  <div class="input-group shadow-sm flex-grow-1">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" id="searchPermissions" class="form-control"
+                      placeholder="Buscar módulo o página...">
+                  </div>
+                  <button type="button" class="btn btn-white border shadow-sm text-danger" id="btnRefreshCatalog"
+                    title="Actualizar catálogo" style="background: white; color: #772e22;">
+                    <i class="fas fa-sync-alt"></i>
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="alert alert-info small mb-3">
-              <i class="fas fa-info-circle me-1"></i>
-              Seleccione las páginas a las que este rol tendrá acceso. Las páginas están agrupadas por módulo.
-              <button type="button" class="btn btn-sm btn-outline-primary ms-2" id="btnRefreshCatalog" 
-                      title="Actualizar catálogo de páginas escaneando el sistema"
-                      aria-label="Actualizar catálogo de páginas disponibles en el sistema">
-                <i class="fas fa-sync-alt me-1"></i> Actualizar catálogo
-              </button>
+
+            <!-- Divider with Label -->
+            <div class="d-flex align-items-center mb-3">
+              <h6 class="fw-bold text-secondary m-0 small text-uppercase"><i class="fas fa-lock me-1"></i> Permisos de
+                Acceso</h6>
+              <div class="flex-grow-1 ms-3 border-bottom"></div>
             </div>
-            <div class="mb-2">
-              <strong>
-                <i class="fas fa-list-check me-1"></i>
-                Permisos de Acceso a Páginas
-              </strong>
+
+            <!-- Grid de Permisos (Requerido por roles.js) -->
+            <div id="permissionsContainer" class="row g-0">
+              <!-- El contenido será inyectado por roles.js -->
             </div>
-            <div class="table-responsive" style="max-height: 50vh; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.375rem;">
-              <table class="table table-bordered table-sm mb-0" id="pestanasPermisosTable">
-                <thead class="sticky-top" style="background: white; z-index: 10;">
-                  <tr>
-                    <th style="width: 70%;">Página / Módulo</th>
-                    <th class="text-center" style="width: 30%;">
-                      <i class="fas fa-check-square me-1"></i>Acceso
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Se llenan dinámicamente -->
-                </tbody>
-              </table>
-            </div>
-            <small class="text-muted mt-2 d-block">
-              <i class="fas fa-lightbulb me-1"></i>
-              <strong>Tip:</strong> Los usuarios con este rol podrán acceder SOLO a las páginas marcadas aquí.
-            </small>
+
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              <i class="fas fa-times me-1"></i>
-              Cerrar
-            </button>
-            <button type="submit" class="btn btn-primary">
-              <i class="fas fa-save me-1"></i>
-              Guardar cambios
+
+          <div class="modal-footer bg-white border-top p-3">
+            <button type="button" class="btn btn-light text-secondary fw-bold px-4 rounded-pill btn-sm"
+              data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm rounded-pill btn-sm"
+              style="background: #772e22; border: none;">
+              <i class="fas fa-check-circle me-2"></i>Guardar Cambios
             </button>
           </div>
         </form>
@@ -224,24 +370,29 @@
 
   <!-- Toast notificación -->
   <div class="toast-container-top">
-    <div id="notificationToast" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div id="notificationToast" class="toast align-items-center text-bg-dark border-0" role="alert"
+      aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body" id="notificationToastBody">Mensaje</div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar notificación"></button>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+          aria-label="Cerrar notificación"></button>
       </div>
     </div>
   </div>
 
   <!-- Scripts -->
   <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
+  <!-- Logger debe cargarse primero para que esté disponible para otros scripts -->
+  <script src="/assets/js/logger.js"></script>
   <script src="/assets/js/sidebar.js"></script>
   <script src="/assets/js/navbar.js"></script>
   <script src="/assets/js/roles.js"></script>
+  <script src="/assets/js/web_config.js"></script>
 
   <script>
     // Función para incluir components (sidebar, navbar) dinámicamente
     async function includeComponent(url, selector) {
-      const res = await fetch(url, {cache: 'no-store'});
+      const res = await fetch(url, { cache: 'no-store' });
       if (res.ok) {
         document.querySelector(selector).innerHTML = await res.text();
       }
@@ -255,10 +406,11 @@
       // auth_guard.js loads via script tag in <head> and executes on DOMContentLoaded
       // It applies data-role based restrictions to all elements before this code runs
       // No additional enforcement script is needed here
-      
+
       // Hacemos visible la página una vez cargados los includes
       document.body.style.visibility = "visible";
     });
   </script>
 </body>
+
 </html>

@@ -10,7 +10,7 @@
   - Mantiene en window.asistentes la lista temporal de asistentes agregados desde el modal.
 */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Cargar selects desde backend para que el usuario seleccione valores existentes
     cargarSelect('proceso', 'cap_proceso', 'proceso');
     cargarSelect('lugar-1', 'cap_lugar', 'lugar');
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     cargarSelect('tema-a', 'cap_tema', 'nombre');
 
     // Event listener para filtrar temas cuando se selecciona un proceso
-    document.getElementById('proceso').addEventListener('change', function() {
+    document.getElementById('proceso').addEventListener('change', function () {
         const procesoId = this.value;
         if (procesoId) {
             cargarTemasporProceso(procesoId);
@@ -32,63 +32,63 @@ document.addEventListener('DOMContentLoaded', function() {
     window.asistentes = [];
 
     // Buscar responsable por cédula y rellenar nombre si existe
-    document.getElementById('bt-responsable').addEventListener('click', function() {
+    document.getElementById('bt-responsable').addEventListener('click', function () {
         let cedula = document.getElementById('cedula').value.trim();
         if (!cedula) return alert('Ingrese la cédula del responsable');
         fetch('assets/php/formulario_api.php?action=get_usuario&cedula=' + encodeURIComponent(cedula))
-        .then(res => res.json())
-        .then(usuario => {
-            if (usuario && usuario.nombre1) {
-                // Concatenar nombres/apellidos de forma segura y limpia
-                document.getElementById('nombre-r').value = `${usuario.nombre1} ${usuario.nombre2} ${usuario.apellido1} ${usuario.apellido2}`.replace(/\s+/g, ' ').trim();
-            } else {
-                document.getElementById('nombre-r').value = '';
-                alert('Usuario no encontrado');
-            }
-        });
+            .then(res => res.json())
+            .then(usuario => {
+                if (usuario && usuario.nombre1) {
+                    // Concatenar nombres/apellidos de forma segura y limpia
+                    document.getElementById('nombre-r').value = `${usuario.nombre1} ${usuario.nombre2} ${usuario.apellido1} ${usuario.apellido2}`.replace(/\s+/g, ' ').trim();
+                } else {
+                    document.getElementById('nombre-r').value = '';
+                    alert('Usuario no encontrado');
+                }
+            });
     });
 
     // Botón dentro del modal: buscar colaborador por cédula para agregar como asistente
-    document.getElementById('bt-ag-capacitado-1').addEventListener('click', function() {
+    document.getElementById('bt-ag-capacitado-1').addEventListener('click', function () {
         let cedula = document.getElementById('ced-capacitado').value.trim();
         if (!cedula) return alert('Ingrese la cédula del asistente');
         fetch('assets/php/formulario_api.php?action=get_colaborador&cedula=' + encodeURIComponent(cedula))
-        .then(res => res.json())
-        .then(col => {
-            if (col && col.ac_nombre1) {
-                let nombre = [col.ac_nombre1, col.ac_nombre2, col.ac_apellido1, col.ac_apellido2].filter(Boolean).join(' ');
-                document.getElementById('nom-capacitado').value = nombre;
+            .then(res => res.json())
+            .then(col => {
+                if (col && col.ac_nombre1) {
+                    let nombre = [col.ac_nombre1, col.ac_nombre2, col.ac_apellido1, col.ac_apellido2].filter(Boolean).join(' ');
+                    document.getElementById('nom-capacitado').value = nombre;
 
-                // Obtener relaciones adicionales (empresa, cargo, área, etc.) para mostrar en la tabla
-                fetch('assets/php/formulario_api.php?action=get_colaborador_relations' +
-                      '&ac_empresa=' + encodeURIComponent(col.ac_empresa) +
-                      '&ac_id_cargo=' + encodeURIComponent(col.ac_id_cargo) +
-                      '&ac_id_area=' + encodeURIComponent(col.ac_id_area) +
-                      '&ac_sub_area=' + encodeURIComponent(col.ac_sub_area) +
-                      '&ac_rango=' + encodeURIComponent(col.ac_rango) +
-                      '&ac_id_situacion=' + encodeURIComponent(col.ac_id_situación))
-                .then(r => r.json())
-                .then(rel => {
-                    // Adjuntamos nombres legibles al objeto colaborador
-                    col.empresa_nombre = rel.empresa;
-                    col.cargo_nombre = rel.cargo;
-                    col.area_nombre = rel.area;
-                    col.sub_area_nombre = rel.sub_area;
-                    col.rango_nombre = rel.rango;
-                    col.situacion_nombre = rel.situacion;
-                    // Guardamos temporalmente para usar al agregar
-                    window.colaborador_modal = col;
-                });
-            } else {
-                document.getElementById('nom-capacitado').value = '';
-                window.colaborador_modal = null;
-                alert('Colaborador no encontrado');
-            }
-        });
+                    // Obtener relaciones adicionales (empresa, cargo, área, etc.) para mostrar en la tabla
+                    fetch('assets/php/formulario_api.php?action=get_colaborador_relations' +
+                        '&ac_empresa=' + encodeURIComponent(col.ac_empresa) +
+                        '&ac_id_cargo=' + encodeURIComponent(col.ac_id_cargo) +
+                        '&ac_id_area=' + encodeURIComponent(col.ac_id_area) +
+                        '&ac_sub_area=' + encodeURIComponent(col.ac_sub_area) +
+                        '&ac_rango=' + encodeURIComponent(col.ac_rango) +
+                        '&ac_id_situacion=' + encodeURIComponent(col.ac_id_situación))
+                        .then(r => r.json())
+                        .then(rel => {
+                            // Adjuntamos nombres legibles al objeto colaborador
+                            col.empresa_nombre = rel.empresa;
+                            col.cargo_nombre = rel.cargo;
+                            col.area_nombre = rel.area;
+                            col.sub_area_nombre = rel.sub_area;
+                            col.rango_nombre = rel.rango;
+                            col.situacion_nombre = rel.situacion;
+                            // Guardamos temporalmente para usar al agregar
+                            window.colaborador_modal = col;
+                        });
+                } else {
+                    document.getElementById('nom-capacitado').value = '';
+                    window.colaborador_modal = null;
+                    alert('Colaborador no encontrado');
+                }
+            });
     });
 
     // Botón "Agregar" del modal: valida y añade el asistente al array window.asistentes
-    document.getElementById('bt-ag-capacitado-2').addEventListener('click', function(e) {
+    document.getElementById('bt-ag-capacitado-2').addEventListener('click', function (e) {
         e.preventDefault();
         let estado = document.getElementById('s-aprobacion').value;
         let col = window.colaborador_modal;
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Evento submit del formulario principal: validaciones y envío JSON al backend
-    document.getElementById('form-capacitacion').addEventListener('submit', function(e) {
+    document.getElementById('form-capacitacion').addEventListener('submit', function (e) {
         e.preventDefault();
 
         // Campos requeridos y mensajes específicos por campo
@@ -152,14 +152,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Validación opcional de archivo adjunto: tamaño y tipo permitidos
         const fileInput = document.getElementById('archivo');
         const file = fileInput.files[0];
-        
+
         if (file) {
             // Tamaño máximo 2MB
             const maxSize = 2 * 1024 * 1024;
             if (file.size > maxSize) {
                 return alert('El archivo excede el tamaño máximo de 2MB');
             }
-            
+
             // Tipos permitidos
             const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif'];
             if (!allowedTypes.includes(file.type)) {
@@ -188,27 +188,39 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
-        .then(res => res.json())
-        .then(resp => {
-            if (resp.success && resp.id_formulario) {
-                // Si hay archivo, subirlo asociándolo al id_formulario
-                if (file) {
-                    uploadFile(resp.id_formulario, file, function(uploadSuccess) {
-                        if (uploadSuccess) {
-                            mostrarExito(resp.id_formulario);
-                        } else {
-                            alert('Formulario guardado pero hubo un error al subir el archivo');
-                            mostrarExito(resp.id_formulario);
-                        }
-                    });
+            .then(res => res.json())
+            .then(resp => {
+                if (resp.success && resp.id_formulario) {
+                    // Si hay archivo, subirlo asociándolo al id_formulario
+                    if (file) {
+                        uploadFile(resp.id_formulario, file, function (uploadSuccess) {
+                            if (uploadSuccess) {
+                                mostrarExito(resp.id_formulario);
+                            } else {
+                                alert('Formulario guardado pero hubo un error al subir el archivo');
+                                mostrarExito(resp.id_formulario);
+                            }
+                        });
+                    } else {
+                        mostrarExito(resp.id_formulario);
+                    }
                 } else {
-                    mostrarExito(resp.id_formulario);
+                    alert('Error al guardar: ' + (resp.error || ''));
                 }
-            } else {
-                alert('Error al guardar: ' + (resp.error || ''));
+            });
+    });
+
+    // Evento para abrir el constructor de evaluación
+    const btnConfig = document.getElementById('btn-config-eval');
+    if (btnConfig) {
+        btnConfig.addEventListener('click', function () {
+            const id = document.getElementById('id_formulario_creado').value;
+            if (id) {
+                // Abrir en popup o nueva pestaña
+                window.open(`crear_evaluacion.html?id_formulario=${id}`, 'ConfigurarEvaluacion', 'width=1000,height=800,scrollbars=yes');
             }
         });
-    });
+    }
 });
 
 // Funcion auxiliar: cargar opciones de un select desde backend
@@ -244,7 +256,7 @@ function actualizarTablaAsistentes() {
     window.asistentes.forEach((a, i) => {
         tbody.innerHTML += `
             <tr>
-                <td>${i+1}</td>
+                <td>${i + 1}</td>
                 <td>${a.nombre}</td>
                 <td>${a.cedula}</td>
                 <td>${a.empresa}</td>
@@ -259,7 +271,7 @@ function actualizarTablaAsistentes() {
 }
 
 // Elimina un asistente por índice y actualiza vista/contador
-window.eliminarAsistente = function(idx) {
+window.eliminarAsistente = function (idx) {
     window.asistentes.splice(idx, 1);
     actualizarTablaAsistentes();
     document.getElementById('asistentes-c').value = window.asistentes.length;
@@ -270,6 +282,14 @@ function mostrarExito(id) {
     document.getElementById('success-message').style.display = 'block';
     document.getElementById('success-message').textContent =
         'Capacitación creada con éxito en el ID asignado: ' + id;
+
+    // Habilitar botón de configuración de evaluación
+    const btnConfig = document.getElementById('btn-config-eval');
+    if (btnConfig) {
+        btnConfig.disabled = false;
+        document.getElementById('id_formulario_creado').value = id;
+    }
+
     document.getElementById('form-capacitacion').reset();
     window.asistentes = [];
     actualizarTablaAsistentes();
@@ -283,25 +303,25 @@ function uploadFile(formularioId, file, callback) {
     formData.append('file', file);
     formData.append('formulario_id', formularioId);
     formData.append('action', 'upload_file');
-    
+
     fetch('assets/php/file_upload_api.php', {
         method: 'POST',
         body: formData
     })
-    .then(res => res.json())
-    .then(resp => {
-        if (resp.success) {
-            console.log('Archivo subido:', resp.filename);
-            callback(true);
-        } else {
-            console.error('Error al subir archivo:', resp.message);
+        .then(res => res.json())
+        .then(resp => {
+            if (resp.success) {
+                console.log('Archivo subido:', resp.filename);
+                callback(true);
+            } else {
+                console.error('Error al subir archivo:', resp.message);
+                callback(false);
+            }
+        })
+        .catch(err => {
+            console.error('Error de red al subir archivo:', err);
             callback(false);
-        }
-    })
-    .catch(err => {
-        console.error('Error de red al subir archivo:', err);
-        callback(false);
-    });
+        });
 }
 
 // Función para cargar temas filtrados por proceso
@@ -311,7 +331,7 @@ function cargarTemasporProceso(procesoId) {
         .then(data => {
             let select = document.getElementById('tema-a');
             if (!select) return;
-            
+
             if (data.success && Array.isArray(data.temas)) {
                 if (data.temas.length === 0) {
                     select.innerHTML = '<option value="">No hay temas para este proceso</option>';

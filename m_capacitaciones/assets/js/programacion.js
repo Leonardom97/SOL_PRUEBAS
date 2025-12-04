@@ -206,7 +206,7 @@
         const data = filterData || programaciones;
 
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" class="text-center">No hay programaciones registradas</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4"><i class="fas fa-calendar-times fa-2x mb-2 d-block opacity-50"></i>No hay programaciones registradas</td></tr>';
             return;
         }
 
@@ -249,20 +249,20 @@
             
             return `
             <tr>
-                <td>${prog.id}</td>
-                <td>${prog.cargo_nombre}</td>
-                <td>${prog.sub_area_nombre || '-'}</td>
-                <td>${prog.tema_nombre}</td>
-                <td>${prog.frecuencia_meses}</td>
-                <td><span class="badge bg-info">${prog.rol_capacitador_nombre}</span></td>
-                <td class="text-center">${fechaProximaBadge}</td>
-                <td class="text-center">${fechaNotificacion}</td>
-                <td class="text-center">${pendientesBadge}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary" onclick="window.editProgramacion(${prog.id})">
+                <td data-label="ID">${prog.id}</td>
+                <td data-label="Cargo">${prog.cargo_nombre}</td>
+                <td data-label="Sub Área">${prog.sub_area_nombre || '-'}</td>
+                <td data-label="Tema">${prog.tema_nombre}</td>
+                <td data-label="Frecuencia">${prog.frecuencia_meses} meses</td>
+                <td data-label="Rol"><span class="badge bg-info">${prog.rol_capacitador_nombre}</span></td>
+                <td data-label="Próxima" class="text-center">${fechaProximaBadge}</td>
+                <td data-label="Notificación" class="text-center">${fechaNotificacion}</td>
+                <td data-label="Pendientes" class="text-center">${pendientesBadge}</td>
+                <td data-label="Acciones">
+                    <button class="btn btn-sm btn-primary me-1" onclick="window.editProgramacion(${prog.id})" title="Editar">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="window.deleteProgramacion(${prog.id})">
+                    <button class="btn btn-sm btn-danger" onclick="window.deleteProgramacion(${prog.id})" title="Eliminar">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>

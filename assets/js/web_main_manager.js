@@ -3,11 +3,11 @@
  * JavaScript for managing web configuration interface
  */
 
-(function() {
+(function () {
     'use strict';
-    
+
     let currentConfig = null;
-    
+
     // Load sidebar and navbar components
     async function includeComponent(file, selector) {
         try {
@@ -19,49 +19,62 @@
             console.error(`Error al cargar ${file}:`, err);
         }
     }
-    
+
     // Initialize when DOM is ready
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', async function () {
         // Load navbar and sidebar first
         await includeComponent("/includes/navbar.html", "#navbar");
         await includeComponent("/includes/sidebar.html", "#sidebar");
-        
+
         // Then initialize the rest
         initializeEventListeners();
         loadCurrentConfig();
     });
-    
+
     /**
      * Initialize event listeners
      */
     function initializeEventListeners() {
         // Form submit
         document.getElementById('configForm').addEventListener('submit', handleFormSubmit);
-        
+
         // File uploads
-        document.getElementById('uploadFavicon').addEventListener('click', function() {
+        document.getElementById('uploadFavicon').addEventListener('click', function () {
             uploadFile('favicon');
         });
-        
-        document.getElementById('uploadLoginImage').addEventListener('click', function() {
-            uploadFile('login_image');
+
+        document.getElementById('uploadLoginImageDay').addEventListener('click', function () {
+            uploadFile('login_image_day');
         });
-        
+
+        document.getElementById('uploadLoginImageNight').addEventListener('click', function () {
+            uploadFile('login_image_night');
+        });
+
         // Preview uploaded files
-        document.getElementById('faviconFile').addEventListener('change', function(e) {
+        document.getElementById('faviconFile').addEventListener('change', function (e) {
             previewImage(e.target.files[0], 'faviconPreview');
         });
-        
-        document.getElementById('loginImageFile').addEventListener('change', function(e) {
-            previewImage(e.target.files[0], 'loginImagePreview');
+
+        document.getElementById('loginImageDayFile').addEventListener('change', function (e) {
+            previewImage(e.target.files[0], 'loginImageDayPreview');
         });
-        
+
+        document.getElementById('loginImageNightFile').addEventListener('change', function (e) {
+            previewImage(e.target.files[0], 'loginImageNightPreview');
+        });
+
+        // Effect speed display
+        document.getElementById('effectSpeed').addEventListener('input', function (e) {
+            document.getElementById('effectSpeedValue').textContent = e.target.value;
+        });
+
         // Reset form
-        document.getElementById('resetForm').addEventListener('click', function() {
+        document.getElementById('resetForm').addEventListener('click', function () {
             loadCurrentConfig();
         });
     }
-    
+
     /**
      * Load current active configuration
      */
@@ -69,7 +82,7 @@
         try {
             const response = await fetch('/php/web_main_api.php?action=get_active');
             const result = await response.json();
-            
+
             if (result.success && result.data) {
                 currentConfig = result.data;
                 populateForm(currentConfig);
@@ -81,7 +94,7 @@
             showAlert('Error al cargar la configuración', 'danger');
         }
     }
-    
+
     /**
      * Populate form with configuration data
      */
@@ -94,22 +107,30 @@
         document.getElementById('themeName').value = config.theme_name || '';
         document.getElementById('faviconPath').value = config.favicon_path || '';
         document.getElementById('loginImagePath').value = config.login_image_path || '';
-        
+        document.getElementById('loginImageDayPath').value = config.login_image_day_path || '';
+        document.getElementById('loginImageNightPath').value = config.login_image_night_path || '';
+        document.getElementById('effectType').value = config.effect_type || 'oil';
+        document.getElementById('effectSpeed').value = config.effect_speed || 5;
+        document.getElementById('effectSpeedValue').textContent = config.effect_speed || 5;
+
         // Show image previews if paths exist
         if (config.favicon_path) {
             showImagePreview(config.favicon_path, 'faviconPreview');
         }
-        if (config.login_image_path) {
-            showImagePreview(config.login_image_path, 'loginImagePreview');
+        if (config.login_image_day_path) {
+            showImagePreview(config.login_image_day_path, 'loginImageDayPreview');
+        }
+        if (config.login_image_night_path) {
+            showImagePreview(config.login_image_night_path, 'loginImageNightPreview');
         }
     }
-    
+
     /**
      * Handle form submission
      */
     async function handleFormSubmit(e) {
         e.preventDefault();
-        
+
         const formData = {
             id: document.getElementById('configId').value,
             site_title: document.getElementById('siteTitle').value,
@@ -118,10 +139,14 @@
             primary_color: document.getElementById('primaryColor').value,
             theme_name: document.getElementById('themeName').value || 'Default',
             favicon_path: document.getElementById('faviconPath').value,
-            login_image_path: document.getElementById('loginImagePath').value,
+            login_image_path: document.getElementById('loginImageDayPath').value, // Default to day image for legacy
+            login_image_day_path: document.getElementById('loginImageDayPath').value,
+            login_image_night_path: document.getElementById('loginImageNightPath').value,
+            effect_type: document.getElementById('effectType').value,
+            effect_speed: document.getElementById('effectSpeed').value,
             is_active: true
         };
-        
+
         try {
             const response = await fetch('/php/web_main_api.php', {
                 method: 'PUT',
@@ -130,20 +155,20 @@
                 },
                 body: JSON.stringify(formData)
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 showAlert('Configuración guardada exitosamente', 'success');
-                
+
                 // Reload configuration
                 await loadCurrentConfig();
-                
+
                 // Apply changes immediately
                 if (window.WebConfig) {
                     window.WebConfig.apply(formData);
                 }
-                
+
                 // Reload page after 1 second to show all changes
                 setTimeout(() => {
                     window.location.reload();
@@ -156,7 +181,7 @@
             showAlert('Error al guardar la configuración', 'danger');
         }
     }
-    
+
     /**
      * Handle save as new theme
      */
@@ -165,17 +190,21 @@
         if (!themeName) {
             return;
         }
-        
+
         const formData = {
             site_title: document.getElementById('siteTitle').value,
             footer_text: document.getElementById('footerText').value,
             primary_color: document.getElementById('primaryColor').value,
             theme_name: themeName,
             favicon_path: document.getElementById('faviconPath').value,
-            login_image_path: document.getElementById('loginImagePath').value,
+            login_image_path: document.getElementById('loginImageDayPath').value,
+            login_image_day_path: document.getElementById('loginImageDayPath').value,
+            login_image_night_path: document.getElementById('loginImageNightPath').value,
+            effect_type: document.getElementById('effectType').value,
+            effect_speed: document.getElementById('effectSpeed').value,
             is_active: false
         };
-        
+
         try {
             const response = await fetch('/php/web_main_api.php', {
                 method: 'POST',
@@ -184,9 +213,9 @@
                 },
                 body: JSON.stringify(formData)
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 showAlert('Tema guardado exitosamente', 'success');
                 loadAllThemes();
@@ -198,40 +227,59 @@
             showAlert('Error al guardar el tema', 'danger');
         }
     }
-    
+
     /**
      * Upload file
      */
     async function uploadFile(type) {
-        const fileInput = document.getElementById(type === 'favicon' ? 'faviconFile' : 'loginImageFile');
+        let fileInputId;
+        if (type === 'favicon') fileInputId = 'faviconFile';
+        else if (type === 'login_image_day') fileInputId = 'loginImageDayFile';
+        else if (type === 'login_image_night') fileInputId = 'loginImageNightFile';
+
+        const fileInput = document.getElementById(fileInputId);
         const file = fileInput.files[0];
-        
+
         if (!file) {
             showAlert('Por favor seleccione un archivo', 'warning');
             return;
         }
-        
+
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_type', type);
-        
+
         try {
             const response = await fetch('/php/web_main_upload.php', {
                 method: 'POST',
                 body: formData
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 showAlert('Archivo subido exitosamente', 'success');
-                
+
                 // Update path in form
-                const pathInput = document.getElementById(type === 'favicon' ? 'faviconPath' : 'loginImagePath');
+                let pathInputId;
+                let previewId;
+
+                if (type === 'favicon') {
+                    pathInputId = 'faviconPath';
+                    previewId = 'faviconPreview';
+                } else if (type === 'login_image_day') {
+                    pathInputId = 'loginImageDayPath';
+                    previewId = 'loginImageDayPreview';
+                } else if (type === 'login_image_night') {
+                    pathInputId = 'loginImageNightPath';
+                    previewId = 'loginImageNightPreview';
+                }
+
+                const pathInput = document.getElementById(pathInputId);
                 pathInput.value = result.path;
-                
+
                 // Show preview
-                showImagePreview(result.path, type === 'favicon' ? 'faviconPreview' : 'loginImagePreview');
+                showImagePreview(result.path, previewId);
             } else {
                 showAlert(result.message || 'Error al subir archivo', 'danger');
             }
@@ -240,22 +288,22 @@
             showAlert('Error al subir el archivo', 'danger');
         }
     }
-    
+
     /**
      * Preview image from file
      */
     function previewImage(file, previewId) {
         if (!file) return;
-        
+
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             const preview = document.getElementById(previewId);
             preview.src = e.target.result;
             preview.style.display = 'block';
         };
         reader.readAsDataURL(file);
     }
-    
+
     /**
      * Show image preview from path
      */
@@ -264,7 +312,7 @@
         preview.src = '/' + path;
         preview.style.display = 'block';
     }
-    
+
     /**
      * Load all saved themes
      */
@@ -272,7 +320,7 @@
         try {
             const response = await fetch('/php/web_main_api.php?action=get_all');
             const result = await response.json();
-            
+
             if (result.success && result.data) {
                 displayThemes(result.data);
             }
@@ -280,27 +328,27 @@
             console.error('Error loading themes:', error);
         }
     }
-    
+
     /**
      * Display themes
      */
     function displayThemes(themes) {
         const container = document.getElementById('themesContainer');
-        
+
         if (!themes || themes.length === 0) {
             container.innerHTML = '<div class="col-12 text-center text-muted py-4">No hay temas guardados</div>';
             return;
         }
-        
+
         container.innerHTML = '';
-        
+
         themes.forEach(theme => {
             const col = document.createElement('div');
             col.className = 'col-md-4 mb-3';
-            
+
             const card = document.createElement('div');
             card.className = 'card theme-card h-100' + (theme.is_active ? ' active' : '');
-            
+
             card.innerHTML = `
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -322,24 +370,24 @@
                     </button>
                 </div>
             `;
-            
+
             col.appendChild(card);
             container.appendChild(col);
         });
     }
-    
+
     /**
      * Apply theme
      */
-    window.applyTheme = async function(themeId) {
+    window.applyTheme = async function (themeId) {
         try {
             const response = await fetch(`/php/web_main_api.php?action=get_by_id&id=${themeId}`);
             const result = await response.json();
-            
+
             if (result.success && result.data) {
                 const theme = result.data;
                 theme.is_active = true;
-                
+
                 const updateResponse = await fetch('/php/web_main_api.php', {
                     method: 'PUT',
                     headers: {
@@ -347,14 +395,14 @@
                     },
                     body: JSON.stringify(theme)
                 });
-                
+
                 const updateResult = await updateResponse.json();
-                
+
                 if (updateResult.success) {
                     showAlert('Tema aplicado exitosamente', 'success');
                     loadCurrentConfig();
                     loadAllThemes();
-                    
+
                     // Reload page to apply theme
                     setTimeout(() => {
                         window.location.reload();
@@ -368,7 +416,7 @@
             showAlert('Error al aplicar el tema', 'danger');
         }
     };
-    
+
     /**
      * Show alert message
      */
@@ -381,7 +429,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
         container.appendChild(alert);
-        
+
         // Auto-dismiss after 5 seconds
         setTimeout(() => {
             alert.remove();

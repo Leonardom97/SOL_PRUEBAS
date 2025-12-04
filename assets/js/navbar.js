@@ -6,7 +6,7 @@
 
   let notificationCheckInterval;
 
-  document.addEventListener('DOMContentLoaded', async function() {
+  document.addEventListener('DOMContentLoaded', async function () {
     try {
       // Fetch and display user information
       const res = await fetch('/php/verificar_sesion.php', { cache: 'no-store' });
@@ -27,17 +27,20 @@
       // Setup notifications
       setupNotifications();
 
+      // Filter navbar items based on permissions
+      filterNavbarItems();
+
       // Setup logout button
       const logoutBtn = document.getElementById('logoutBtn');
       if (logoutBtn) {
-        logoutBtn.addEventListener('click', async function(e) {
+        logoutBtn.addEventListener('click', async function (e) {
           e.preventDefault();
-          
+
           // Clear notification interval
           if (notificationCheckInterval) {
             clearInterval(notificationCheckInterval);
           }
-          
+
           try {
             // Call logout endpoint
             const logoutRes = await fetch('/php/logout.php', {
@@ -87,6 +90,64 @@
     }
   });
 
+  /**
+   * Hide navbar items based on permissions
+   */
+  async function filterNavbarItems() {
+    try {
+      // Get all links in sidebar and navbar
+      const links = document.querySelectorAll('#accordionSidebar a[href], #navbar a[href]');
+
+      // Get current user roles
+      const userRoles = JSON.parse(sessionStorage.getItem('userRoles') || '[]');
+      const isAdmin = userRoles.includes('administrador');
+
+      if (isAdmin) return; // Admins see everything
+
+      // Check each link
+      for (const link of links) {
+        const href = link.getAttribute('href');
+        if (!href || href === '#' || href.startsWith('javascript:')) continue;
+
+        // Normalize path (remove query params)
+        const path = href.split('?')[0];
+
+        // Check permission using auth_guard's global function if available, or fetch directly
+        let hasAccess = false;
+        if (window.hasPagePermission) {
+          hasAccess = await window.hasPagePermission(path);
+        } else {
+          // Fallback if auth_guard isn't fully loaded yet
+          const res = await fetch(`/php/permissions_api.php?check_access=1&page=${encodeURIComponent(path)}`);
+          const data = await res.json();
+          hasAccess = data.success && data.has_access;
+        }
+
+        if (!hasAccess) {
+          // Hide the parent li if it's a direct nav item, or just the link if it's in a dropdown
+          const parentLi = link.closest('li.nav-item');
+          const parentDropdown = link.closest('.dropdown-menu');
+
+          if (parentDropdown) {
+            link.style.display = 'none';
+            // If dropdown is empty, hide the parent nav-item
+            const visibleLinks = Array.from(parentDropdown.querySelectorAll('a')).filter(a => a.style.display !== 'none');
+            if (visibleLinks.length === 0) {
+              const dropdownNav = parentDropdown.closest('li.nav-item');
+              if (dropdownNav) dropdownNav.style.display = 'none';
+            }
+          } else if (parentLi) {
+            parentLi.style.display = 'none';
+          } else {
+            link.style.display = 'none';
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error filtering navbar items:', error);
+    }
+  }
+
   async function setupNotifications() {
     // Load notifications on page load
     await loadNotifications();
@@ -97,7 +158,7 @@
     // Reload notifications when dropdown is opened
     const notificationBell = document.getElementById('notificationBell');
     if (notificationBell) {
-      notificationBell.addEventListener('click', async function(e) {
+      notificationBell.addEventListener('click', async function (e) {
         await loadNotifications();
       });
     }
@@ -126,7 +187,7 @@
 
     // Filter unread notifications
     const unread = notifications.filter(n => !n.leida);
-    
+
     // Update badge
     if (unread.length > 0) {
       badge.textContent = unread.length > 99 ? '99+' : unread.length;
@@ -147,12 +208,12 @@
     }
 
     notificationList.innerHTML = notifications.slice(0, 5).map(notif => {
-      const bgClass = notif.estado === 'vencida' ? 'bg-danger' : 
-                      notif.estado === 'proximo_vencer' ? 'bg-warning' : 'bg-info';
-      const icon = notif.estado === 'vencida' ? 'fa-exclamation-triangle' : 
-                   notif.estado === 'proximo_vencer' ? 'fa-clock' : 'fa-calendar-alt';
-      
-      const daysText = notif.dias_para_vencimiento < 0 ? 
+      const bgClass = notif.estado === 'vencida' ? 'bg-danger' :
+        notif.estado === 'proximo_vencer' ? 'bg-warning' : 'bg-info';
+      const icon = notif.estado === 'vencida' ? 'fa-exclamation-triangle' :
+        notif.estado === 'proximo_vencer' ? 'fa-clock' : 'fa-calendar-alt';
+
+      const daysText = notif.dias_para_vencimiento < 0 ?
         `Vencida hace ${Math.abs(notif.dias_para_vencimiento)} días` :
         `Faltan ${notif.dias_para_vencimiento} días`;
 
@@ -182,7 +243,7 @@
     }
   }
 
-  window.markAsRead = async function(id) {
+  window.markAsRead = async function (id) {
     try {
       await fetch(`/m_capacitaciones/assets/php/notificaciones_api.php?action=mark_as_read&id=${id}`, {
         method: 'POST'

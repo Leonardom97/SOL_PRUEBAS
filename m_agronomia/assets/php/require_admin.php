@@ -55,9 +55,9 @@ function require_admin(): void {
   $isAdmin = in_array('administrador', $roles, true) ||
              in_array('admin', $roles, true) ||
              in_array('administrator', $roles, true) ||
-             in_array('supervisor_agronomico', $roles, true);
+             in_array('Asist_agronómico', $roles, true);
   $isAux = false;
-  $isAsistAgronomico = in_array('asist_agronómico', $roles, true);
+  $isAsistAgronomico = in_array('Asist_agronómico', $roles, true);
   foreach ($roles as $r) { if (strpos($r, 'aux') !== false) { $isAux = true; break; } }
   if (!($isAdmin || $isAux || $isAsistAgronomico)) {
     http_response_code(403);
@@ -76,7 +76,7 @@ function require_admin_only(): void {
   $ok = in_array('administrador', $roles, true) ||
         in_array('admin', $roles, true) ||
         in_array('administrator', $roles, true) ||
-        in_array('supervisor_agronomico', $roles, true);
+        in_array('Asist_agronómico', $roles, true);
   if (!$ok) {
     http_response_code(403);
     header('Content-Type: application/json; charset=utf-8');
@@ -92,7 +92,7 @@ function require_admin_only(): void {
 function require_edit_permission(): void {
   $roles = collect_roles();
   // Asist_Agronómico can only view, not edit
-  if (in_array('asist_agronómico', $roles, true)) {
+  if (in_array('Asist_agronómico', $roles, true)) {
     http_response_code(403);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([

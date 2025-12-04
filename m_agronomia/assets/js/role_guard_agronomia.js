@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const r=roles();
   const isAdmin=r.includes('administrador');
   const isAux=r.some(x=>x.includes('aux'));
-  const isAsistAgronomico=r.includes('asist_agronómico');
+  const isAsistAgronomico=r.includes('Asist_agronómico');
   if(isAdmin||isAux||isAsistAgronomico) return;
   // Oculta módulo
   const bell=document.getElementById('noti-admin'); if(bell) bell.remove();

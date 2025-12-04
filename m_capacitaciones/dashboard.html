@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html data-bs-theme="light" lang="es-419">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
@@ -8,12 +9,13 @@
     <link rel="stylesheet" href="../assets/fonts/fontawesome-all.min.css">
     <link rel="stylesheet" href="../assets/css/bs-theme-overrides.css">
     <style>
-        body { visibility: hidden; }
-        .stat-card { transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-5px); }
+        body {
+            visibility: hidden;
+        }
     </style>
 </head>
-<body id="page-top" data-role="Administrador,Capacitador,Aux_Capacitador,Capacitador_SIE,Capacitador_GH,Capacitador_TI,Capacitador_MT,Capacitador_ADM,Capacitador_IND,Capacitador_AGR">
+
+<body id="page-top">
     <script src="../assets/js/auth_guard.js"></script>
 
     <div id="wrapper">
@@ -45,7 +47,8 @@
                                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                 Total Personas (Activas)
                                             </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statTotalColaboradores">-</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"
+                                                id="statTotalColaboradores">-</div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-user-friends fa-2x text-gray-300"></i>
@@ -63,7 +66,8 @@
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Total Capacitaciones (Al Día)
                                             </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statCapacitados">-</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statCapacitados">-
+                                            </div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-graduation-cap fa-2x text-gray-300"></i>
@@ -81,7 +85,8 @@
                                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                                 Pendientes ó Próximos a Vencer
                                             </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statPendientes">-</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statPendientes">-
+                                            </div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-hourglass-half fa-2x text-gray-300"></i>
@@ -99,10 +104,107 @@
                                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                                                 Capacitaciones (Vencidas)
                                             </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statVencidas">-</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="statVencidas">-
+                                            </div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                                        <div class="row mb-4">
+                        <!-- Card: Evaluaciones Realizadas -->
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Evaluaciones Realizadas (Aprobadas)</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"
+                                                id="cardTotalRealizadas">-</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card: Asistentes que Realizaron -->
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Asistentes con Evaluaciones</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"
+                                                id="cardTotalAsistentes">-</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card: Pendientes -->
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Evaluaciones Pendientes / No Realizadas</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"
+                                                id="cardTotalPendientes">-</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Summary by Category -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card shadow">
+                                <div class="card-header py-3">
+                                    <h6 class="text-primary m-0 fw-bold">Top 10 Cargos con Capacitaciones Pendientes
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="topCargosPendientes">
+                                        <div class="text-center">
+                                            <div class="spinner-border spinner-border-sm" role="status">
+                                                <span class="visually-hidden">Cargando...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card shadow">
+                                <div class="card-header py-3">
+                                    <h6 class="text-primary m-0 fw-bold">Top 10 Temas con Capacitaciones Pendientes</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="topTemasPendientes">
+                                        <div class="text-center">
+                                            <div class="spinner-border spinner-border-sm" role="status">
+                                                <span class="visually-hidden">Cargando...</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -182,42 +284,7 @@
                         </div>
                     </div>
 
-                    <!-- Summary by Category -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card shadow">
-                                <div class="card-header py-3">
-                                    <h6 class="text-primary m-0 fw-bold">Top 10 Cargos con Capacitaciones Pendientes</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div id="topCargosPendientes">
-                                        <div class="text-center">
-                                            <div class="spinner-border spinner-border-sm" role="status">
-                                                <span class="visually-hidden">Cargando...</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="col-md-6">
-                            <div class="card shadow">
-                                <div class="card-header py-3">
-                                    <h6 class="text-primary m-0 fw-bold">Top 10 Temas con Capacitaciones Pendientes</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div id="topTemasPendientes">
-                                        <div class="text-center">
-                                            <div class="spinner-border spinner-border-sm" role="status">
-                                                <span class="visually-hidden">Cargando...</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Detailed Table -->
                     <div class="card shadow">
@@ -289,6 +356,8 @@
     <script src="assets/js/xlsx.full.min.js"></script>
     <script src="assets/js/date-utils.js"></script>
     <script src="assets/js/dashboard.js"></script>
+    <script src="../assets/js/chart.js"></script>
     <script src="../assets/js/web_config.js"></script>
 </body>
+
 </html>
