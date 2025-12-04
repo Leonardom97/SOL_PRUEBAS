@@ -34,7 +34,7 @@
     modal:'modal-editar'
   };
     const COLUMNAS=[
-    'ct_cal_trampas_id','fecha','hora','responsable','colaborador','plantacion','finca','siembra','lote','parcela','trampa','plaga','hembra','macho','lado_a','lado_b','estado_lona','estado_trampa','estado_ubicacion','estado_ventana','estado_cania','estado_melaza','estado_feromona','calificación','observaciones','error_registro','supervision'
+    'ct_cal_trampas_id','fecha','hora','responsable','colaborador','plantacion','finca','siembra','lote','parcela','trampa','plaga','hembra','macho','lado_a','lado_b','estado_lona','estado_trampa','estado_ubicacion','estado_ventana','estado_cania','estado_melaza','estado_feromona','calificación','observaciones','supervision','error_registro'
   ];
   const API='assets/php/ct_cal_trampas_api.php';
   const ID_KEY='ct_cal_trampas_id';
@@ -94,13 +94,10 @@
       const tr = document.createElement('tr');
       tr.innerHTML = `<td><input type="checkbox" class="row-check" data-index="${i}"></td>`;
       COLUMNAS.forEach(col=>{
+        if(col==='error_registro') return; // Skip - will be added after actions
         const td = document.createElement('td');
         if(col==='supervision'){ td.dataset.estado = est; td.innerHTML = icono(est); }
-        else if(col==='error_registro'){
-          const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
-          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' :
-            `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
-        } else td.textContent = row[col] ?? '';
+        else td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
       const fecha=row[DATE_COL]||'', inactivo=(row.error_registro||'').toLowerCase()==='inactivo';
@@ -116,6 +113,12 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
+      // Add error_registro column after actions
+      const tdError = document.createElement('td');
+      const inact = (row.error_registro||'').toLowerCase() === 'inactivo';
+      tdError.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' :
+        `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
+      tr.appendChild(tdError);
       tbody.appendChild(tr);
     });
     bindRowEvents(); renderPagination();

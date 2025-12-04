@@ -90,7 +90,7 @@ try {
         $cols=[
             'aud_fertilizacion_id','hora','responsable','labor_especifica','fecha_actividad','plantacion',
             'siembra','finca','lote','parcela','tipo_auditoria','tipo_fertilizacion','linea_entrada',
-            'linea_salida','calificacion','observacion','error_registro','supervision','check'
+            'linea_salida','calificacion','observacion','supervision','error_registro','check'
         ];
         $id=$body['aud_fertilizacion_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];

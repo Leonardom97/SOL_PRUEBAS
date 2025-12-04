@@ -92,7 +92,7 @@ try {
             'labor','linea_entrada','linea_salida','hora_entrada','hora_salida','polen_g','talco_g',
             'poliniza_6_g','ana_98_g','acadian_cc','cosmoagua_g','agua_cc','cosmoflux','stimplex_cc',
             'oleorganic_cc','cosmo_oil_cc','etanol_cc','flores_dobles','flores_buenas','flores_ayudadas',
-            'aplicacion_2','aplicacion_3','observaciones','error_registro','supervision','check'
+            'aplicacion_2','aplicacion_3','observaciones','supervision','error_registro','check'
         ];
         $id=$body['polinizacion_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];

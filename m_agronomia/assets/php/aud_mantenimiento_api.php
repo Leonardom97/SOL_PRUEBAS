@@ -90,7 +90,7 @@ try {
         $cols=[
             'aud_mantenimiento_id','hora','responsable','labor_especifica','fecha_actividad','plantacion',
             'siembra','finca','lote','parcela','tipo_auditoria','linea_entrada','linea_salida',
-            'calificacion_m','linea_m','palma_m','observaciones','error_registro','supervision','check'
+            'calificacion_m','linea_m','palma_m','observaciones','supervision','error_registro','check'
         ];
         $id=$body['aud_mantenimiento_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];

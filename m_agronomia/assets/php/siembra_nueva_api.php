@@ -91,7 +91,7 @@ try {
             'siembra_nueva_id','fecha','hora','fecha_actividad','responsable','labor','plantacion',
             'finca','siembra','lote','parcela','linea_entrada','linea_salida','hora_entrada','hora_salida',
             'contratista','codigo','colaborador','labor_especifica','tipo_labor','cantidad_unidad',
-            'cant_colaborador_siembra','operador','maquina','observacion','error_registro','supervision','check'
+            'cant_colaborador_siembra','operador','maquina','observacion','supervision','error_registro','check'
         ];
         $id=$body['siembra_nueva_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
