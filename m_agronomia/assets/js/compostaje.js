@@ -46,7 +46,7 @@
   const API = 'assets/php/compostaje_api.php';
   const ID_KEY = 'compostaje_id';
   const DATE_COL = 'fecha';
-  const ACTIONS = { listFallback:['conexion','listar','list'], save:'actualizar', inactivate:'inactivar', reject:'rechazar', approve:'aprobar' };
+  const ACTIONS = { listFallback:['conexion','listar','list'], save:'actualizar', inactivate:'inactivar', reject:'rechazar', approve:'aprobar', activate:'activar' };
 
   // Debounce for filter inputs
   const FILTER_DEBOUNCE_MS = 300;
@@ -129,10 +129,28 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
+      // New: render error_registro as a switch + badge styled via CSS (.error-reg-badge)
       const tdErr = document.createElement('td');
-      const inact = (row.error_registro || '').toLowerCase() === 'inactivo';
-      tdErr.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' :
-        `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
+      const inactLower = (row.error_registro||'').toLowerCase();
+      const isActive = inactLower !== 'inactivo';
+      const switchId = 'errorSwitch' + row[ID_KEY];
+      tdErr.innerHTML = `
+        <div class="form-check form-switch d-inline-block">
+          <input class="form-check-input error-reg-switch" 
+                 type="checkbox" 
+                 role="switch"
+                 id="${switchId}"
+                 data-id="${row[ID_KEY]}"
+                 ${isActive ? 'checked' : ''}
+                 title="${isActive ? 'Inactivar registro' : 'Activar registro'}"
+                 aria-label="${isActive ? 'Inactivar' : 'Activar'} registro ${row[ID_KEY]}">
+          <label class="form-check-label small" for="${switchId}">
+            <span class="error-reg-badge ${isActive ? 'active' : 'inactive'}">
+              ${isActive ? 'Activo' : 'Inactivo'}
+            </span>
+          </label>
+        </div>
+      `;
       tr.appendChild(tdErr);
       tbody.appendChild(tr);
     });
@@ -143,7 +161,46 @@
     const t = document.getElementById(DOM.tbody); if(!t) return;
     t.querySelectorAll('.btn-editar').forEach(b=> b.onclick = ()=> openModal(b.dataset.id, false));
     t.querySelectorAll('.btn-ver').forEach(b=> b.onclick = ()=> openModal(b.dataset.id, true));
-    t.querySelectorAll('.btn-inactivar').forEach(b=> b.onclick = ()=> inactivar(b.dataset.id));
+    // bind switches
+    t.querySelectorAll('.error-reg-switch').forEach(input=>{
+      input.onchange = (e)=>{
+        const id = input.dataset.id;
+        const prevState = !input.checked; // previous state (before change)
+        toggleErrorRegistro(id, prevState, input);
+      };
+    });
+  }
+
+  // Toggle error_registro state: if switch is checked => activate, else => inactivate
+  async function toggleErrorRegistro(id, prevWasActive, switchElement){
+    const desiredActive = !!switchElement.checked;
+    const action = desiredActive ? ACTIONS.activate : ACTIONS.inactivate;
+    const prompt = desiredActive ? '¿Activar registro?' : '¿Inactivar registro?';
+    if(!confirm(prompt)){
+      switchElement.checked = !!prevWasActive;
+      return;
+    }
+
+    try{
+      const r = await fetch(`${API}?action=${action}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({[ID_KEY]:id})});
+      const j = await r.json();
+      if(j.success){
+        console.log('['+ID_KEY+'] toggle error_registro ok', {id, action, result:j});
+        await load();
+      } else {
+        const err = j.error || 'Fallo acción';
+        const norm = (err===null||err===undefined)?'':String(err).trim().toLowerCase();
+        if(norm==='exception' || norm==='id_required'){ console.warn('['+ID_KEY+'] error suprimido:', err); }
+        else { alert(err); }
+        switchElement.checked = !!prevWasActive;
+      }
+    }catch(err){
+      const msg = err?.message || 'Error al cambiar estado';
+      const norm = (msg===null||msg===undefined)?'':String(msg).trim().toLowerCase();
+      if(norm==='exception' || norm==='id_required'){ console.warn('['+ID_KEY+'] error suprimido:', msg); }
+      else { alert(msg); }
+      switchElement.checked = !!prevWasActive;
+    }
   }
 
   async function inactivar(id){
@@ -163,6 +220,26 @@
       const norm = (msg===null||msg===undefined)?'':String(msg).trim().toLowerCase();
       if(norm==='exception' || norm==='id_required'){ console.warn('[compostaje] error suprimido:', msg); }
       else alert(msg);
+    }
+  }
+
+  async function activar(id){
+    if(!confirm('¿Activar registro?')) return;
+    try{
+      const r = await fetch(`${API}?action=${ACTIONS.activate}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({[ID_KEY]:id})});
+      const j = await r.json();
+      if(j.success){ console.log('['+ID_KEY+'] activar ok', {id, result:j}); load(); }
+      else {
+        const err = j.error || 'Fallo activar';
+        const norm = (err===null||err===undefined)?'':String(err).trim().toLowerCase();
+        if(norm==='exception' || norm==='id_required'){ console.warn('['+ID_KEY+'] error suprimido:', err); }
+        else { alert(err); }
+      }
+    }catch(err){
+      const msg = err?.message || 'Error activar';
+      const norm = (msg===null||msg===undefined)?'':String(msg).trim().toLowerCase();
+      if(norm==='exception' || norm==='id_required'){ console.warn('['+ID_KEY+'] error suprimido:', msg); }
+      else { alert(msg); }
     }
   }
 

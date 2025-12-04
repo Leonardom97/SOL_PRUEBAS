@@ -24,7 +24,8 @@ function map_action(?string $a): string {
     'actualizar'=>'actualizar','upsert'=>'actualizar',
     'inactivar'=>'inactivar','desactivar'=>'inactivar',
     'rechazar'=>'rechazar','reject'=>'rechazar',
-    'aprobar'=>'aprobar','approve'=>'aprobar'
+    'aprobar'=>'aprobar','approve'=>'aprobar',
+    'activar'=>'activar','reactivar'=>'activar','activar_registro'=>'activar'
   ];
   return $m[$a]??'';
 }
@@ -147,6 +148,19 @@ try {
         $st->execute([$id]);
         $success = $st->rowCount() > 0;
         respond(['success'=>$success,'action'=>'inactivar','id'=>$id,'estado'=>'inactivo']);
+    }
+
+    // --- ACTIVAR: quita flag error_registro en MAIN (pone NULL) ---
+    if ($action === 'activar') {
+        $pg = getMain();
+        $id = $body['aud_fertilizacion_id'] ?? null;
+        if((!$id || trim($id)==='') && isset($body['id'])) $id = $body['id'];
+        if(!$id) respond(['success'=>false,'error'=>'id_invalid'],400);
+        $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+        $st = $pg->prepare("UPDATE aud_fertilizacion SET error_registro = NULL WHERE aud_fertilizacion_id = :id");
+        $st->execute(['id'=>$id]);
+        $success = $st->rowCount() > 0;
+        respond(['success'=>$success,'action'=>'activar','id'=>$id,'estado'=>'activo']);
     }
 
     if ($action==='rechazar'){

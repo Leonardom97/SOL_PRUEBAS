@@ -28,7 +28,8 @@ function map_action(?string $a): string {
         'actualizar'=>'actualizar','upsert'=>'actualizar',
         'inactivar'=>'inactivar','desactivar'=>'inactivar',
         'rechazar'=>'rechazar','reject'=>'rechazar',
-        'aprobar'=>'aprobar','approve'=>'aprobar'
+        'aprobar'=>'aprobar','approve'=>'aprobar',
+    'activar'=>'activar','reactivar'=>'activar','activar_registro'=>'activar'
     ];
     return $m[$a] ?? '';
 }
