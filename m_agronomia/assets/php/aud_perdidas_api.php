@@ -137,29 +137,82 @@ try {
         }
     }
 
-    if ($action==='inactivar'){
-        $pg = getMain();
-        $id=$body['aud_perdidas_id']??null;
-        if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
-        if(!$id) respond(['success'=>false,'error'=>'id_invalid'],400);
-        $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-        $st=$pg->prepare("UPDATE aud_perdidas SET error_registro='inactivo' WHERE aud_perdidas_id=?");
-        $st->execute([$id]);
-        $success = $st->rowCount() > 0;
-        respond(['success'=>$success,'action'=>'inactivar','id'=>$id,'estado'=>'inactivo']);
-    }
-
-    // --- ACTIVAR: quita flag error_registro en MAIN (pone NULL) ---
-    if ($action === 'activar') {
-        $pg = getMain();
+    // --- INACTIVAR: marca error_registro='inactivo' en MAIN y en TEMP si existe ---
+    if ($action === 'inactivar') {
         $id = $body['aud_perdidas_id'] ?? null;
         if((!$id || trim($id)==='') && isset($body['id'])) $id = $body['id'];
         if(!$id) respond(['success'=>false,'error'=>'id_invalid'],400);
-        $pg->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-        $st = $pg->prepare("UPDATE aud_perdidas SET error_registro = NULL WHERE aud_perdidas_id = :id");
-        $st->execute(['id'=>$id]);
-        $success = $st->rowCount() > 0;
-        respond(['success'=>$success,'action'=>'activar','id'=>$id,'estado'=>'activo']);
+
+        $warnings = [];
+        $updatedMain = 0;
+        $updatedTemp = 0;
+
+        // MAIN
+        try {
+            $pgMain = getMain();
+            $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $stMain = $pgMain->prepare("UPDATE aud_perdidas SET error_registro = 'inactivo' WHERE aud_perdidas_id = :id");
+            $stMain->execute(['id'=>$id]);
+            $updatedMain = $stMain->rowCount();
+        } catch(Throwable $e) {
+            $warnings[] = 'main_error: '.$e->getMessage();
+            $updatedMain = 0;
+        }
+
+        // TEMP (intentar si existe)
+        try {
+            $pgTemp = getTemporal();
+            $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $stTemp = $pgTemp->prepare("UPDATE public.aud_perdidas SET error_registro = 'inactivo' WHERE aud_perdidas_id = :id");
+            $stTemp->execute(['id'=>$id]);
+            $updatedTemp = $stTemp->rowCount();
+        } catch(Throwable $e) {
+            // no fallo crítico si temporal no accesible, sólo avisamos
+            $warnings[] = 'temp_error: '.$e->getMessage();
+            $updatedTemp = 0;
+        }
+
+        $ok = ($updatedMain + $updatedTemp) > 0;
+        respond(['success'=>$ok,'action'=>'inactivar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'inactivo','warnings'=>$warnings]);
+    }
+
+    // --- ACTIVAR: quita flag error_registro en MAIN y TEMP (pone NULL) ---
+    if ($action === 'activar') {
+        $id = $body['aud_perdidas_id'] ?? null;
+        if((!$id || trim($id)==='') && isset($body['id'])) $id = $body['id'];
+        if(!$id) respond(['success'=>false,'error'=>'id_invalid'],400);
+
+        $warnings = [];
+        $updatedMain = 0;
+        $updatedTemp = 0;
+
+        // MAIN
+        try {
+            $pgMain = getMain();
+            $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            // intento poner NULL; si tu esquema no permite NULL podrías cambiar a empty string ''.
+            $stMain = $pgMain->prepare("UPDATE aud_perdidas SET error_registro = NULL WHERE aud_perdidas_id = :id");
+            $stMain->execute(['id'=>$id]);
+            $updatedMain = $stMain->rowCount();
+        } catch(Throwable $e) {
+            $warnings[] = 'main_error: '.$e->getMessage();
+            $updatedMain = 0;
+        }
+
+        // TEMP
+        try {
+            $pgTemp = getTemporal();
+            $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $stTemp = $pgTemp->prepare("UPDATE public.aud_perdidas SET error_registro = NULL WHERE aud_perdidas_id = :id");
+            $stTemp->execute(['id'=>$id]);
+            $updatedTemp = $stTemp->rowCount();
+        } catch(Throwable $e) {
+            $warnings[] = 'temp_error: '.$e->getMessage();
+            $updatedTemp = 0;
+        }
+
+        $ok = ($updatedMain + $updatedTemp) > 0;
+        respond(['success'=>$ok,'action'=>'activar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'activo','warnings'=>$warnings]);
     }
 
     if ($action==='rechazar'){
