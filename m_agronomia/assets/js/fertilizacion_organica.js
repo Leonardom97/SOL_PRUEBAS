@@ -162,7 +162,7 @@
     const footer = document.querySelector('#modal-editar .modal-footer');
     if(footer){
       footer.querySelectorAll('.icon-repeat-supervision').forEach(x=>x.remove());
-      if(row.supervision==='aprobado' || row.check==1){
+      if((row.supervision==='aprobado' || row.check==1) && readonly){
         const btn=document.createElement('button'); btn.type='button'; btn.className='btn btn-link icon-repeat-supervision';
         btn.title='Revertir aprobación'; btn.innerHTML='<i class="fa-solid fa-repeat" style="font-size:1.6em;color:#198754;"></i>';
         btn.onclick = ()=>revertir(id); footer.insertBefore(btn, footer.firstChild);
