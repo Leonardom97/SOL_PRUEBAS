@@ -446,56 +446,55 @@
     }
   }
 
+  // Helper function to get current periods
+  function getCurrentPeriods() {
+    const selectPeriodCap = document.getElementById('select-periodo-capacitaciones');
+    const selectPeriodPesadasKPI = document.getElementById('select-periodo-pesadas-kpi');
+    const selectPeriodPesadasChart = document.getElementById('select-periodo-pesadas-chart');
+    
+    return {
+      cap: selectPeriodCap ? selectPeriodCap.value : 'month',
+      kpi: selectPeriodPesadasKPI ? selectPeriodPesadasKPI.value : 'month',
+      chart: selectPeriodPesadasChart ? selectPeriodPesadasChart.value : 'month'
+    };
+  }
+
+  // Helper function to refresh panel data
+  function refreshPanelData() {
+    const periods = getCurrentPeriods();
+    fetchAndPopulate(periods.cap, periods.kpi, periods.chart);
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const selectPeriodCap = document.getElementById('select-periodo-capacitaciones');
     const selectPeriodPesadasKPI = document.getElementById('select-periodo-pesadas-kpi');
     const selectPeriodPesadasChart = document.getElementById('select-periodo-pesadas-chart');
 
-    const getPeriodCap = () => selectPeriodCap ? selectPeriodCap.value : 'month';
-    const getPeriodPesadasKPI = () => selectPeriodPesadasKPI ? selectPeriodPesadasKPI.value : 'month';
-    const getPeriodPesadasChart = () => selectPeriodPesadasChart ? selectPeriodPesadasChart.value : 'month';
-
     // Carga inicial
-    fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), getPeriodPesadasChart());
+    refreshPanelData();
 
     // Evento cambio de periodo Capacitaciones
     if (selectPeriodCap) {
-      selectPeriodCap.addEventListener('change', (e) => {
-        fetchAndPopulate(e.target.value, getPeriodPesadasKPI(), getPeriodPesadasChart());
-      });
+      selectPeriodCap.addEventListener('change', () => refreshPanelData());
     }
 
     // Listeners Pesadas KPI
     if (selectPeriodPesadasKPI) {
-      selectPeriodPesadasKPI.addEventListener('change', (e) => {
-        fetchAndPopulate(getPeriodCap(), e.target.value, getPeriodPesadasChart());
-      });
+      selectPeriodPesadasKPI.addEventListener('change', () => refreshPanelData());
     }
 
     // Listeners Pesadas Chart
     if (selectPeriodPesadasChart) {
-      selectPeriodPesadasChart.addEventListener('change', (e) => {
-        fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), e.target.value);
-      });
+      selectPeriodPesadasChart.addEventListener('change', () => refreshPanelData());
     }
 
     // Auto-refresh cada minuto
-    setInterval(() => {
-      fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), getPeriodPesadasChart());
-    }, 60 * 1000);
+    setInterval(refreshPanelData, 60 * 1000);
   });
 
   // Listener para cambios en fecha de corte desde m_agronomia/f_cortes.html
   window.addEventListener('fechaCorteChanged', () => {
     console.log('[panel.js] Fecha de corte actualizada, refrescando panel...');
-    const selectPeriodCap = document.getElementById('select-periodo-capacitaciones');
-    const selectPeriodPesadasKPI = document.getElementById('select-periodo-pesadas-kpi');
-    const selectPeriodPesadasChart = document.getElementById('select-periodo-pesadas-chart');
-    
-    const getPeriodCap = () => selectPeriodCap ? selectPeriodCap.value : 'month';
-    const getPeriodPesadasKPI = () => selectPeriodPesadasKPI ? selectPeriodPesadasKPI.value : 'month';
-    const getPeriodPesadasChart = () => selectPeriodPesadasChart ? selectPeriodPesadasChart.value : 'month';
-    
-    fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), getPeriodPesadasChart());
+    refreshPanelData();
   });
 })();
