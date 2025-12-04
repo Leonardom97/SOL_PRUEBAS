@@ -90,7 +90,7 @@ try {
         $cols=[
             'resiembra_id','fecha','hora','fecha_actividad','colaborador','labor','contratista',
             'plantacion','finca','siembra','lote','parcela','linea','palma','variedad_res',
-            'observacion_res','error_registro','supervision','check'
+            'observacion_res','supervision','error_registro','check'
         ];
         $id=$body['resiembra_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];

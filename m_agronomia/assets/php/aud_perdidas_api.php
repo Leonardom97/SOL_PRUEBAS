@@ -89,7 +89,7 @@ try {
         if(!is_array($body)) throw new RuntimeException('JSON inválido');
         $cols=[
             'aud_perdidas_id','hora','responsable','tipo_auditoria','fecha_actividad','plantacion',
-            'siembra','finca','lote','parcela','linea','palma','fruto_suelto_perdido','racimos_perdidos','error_registro','supervision','check'
+            'siembra','finca','lote','parcela','linea','palma','fruto_suelto_perdido','racimos_perdidos','supervision','error_registro','check'
         ];
         $id=$body['aud_perdidas_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];

@@ -91,7 +91,7 @@ try {
             'coberturas_id','fecha','hora','fecha_actividad','responsable','contratista','codigo','colaborador',
             'labor','plantacion','finca','siembra','lote','parcela','linea_entrada','linea_salida',
             'unidad','cantidad','h_inicio','h_fin','cobertura','cant_colaboradores','operador','maquina',
-            'observaciones','error_registro','supervision','check'
+            'observaciones','supervision','error_registro','check'
         ];
         $id=$body['coberturas_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];

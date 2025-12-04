@@ -90,7 +90,7 @@ try {
         $cols=[
             'salida_vivero_id','fecha','hora','fecha_actividad','colaborador','labor','plantacion',
             'finca','siembra','lote','parcela','variedad','cantidad','recibe','transporte','numero',
-            'observacion_vivero','error_registro','supervision','check'
+            'observacion_vivero','supervision','error_registro','check'
         ];
         $id=$body['salida_vivero_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];

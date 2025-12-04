@@ -88,7 +88,7 @@ try {
         $pg = getTemporal();
         if(!is_array($body)) throw new RuntimeException('JSON inválido');
         $cols=[
-            'monitoreos_generales_id','fecha','hora','colaborador','plantacion','finca','siembra','lote','parcela','linea','palma','grupo','estado','validacion','sintoma','observacion','error_registro','supervision','check'
+            'monitoreos_generales_id','fecha','hora','colaborador','plantacion','finca','siembra','lote','parcela','linea','palma','grupo','estado','validacion','sintoma','observacion','supervision','error_registro','check'
         ];
         $id=$body['monitoreos_generales_id']??null;
         if((!$id||trim($id)==='') && isset($body['id'])) $id = $body['id'];
