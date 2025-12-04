@@ -484,4 +484,18 @@
       fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), getPeriodPesadasChart());
     }, 60 * 1000);
   });
+
+  // Listener para cambios en fecha de corte desde m_agronomia/f_cortes.html
+  window.addEventListener('fechaCorteChanged', () => {
+    console.log('[panel.js] Fecha de corte actualizada, refrescando panel...');
+    const selectPeriodCap = document.getElementById('select-periodo-capacitaciones');
+    const selectPeriodPesadasKPI = document.getElementById('select-periodo-pesadas-kpi');
+    const selectPeriodPesadasChart = document.getElementById('select-periodo-pesadas-chart');
+    
+    const getPeriodCap = () => selectPeriodCap ? selectPeriodCap.value : 'month';
+    const getPeriodPesadasKPI = () => selectPeriodPesadasKPI ? selectPeriodPesadasKPI.value : 'month';
+    const getPeriodPesadasChart = () => selectPeriodPesadasChart ? selectPeriodPesadasChart.value : 'month';
+    
+    fetchAndPopulate(getPeriodCap(), getPeriodPesadasKPI(), getPeriodPesadasChart());
+  });
 })();
