@@ -140,7 +140,8 @@
                  id="${switchId}"
                  data-id="${row[ID_KEY]}"
                  ${isActive ? 'checked' : ''}
-                 title="${isActive ? 'Inactivar registro' : 'Activar registro'}"
+                 ${disabledAttr}
+                 title=\"${titleText}\"
                  aria-label="${isActive ? 'Inactivar' : 'Activar'} registro ${row[ID_KEY]}">
           <label class="form-check-label small" for="${switchId}">
             <span class="error-reg-badge ${isActive ? 'active' : 'inactive'}">

@@ -55,7 +55,10 @@ function require_admin(): void {
   $isAdmin = in_array('administrador', $roles, true) ||
              in_array('admin', $roles, true) ||
              in_array('administrator', $roles, true) ||
-             in_array('supervisor_agronomico', $roles, true);
+             in_array('agronomico', $roles, true) ||
+             in_array('sup_logistica1', $roles, true) ||
+             in_array('sup_logistica2', $roles, true) ||
+             in_array('asist_agronomico', $roles, true);
   $isAux = false;
   foreach ($roles as $r) { if (strpos($r, 'aux') !== false) { $isAux = true; break; } }
   if (!($isAdmin || $isAux)) {
@@ -63,7 +66,7 @@ function require_admin(): void {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
       'success' => false,
-      'error'   => 'Acceso denegado. Se requiere rol administrador, supervisor agronómico o auxiliar.',
+      'error'   => 'Acceso denegado. Se requiere rol de agronomía válido.',
       'roles_detectados' => $roles
     ]);
     exit;
@@ -75,13 +78,14 @@ function require_admin_only(): void {
   $ok = in_array('administrador', $roles, true) ||
         in_array('admin', $roles, true) ||
         in_array('administrator', $roles, true) ||
-        in_array('supervisor_agronomico', $roles, true);
+        in_array('agronomico', $roles, true) ||
+        in_array('asist_agronomico', $roles, true);
   if (!$ok) {
     http_response_code(403);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
       'success' => false,
-      'error'   => 'Acceso denegado. Sólo el rol administrador o supervisor agronómico puede realizar esta acción.',
+      'error'   => 'Acceso denegado. Sólo roles con permisos completos pueden realizar esta acción.',
       'roles_detectados' => $roles
     ]);
     exit;

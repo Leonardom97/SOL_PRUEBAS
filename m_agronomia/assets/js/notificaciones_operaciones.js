@@ -203,6 +203,11 @@
     const accionesColName = cols.find(c => norm(c)==='acciones');
     const idKey = idCol || idColForEntidad(entidad);
 
+    // Obtener permisos del usuario usando el sistema de role_permissions
+    const perms = window.AgronomiaRolePermissions ? window.AgronomiaRolePermissions.getUserPermissions() : { canApprove: true, canReject: true };
+    const canApprove = perms.canApprove;
+    const canReject = perms.canReject;
+
     const thead='<thead class="table-light"><tr>'+
       cols.map(c=>'<th>'+escapeHtml(c)+'</th>').join('')+
       '<th>'+(accionesColName ? 'Aprobación':'Acciones')+'</th>'+
@@ -218,11 +223,20 @@
           }
           return '<td>'+escapeHtml(r? r[c] : '')+'</td>';
         }).join('');
-        const aprobacion =
-          '<td style="white-space:nowrap;">'+
-            '<button class="btn btn-sm btn-success md-aprobar" data-id="'+escapeHtml(idVal)+'" data-idcol="'+escapeHtml(idKey)+'" data-entidad="'+escapeHtml(entidad)+'" title="Aprobar"><i class="fa fa-check"></i></button>'+
-            '<button class="btn btn-sm btn-outline-danger md-rechazar" data-id="'+escapeHtml(idVal)+'" data-idcol="'+escapeHtml(idKey)+'" data-entidad="'+escapeHtml(entidad)+'" style="margin-left:6px;" title="Rechazar"><i class="fa fa-times"></i></button>'+
-          '</td>';
+        
+        // Renderizar botones de aprobación/rechazo solo si el usuario tiene permisos
+        let aprobacion = '<td style="white-space:nowrap;">';
+        if (canApprove) {
+          aprobacion += '<button class="btn btn-sm btn-success md-aprobar" data-id="'+escapeHtml(idVal)+'" data-idcol="'+escapeHtml(idKey)+'" data-entidad="'+escapeHtml(entidad)+'" title="Aprobar"><i class="fa fa-check"></i></button>';
+        }
+        if (canReject) {
+          aprobacion += '<button class="btn btn-sm btn-outline-danger md-rechazar" data-id="'+escapeHtml(idVal)+'" data-idcol="'+escapeHtml(idKey)+'" data-entidad="'+escapeHtml(entidad)+'" style="margin-left:6px;" title="Rechazar"><i class="fa fa-times"></i></button>';
+        }
+        if (!canApprove && !canReject) {
+          aprobacion += '<span class="text-muted small">Sin permisos</span>';
+        }
+        aprobacion += '</td>';
+        
         return '<tr>'+tds+aprobacion+'</tr>';
       }).join('')+
       '</tbody>';
