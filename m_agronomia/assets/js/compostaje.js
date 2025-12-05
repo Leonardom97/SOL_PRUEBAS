@@ -284,7 +284,7 @@
   async function revertir(id){
     if(!confirm('¿Revertir aprobación?')) return;
     try{
-      const r = await fetch(`${API}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action: ACTIONS.reject, [ID_KEY]: id }) });
+      const r = await fetch(`${API}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action: ACTIONS.revert, [ID_KEY]: id }) });
       const j = await r.json();
       if(!j.success){
         const err = j.error || 'No revertido';
