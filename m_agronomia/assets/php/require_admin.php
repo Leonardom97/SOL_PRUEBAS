@@ -52,16 +52,25 @@ function collect_roles(): array {
 
 function require_admin(): void {
   $roles = collect_roles();
-  $isAdmin = in_array('administrador', $roles, true) ||
-             in_array('admin', $roles, true) ||
-             in_array('administrator', $roles, true) ||
-             in_array('agronomico', $roles, true) ||
-             in_array('sup_logistica1', $roles, true) ||
-             in_array('sup_logistica2', $roles, true) ||
-             in_array('asist_agronomico', $roles, true);
-  $isAux = false;
-  foreach ($roles as $r) { if (strpos($r, 'aux') !== false) { $isAux = true; break; } }
-  if (!($isAdmin || $isAux)) {
+  $validRoles = ['administrador', 'admin', 'administrator', 'agronomico', 
+                 'sup_logistica1', 'sup_logistica2', 'asist_agronomico', 'aux_agronomico'];
+  $hasValidRole = false;
+  foreach ($validRoles as $validRole) {
+    if (in_array($validRole, $roles, true)) {
+      $hasValidRole = true;
+      break;
+    }
+  }
+  // Also check for roles containing 'aux'
+  if (!$hasValidRole) {
+    foreach ($roles as $r) { 
+      if (strpos($r, 'aux') !== false) { 
+        $hasValidRole = true; 
+        break; 
+      } 
+    }
+  }
+  if (!$hasValidRole) {
     http_response_code(403);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
@@ -87,6 +96,163 @@ function require_admin_only(): void {
       'success' => false,
       'error'   => 'Acceso denegado. Sólo roles con permisos completos pueden realizar esta acción.',
       'roles_detectados' => $roles
+    ]);
+    exit;
+  }
+}
+
+/**
+ * Verifica si el usuario tiene un rol específico o contiene un patrón
+ */
+function has_role_pattern(string $needle, array $roles): bool {
+  $needle = strtolower($needle);
+  foreach ($roles as $r) {
+    if ($r === $needle) return true;
+    if (strpos($needle, 'aux') !== false && strpos($r, 'aux') !== false) return true;
+  }
+  return false;
+}
+
+/**
+ * Verifica si el usuario puede aprobar registros
+ */
+function can_approve(): bool {
+  $roles = collect_roles();
+  $allowedRoles = ['administrador', 'admin', 'administrator', 'agronomico', 'sup_logistica1', 'sup_logistica2', 'asist_agronomico'];
+  foreach ($allowedRoles as $role) {
+    if (in_array($role, $roles, true)) return true;
+  }
+  return false;
+}
+
+/**
+ * Verifica si el usuario puede rechazar registros
+ */
+function can_reject(): bool {
+  $roles = collect_roles();
+  $allowedRoles = ['administrador', 'admin', 'administrator', 'agronomico', 'sup_logistica1', 'sup_logistica2', 'asist_agronomico'];
+  foreach ($allowedRoles as $role) {
+    if (in_array($role, $roles, true)) return true;
+  }
+  return false;
+}
+
+/**
+ * Verifica si el usuario puede revertir registros aprobados
+ */
+function can_revert(): bool {
+  $roles = collect_roles();
+  $allowedRoles = ['administrador', 'admin', 'administrator', 'agronomico', 'asist_agronomico'];
+  foreach ($allowedRoles as $role) {
+    if (in_array($role, $roles, true)) return true;
+  }
+  return false;
+}
+
+/**
+ * Verifica si el usuario puede activar error_registro
+ */
+function can_activate_error(): bool {
+  $roles = collect_roles();
+  $allowedRoles = ['administrador', 'admin', 'administrator', 'agronomico', 'asist_agronomico'];
+  foreach ($allowedRoles as $role) {
+    if (in_array($role, $roles, true)) return true;
+  }
+  return false;
+}
+
+/**
+ * Verifica si el usuario puede inactivar error_registro
+ */
+function can_inactivate_error(): bool {
+  $roles = collect_roles();
+  // Todos los roles del módulo pueden inactivar
+  $allowedRoles = ['administrador', 'admin', 'administrator', 'agronomico', 'sup_logistica1', 'sup_logistica2', 'asist_agronomico'];
+  foreach ($allowedRoles as $role) {
+    if (in_array($role, $roles, true)) return true;
+  }
+  // También permitir roles que contengan 'aux'
+  foreach ($roles as $r) {
+    if (strpos($r, 'aux') !== false) return true;
+  }
+  return false;
+}
+
+/**
+ * Requiere permiso para aprobar. Si no tiene permiso, responde 403 y termina.
+ */
+function require_approve_permission(): void {
+  if (!can_approve()) {
+    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+      'success' => false,
+      'error'   => 'Acceso denegado. No tiene permisos para aprobar registros.',
+      'roles_detectados' => collect_roles()
+    ]);
+    exit;
+  }
+}
+
+/**
+ * Requiere permiso para rechazar. Si no tiene permiso, responde 403 y termina.
+ */
+function require_reject_permission(): void {
+  if (!can_reject()) {
+    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+      'success' => false,
+      'error'   => 'Acceso denegado. No tiene permisos para rechazar registros.',
+      'roles_detectados' => collect_roles()
+    ]);
+    exit;
+  }
+}
+
+/**
+ * Requiere permiso para revertir. Si no tiene permiso, responde 403 y termina.
+ */
+function require_revert_permission(): void {
+  if (!can_revert()) {
+    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+      'success' => false,
+      'error'   => 'Acceso denegado. No tiene permisos para revertir registros aprobados.',
+      'roles_detectados' => collect_roles()
+    ]);
+    exit;
+  }
+}
+
+/**
+ * Requiere permiso para activar. Si no tiene permiso, responde 403 y termina.
+ */
+function require_activate_permission(): void {
+  if (!can_activate_error()) {
+    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+      'success' => false,
+      'error'   => 'Acceso denegado. No tiene permisos para activar registros.',
+      'roles_detectados' => collect_roles()
+    ]);
+    exit;
+  }
+}
+
+/**
+ * Requiere permiso para inactivar. Si no tiene permiso, responde 403 y termina.
+ */
+function require_inactivate_permission(): void {
+  if (!can_inactivate_error()) {
+    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+      'success' => false,
+      'error'   => 'Acceso denegado. No tiene permisos para inactivar registros.',
+      'roles_detectados' => collect_roles()
     ]);
     exit;
   }

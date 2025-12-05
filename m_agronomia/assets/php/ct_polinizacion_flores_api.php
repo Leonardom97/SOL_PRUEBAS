@@ -33,10 +33,19 @@ try {
     if (!$action) throw new RuntimeException('action requerido. Valores: conexion, actualizar, inactivar, rechazar, aprobar');
 
     $action = map_action($action);
-    if (in_array($action,['aprobar','rechazar'],true)) {
-        require_once __DIR__ . '/require_admin.php';
-        require_admin_only();
+    // Validación de permisos según la acción
+    require_once __DIR__ . '/require_admin.php';
+    
+    if ($action === 'aprobar') {
+        require_approve_permission();
+    } elseif ($action === 'rechazar') {
+        require_reject_permission();
+    } elseif ($action === 'activar') {
+        require_activate_permission();
+    } elseif ($action === 'inactivar') {
+        require_inactivate_permission();
     }
+
 
     // listado (MAIN)
     if ($action==='conexion') {
