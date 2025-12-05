@@ -161,7 +161,7 @@ try {
             $foundMain = (bool)$stCheck->fetchColumn();
             
             if ($foundMain) {
-                $stMain = $pgMain->prepare("UPDATE public.cosecha_fruta SET error_registro = 'inactivo' WHERE cosecha_fruta_id = :id");
+                $stMain = $pgMain->prepare("UPDATE cosecha_fruta SET error_registro = 'inactivo' WHERE cosecha_fruta_id = :id");
                 $stMain->execute(['id'=>$id]);
                 $updatedMain = $stMain->rowCount();
             }
@@ -180,7 +180,7 @@ try {
             $foundTemp = (bool)$stCheck->fetchColumn();
             
             if ($foundTemp) {
-                $stTemp = $pgTemp->prepare("UPDATE public.cosecha_fruta SET error_registro = 'inactivo' WHERE cosecha_fruta_id = :id");
+                $stTemp = $pgTemp->prepare("UPDATE cosecha_fruta SET error_registro = 'inactivo' WHERE cosecha_fruta_id = :id");
                 $stTemp->execute(['id'=>$id]);
                 $updatedTemp = $stTemp->rowCount();
             }
@@ -222,7 +222,7 @@ try {
             
             if ($foundMain) {
                 // intento poner NULL; si tu esquema no permite NULL podrías cambiar a empty string ''.
-                $stMain = $pgMain->prepare("UPDATE public.cosecha_fruta SET error_registro = NULL WHERE cosecha_fruta_id = :id");
+                $stMain = $pgMain->prepare("UPDATE cosecha_fruta SET error_registro = NULL WHERE cosecha_fruta_id = :id");
                 $stMain->execute(['id'=>$id]);
                 $updatedMain = $stMain->rowCount();
             }
@@ -241,7 +241,7 @@ try {
             $foundTemp = (bool)$stCheck->fetchColumn();
             
             if ($foundTemp) {
-                $stTemp = $pgTemp->prepare("UPDATE public.cosecha_fruta SET error_registro = NULL WHERE cosecha_fruta_id = :id");
+                $stTemp = $pgTemp->prepare("UPDATE cosecha_fruta SET error_registro = NULL WHERE cosecha_fruta_id = :id");
                 $stTemp->execute(['id'=>$id]);
                 $updatedTemp = $stTemp->rowCount();
             }
