@@ -14,6 +14,42 @@
  * 3. sup_logistica1: Puede ingresar, aprobar/rechazar, NO revertir, solo INACTIVAR error_registro
  * 4. sup_logistica2: Puede ingresar, aprobar/rechazar, NO revertir, solo INACTIVAR error_registro
  * 5. asist_agronomico: Puede ingresar, aprobar/rechazar, revertir, puede ACTIVAR error_registro
+ *
+ * ============================================================================
+ * CONFIGURACIÓN DE ROLES EN BASE DE DATOS:
+ * ============================================================================
+ * 
+ * Para agregar los roles necesarios en la base de datos, ejecute los siguientes
+ * comandos SQL en su base de datos PostgreSQL:
+ * 
+ * -- 1. Crear roles si no existen (tabla adm_roles)
+ * INSERT INTO adm_roles (nombre, estado) VALUES ('agronomico', 0) 
+ * ON CONFLICT DO NOTHING;
+ * 
+ * INSERT INTO adm_roles (nombre, estado) VALUES ('aux_agronomico', 0) 
+ * ON CONFLICT DO NOTHING;
+ * 
+ * INSERT INTO adm_roles (nombre, estado) VALUES ('sup_logistica1', 0) 
+ * ON CONFLICT DO NOTHING;
+ * 
+ * INSERT INTO adm_roles (nombre, estado) VALUES ('sup_logistica2', 0) 
+ * ON CONFLICT DO NOTHING;
+ * 
+ * INSERT INTO adm_roles (nombre, estado) VALUES ('asist_agronomico', 0) 
+ * ON CONFLICT DO NOTHING;
+ * 
+ * -- 2. Asignar rol a un usuario (reemplace USER_ID y ROLE_ID según corresponda)
+ * -- Primero obtenga el ID del rol:
+ * -- SELECT id FROM adm_roles WHERE nombre = 'agronomico';
+ * 
+ * -- Luego asigne el rol al usuario:
+ * -- INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (USER_ID, ROLE_ID);
+ * 
+ * -- O actualice el campo rol en la tabla de usuarios:
+ * -- UPDATE usuarios SET rol = 'agronomico' WHERE id = USER_ID;
+ * 
+ * NOTA: El campo 'estado' en adm_roles usa 0 para activo y 1 para inactivo.
+ * ============================================================================
  */
 
 // Inicia sesión si no está activa
