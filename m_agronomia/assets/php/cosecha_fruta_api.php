@@ -148,33 +148,50 @@ try {
         $warnings = [];
         $updatedMain = 0;
         $updatedTemp = 0;
+        $foundMain = false;
+        $foundTemp = false;
 
-        // MAIN
+        // MAIN - check if exists first, then update
         try {
             $pgMain = getMain();
             $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            $stMain = $pgMain->prepare("UPDATE public.cosecha_fruta SET error_registro = 'inactivo' WHERE cosecha_fruta_id = :id");
-            $stMain->execute(['id'=>$id]);
-            $updatedMain = $stMain->rowCount();
+            // First check if record exists
+            $stCheck = $pgMain->prepare("SELECT 1 FROM cosecha_fruta WHERE cosecha_fruta_id = :id LIMIT 1");
+            $stCheck->execute(['id'=>$id]);
+            $foundMain = (bool)$stCheck->fetchColumn();
+            
+            if ($foundMain) {
+                $stMain = $pgMain->prepare("UPDATE cosecha_fruta SET error_registro = 'inactivo' WHERE cosecha_fruta_id = :id");
+                $stMain->execute(['id'=>$id]);
+                $updatedMain = $stMain->rowCount();
+            }
         } catch(Throwable $e) {
             $warnings[] = 'main_error: '.$e->getMessage();
             $updatedMain = 0;
         }
 
-        // TEMP (intentar si existe)
+        // TEMP - check if exists first, then update
         try {
             $pgTemp = getTemporal();
             $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            $stTemp = $pgTemp->prepare("UPDATE public.cosecha_fruta SET error_registro = 'inactivo' WHERE cosecha_fruta_id = :id");
-            $stTemp->execute(['id'=>$id]);
-            $updatedTemp = $stTemp->rowCount();
+            // First check if record exists
+            $stCheck = $pgTemp->prepare("SELECT 1 FROM cosecha_fruta WHERE cosecha_fruta_id = :id LIMIT 1");
+            $stCheck->execute(['id'=>$id]);
+            $foundTemp = (bool)$stCheck->fetchColumn();
+            
+            if ($foundTemp) {
+                $stTemp = $pgTemp->prepare("UPDATE cosecha_fruta SET error_registro = 'inactivo' WHERE cosecha_fruta_id = :id");
+                $stTemp->execute(['id'=>$id]);
+                $updatedTemp = $stTemp->rowCount();
+            }
         } catch(Throwable $e) {
             // no fallo crítico si temporal no accesible, sólo avisamos
             $warnings[] = 'temp_error: '.$e->getMessage();
             $updatedTemp = 0;
         }
 
-        $ok = ($updatedMain + $updatedTemp) > 0;
+        // Success if record was found in at least one database
+        $ok = ($foundMain || $foundTemp);
         $response = ['success'=>$ok,'action'=>'inactivar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'inactivo','warnings'=>$warnings];
         if (!$ok) {
             $response['error'] = 'No se encontró el registro con ID: '.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').' en ninguna base de datos';
@@ -191,33 +208,50 @@ try {
         $warnings = [];
         $updatedMain = 0;
         $updatedTemp = 0;
+        $foundMain = false;
+        $foundTemp = false;
 
-        // MAIN
+        // MAIN - check if exists first, then update
         try {
             $pgMain = getMain();
             $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            // intento poner NULL; si tu esquema no permite NULL podrías cambiar a empty string ''.
-            $stMain = $pgMain->prepare("UPDATE public.cosecha_fruta SET error_registro = NULL WHERE cosecha_fruta_id = :id");
-            $stMain->execute(['id'=>$id]);
-            $updatedMain = $stMain->rowCount();
+            // First check if record exists
+            $stCheck = $pgMain->prepare("SELECT 1 FROM cosecha_fruta WHERE cosecha_fruta_id = :id LIMIT 1");
+            $stCheck->execute(['id'=>$id]);
+            $foundMain = (bool)$stCheck->fetchColumn();
+            
+            if ($foundMain) {
+                // intento poner NULL; si tu esquema no permite NULL podrías cambiar a empty string ''.
+                $stMain = $pgMain->prepare("UPDATE cosecha_fruta SET error_registro = NULL WHERE cosecha_fruta_id = :id");
+                $stMain->execute(['id'=>$id]);
+                $updatedMain = $stMain->rowCount();
+            }
         } catch(Throwable $e) {
             $warnings[] = 'main_error: '.$e->getMessage();
             $updatedMain = 0;
         }
 
-        // TEMP
+        // TEMP - check if exists first, then update
         try {
             $pgTemp = getTemporal();
             $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            $stTemp = $pgTemp->prepare("UPDATE public.cosecha_fruta SET error_registro = NULL WHERE cosecha_fruta_id = :id");
-            $stTemp->execute(['id'=>$id]);
-            $updatedTemp = $stTemp->rowCount();
+            // First check if record exists
+            $stCheck = $pgTemp->prepare("SELECT 1 FROM cosecha_fruta WHERE cosecha_fruta_id = :id LIMIT 1");
+            $stCheck->execute(['id'=>$id]);
+            $foundTemp = (bool)$stCheck->fetchColumn();
+            
+            if ($foundTemp) {
+                $stTemp = $pgTemp->prepare("UPDATE cosecha_fruta SET error_registro = NULL WHERE cosecha_fruta_id = :id");
+                $stTemp->execute(['id'=>$id]);
+                $updatedTemp = $stTemp->rowCount();
+            }
         } catch(Throwable $e) {
             $warnings[] = 'temp_error: '.$e->getMessage();
             $updatedTemp = 0;
         }
 
-        $ok = ($updatedMain + $updatedTemp) > 0;
+        // Success if record was found in at least one database
+        $ok = ($foundMain || $foundTemp);
         $response = ['success'=>$ok,'action'=>'activar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'activo','warnings'=>$warnings];
         if (!$ok) {
             $response['error'] = 'No se encontró el registro con ID: '.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').' en ninguna base de datos';
