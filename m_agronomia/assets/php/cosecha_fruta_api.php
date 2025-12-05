@@ -153,7 +153,7 @@ try {
         try {
             $pgMain = getMain();
             $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            $stMain = $pgMain->prepare("UPDATE cosecha_fruta SET error_registro = 'inactivo' WHERE cosecha_fruta_id = :id");
+            $stMain = $pgMain->prepare("UPDATE public.cosecha_fruta SET error_registro = 'inactivo' WHERE cosecha_fruta_id = :id");
             $stMain->execute(['id'=>$id]);
             $updatedMain = $stMain->rowCount();
         } catch(Throwable $e) {
@@ -197,7 +197,7 @@ try {
             $pgMain = getMain();
             $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
             // intento poner NULL; si tu esquema no permite NULL podrías cambiar a empty string ''.
-            $stMain = $pgMain->prepare("UPDATE cosecha_fruta SET error_registro = NULL WHERE cosecha_fruta_id = :id");
+            $stMain = $pgMain->prepare("UPDATE public.cosecha_fruta SET error_registro = NULL WHERE cosecha_fruta_id = :id");
             $stMain->execute(['id'=>$id]);
             $updatedMain = $stMain->rowCount();
         } catch(Throwable $e) {
