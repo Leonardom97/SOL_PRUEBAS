@@ -2,12 +2,18 @@
 /**
  * roles_auth.php
  *
- * Funciones auxiliares para manejo de roles:
+ * Funciones auxiliares para manejo de roles en módulo agronomía:
  *  - Obtener roles del usuario desde la sesión
  *  - Verificar si el usuario posee cierto rol (o algún rol auxiliar)
  *  - Exigir roles para endpoints protegidos
  *
- * Nota: Puede unificarse con require_admin.php para evitar duplicidad.
+ * ROLES Y PERMISOS PARA MÓDULO AGRONOMÍA:
+ * 
+ * 1. aux_agronomico: Puede ingresar, NO aprobar/rechazar, NO revertir, solo INACTIVAR error_registro
+ * 2. agronomico: Acceso completo sin restricciones
+ * 3. sup_logistica1: Puede ingresar, aprobar/rechazar, NO revertir, solo INACTIVAR error_registro
+ * 4. sup_logistica2: Puede ingresar, aprobar/rechazar, NO revertir, solo INACTIVAR error_registro
+ * 5. asist_agronomico: Puede ingresar, aprobar/rechazar, revertir, puede ACTIVAR error_registro
  */
 
 // Inicia sesión si no está activa
@@ -66,6 +72,133 @@ function require_any_role(array $rolesNeeded) {
         'message' => 'No autorizado'
     ]);
     exit;
+}
+
+/**
+ * Verifica si el usuario puede INGRESAR/EDITAR datos (todos los roles de agronomía pueden)
+ */
+function can_enter_data(): bool {
+    return has_role('administrador') || has_role('agronomico') || 
+           has_role('aux_agronomico') || has_role('sup_logistica1') || 
+           has_role('sup_logistica2') || has_role('asist_agronomico');
+}
+
+/**
+ * Verifica si el usuario puede APROBAR/RECHAZAR
+ * aux_agronomico NO puede aprobar/rechazar
+ */
+function can_approve_reject(): bool {
+    $userRoles = get_user_roles();
+    // aux_agronomico NO puede
+    if (has_role('aux_agronomico', $userRoles)) return false;
+    // Los demás sí pueden
+    return has_role('administrador', $userRoles) || has_role('agronomico', $userRoles) || 
+           has_role('sup_logistica1', $userRoles) || has_role('sup_logistica2', $userRoles) || 
+           has_role('asist_agronomico', $userRoles);
+}
+
+/**
+ * Verifica si el usuario puede REVERTIR aprobaciones
+ * Solo agronomico y asist_agronomico pueden revertir
+ */
+function can_revert_approved(): bool {
+    return has_role('administrador') || has_role('agronomico') || has_role('asist_agronomico');
+}
+
+/**
+ * Verifica si el usuario puede ACTIVAR error_registro
+ * Solo agronomico y asist_agronomico pueden activar
+ */
+function can_activate_error_registro(): bool {
+    return has_role('administrador') || has_role('agronomico') || has_role('asist_agronomico');
+}
+
+/**
+ * Verifica si el usuario puede INACTIVAR error_registro
+ * Todos los roles de agronomía pueden inactivar
+ */
+function can_inactivate_error_registro(): bool {
+    return can_enter_data(); // Mismo criterio
+}
+
+/**
+ * Requiere permiso para ingresar/editar datos
+ */
+function require_enter_data_permission(): void {
+    if (!can_enter_data()) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => false,
+            'error'   => 'forbidden',
+            'message' => 'No tiene permisos para ingresar o editar datos.'
+        ]);
+        exit;
+    }
+}
+
+/**
+ * Requiere permiso para aprobar/rechazar
+ */
+function require_approve_reject_permission(): void {
+    if (!can_approve_reject()) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => false,
+            'error'   => 'forbidden',
+            'message' => 'No tiene permisos para aprobar o rechazar registros.'
+        ]);
+        exit;
+    }
+}
+
+/**
+ * Requiere permiso para revertir aprobaciones
+ */
+function require_revert_permission(): void {
+    if (!can_revert_approved()) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => false,
+            'error'   => 'forbidden',
+            'message' => 'No tiene permisos para revertir registros aprobados.'
+        ]);
+        exit;
+    }
+}
+
+/**
+ * Requiere permiso para activar error_registro
+ */
+function require_activate_error_registro_permission(): void {
+    if (!can_activate_error_registro()) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => false,
+            'error'   => 'forbidden',
+            'message' => 'No tiene permisos para activar registros. Solo puede inactivar.'
+        ]);
+        exit;
+    }
+}
+
+/**
+ * Requiere permiso para inactivar error_registro
+ */
+function require_inactivate_error_registro_permission(): void {
+    if (!can_inactivate_error_registro()) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => false,
+            'error'   => 'forbidden',
+            'message' => 'No tiene permisos para inactivar registros.'
+        ]);
+        exit;
+    }
 }
 
 /**
