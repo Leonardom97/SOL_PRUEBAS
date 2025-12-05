@@ -81,10 +81,20 @@
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
       // New: render error_registro as a switch + badge styled via CSS (.error-reg-badge)
+      // Control de permisos para activar/inactivar
+      const perms = window.AgronomiaRolePermissions ? window.AgronomiaRolePermissions.getUserPermissions() : { canActivate: true, canInactivate: true };
       const tdError = document.createElement('td');
       const inactLower = (row.error_registro||'').toLowerCase();
       const isActive = inactLower !== 'inactivo';
       const switchId = 'errorSwitch' + row[ID_KEY];
+      
+      // Determinar si el switch debe estar deshabilitado según permisos
+      const canToggle = (isActive && perms.canInactivate) || (!isActive && perms.canActivate);
+      const disabledAttr = canToggle ? '' : 'disabled';
+      const titleText = !canToggle 
+        ? 'Sin permisos para esta acción' 
+        : (isActive ? 'Inactivar registro' : 'Activar registro');
+      
       tdError.innerHTML = `
         <div class="form-check form-switch d-inline-block">
           <input class="form-check-input error-reg-switch" 
@@ -93,7 +103,8 @@
                  id="${switchId}"
                  data-id="${row[ID_KEY]}"
                  ${isActive ? 'checked' : ''}
-                 title="${isActive ? 'Inactivar registro' : 'Activar registro'}"
+                 ${disabledAttr}
+                 title="${titleText}"
                  aria-label="${isActive ? 'Inactivar' : 'Activar'} registro ${row[ID_KEY]}">
           <label class="form-check-label small" for="${switchId}">
             <span class="error-reg-badge ${isActive ? 'active' : 'inactive'}">
@@ -124,9 +135,24 @@
 
   // Toggle error_registro state: if switch is checked => activate, else => inactivate
   async function toggleErrorRegistro(id, prevWasActive, switchElement){
+    // Verificar permisos antes de proceder
+    const perms = window.AgronomiaRolePermissions ? window.AgronomiaRolePermissions.getUserPermissions() : { canActivate: true, canInactivate: true };
+    const desiredActive = !!switchElement.checked;
+    
+    // Validar permisos según la acción deseada
+    if (desiredActive && !perms.canActivate) {
+      alert('No tienes permisos para activar registros.');
+      switchElement.checked = !!prevWasActive; // revertir
+      return;
+    }
+    if (!desiredActive && !perms.canInactivate) {
+      alert('No tienes permisos para inactivar registros.');
+      switchElement.checked = !!prevWasActive; // revertir
+      return;
+    }
+    
     // prevWasActive indicates whether the record WAS active before the change
     // desired new state is based on switchElement.checked
-    const desiredActive = !!switchElement.checked;
     const action = desiredActive ? ACTIONS.activate : ACTIONS.inactivate;
     const prompt = desiredActive ? '¿Activar registro?' : '¿Inactivar registro?';
     if(!confirm(prompt)){
@@ -210,7 +236,11 @@
     const footer = document.querySelector('#modal-editar .modal-footer');
     if(footer){
       footer.querySelectorAll('.icon-repeat-supervision').forEach(x=>x.remove());
-      if((row.supervision==='aprobado' || row.check==1) && readonly){
+      
+      // Verificar permisos para mostrar el botón de revertir
+      const perms = window.AgronomiaRolePermissions ? window.AgronomiaRolePermissions.getUserPermissions() : { canRevert: true };
+      
+      if((row.supervision==='aprobado' || row.check==1) && readonly && perms.canRevert){
         const btn=document.createElement('button'); btn.type='button'; btn.className='btn btn-link icon-repeat-supervision';
         btn.title='Revertir aprobación'; btn.innerHTML='<i class="fa-solid fa-repeat" style="font-size:1.6em;color:#198754;"></i>';
         btn.onclick = ()=>revertir(id); footer.insertBefore(btn, footer.firstChild);
