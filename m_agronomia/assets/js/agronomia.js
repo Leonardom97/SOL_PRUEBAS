@@ -136,9 +136,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (raw.includes('asist_agronomico') || (raw.includes('asist') && raw.includes('agron'))) {
         roles.add('asist_agronomico');
       }
-      if (raw.includes('supervisor_agronomico')) {
-        roles.add('supervisor_agronomico');
-      }
 
       // Si tu backend devuelve un array data.roles, puedes añadirlo aquí:
       if (Array.isArray(data.roles)) {
@@ -160,9 +157,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
           if (s.includes('asist_agronomico') || (s.includes('asist') && s.includes('agron'))) {
             roles.add('asist_agronomico');
-          }
-          if (s.includes('supervisor_agronomico')) {
-            roles.add('supervisor_agronomico');
           }
         });
       }

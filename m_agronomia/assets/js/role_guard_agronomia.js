@@ -23,8 +23,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     r === 'aux_agronomico' || 
     r === 'sup_logistica1' ||
     r === 'sup_logistica2' ||
-    r === 'asist_agronomico' ||
-    r === 'supervisor_agronomico'
+    r === 'asist_agronomico'
   );
   
   // If no agronomia role, hide the module
@@ -50,11 +49,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   const isSupLogistica1 = userRoles.includes('sup_logistica1');
   const isSupLogistica2 = userRoles.includes('sup_logistica2');
   const isAsistAgronomico = userRoles.includes('asist_agronomico');
-  const isSupervisorAgronomico = userRoles.includes('supervisor_agronomico');
   
   window.AGRONOMIA_PERMISSIONS = {
     // aux_agronomico CANNOT approve/reject
-    canApproveReject: isAdmin || isAgronomico || isSupLogistica1 || isSupLogistica2 || isAsistAgronomico || isSupervisorAgronomico,
+    canApproveReject: isAdmin || isAgronomico || isSupLogistica1 || isSupLogistica2 || isAsistAgronomico,
     
     // Only agronomico and asist_agronomico can revert
     canRevert: isAdmin || isAgronomico || isAsistAgronomico,
