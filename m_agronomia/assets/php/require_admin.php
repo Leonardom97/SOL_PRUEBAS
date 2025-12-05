@@ -152,7 +152,7 @@ function can_revert(): bool {
 /**
  * Verifica si el usuario puede activar error_registro
  */
-function can_activate_error(): bool {
+function can_activate(): bool {
   $roles = collect_roles();
   $allowedRoles = ['administrador', 'admin', 'administrator', 'agronomico', 'asist_agronomico'];
   foreach ($allowedRoles as $role) {
@@ -164,7 +164,7 @@ function can_activate_error(): bool {
 /**
  * Verifica si el usuario puede inactivar error_registro
  */
-function can_inactivate_error(): bool {
+function can_inactivate(): bool {
   $roles = collect_roles();
   // Todos los roles del módulo pueden inactivar
   $allowedRoles = ['administrador', 'admin', 'administrator', 'agronomico', 'sup_logistica1', 'sup_logistica2', 'asist_agronomico'];
@@ -230,7 +230,7 @@ function require_revert_permission(): void {
  * Requiere permiso para activar. Si no tiene permiso, responde 403 y termina.
  */
 function require_activate_permission(): void {
-  if (!can_activate_error()) {
+  if (!can_activate()) {
     http_response_code(403);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
@@ -246,7 +246,7 @@ function require_activate_permission(): void {
  * Requiere permiso para inactivar. Si no tiene permiso, responde 403 y termina.
  */
 function require_inactivate_permission(): void {
-  if (!can_inactivate_error()) {
+  if (!can_inactivate()) {
     http_response_code(403);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
