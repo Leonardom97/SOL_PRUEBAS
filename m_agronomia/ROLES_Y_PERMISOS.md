@@ -216,6 +216,12 @@ El sistema valida permisos en tres niveles:
    - Valida roles en cada llamada a la API
    - Protege contra manipulación del frontend
    - Retorna errores 403 para accesos no autorizados
+   - **Validación granular**: Verifica permisos específicos para cada acción (aprobar, rechazar, activar, inactivar)
+   - **Funciones de validación**: `require_approve_permission()`, `require_reject_permission()`, `require_activate_permission()`, `require_inactivate_permission()`
+   - **Archivos clave**: 
+     - `require_admin.php`: Funciones principales de validación de permisos
+     - `roles_auth.php`: Funciones auxiliares para manejo de roles
+     - `*_api.php`: 27 archivos API con validación de permisos integrada
 
 3. **Base de Datos**:
    - Tabla `adm_roles`: Define los roles disponibles
@@ -239,10 +245,13 @@ El sistema valida permisos en tres niveles:
 Para agregar nuevos roles o modificar permisos:
 
 1. Actualizar `role_permissions.js` con la nueva configuración
-2. Actualizar los atributos `data-role` en los archivos HTML
-3. Actualizar `material-super.js` para incluir el nuevo rol en los tabs
-4. Actualizar `require_admin.php` si se requiere validación del backend
+2. Actualizar los atributos `data-role` en los archivos HTML (sidebar, navbar, páginas)
+3. **Actualizar funciones de permisos en el backend**:
+   - Modificar `require_admin.php`: agregar el nuevo rol a las funciones `can_*()` correspondientes
+   - Modificar `roles_auth.php`: agregar el nuevo rol a las funciones de validación
+4. Actualizar `material-super.js` para incluir el nuevo rol en los tabs si es necesario
 5. Crear el rol en la base de datos usando la interfaz de gestión de roles
+6. **Probar exhaustivamente** el nuevo rol contra la matriz de permisos
 
 ---
 
