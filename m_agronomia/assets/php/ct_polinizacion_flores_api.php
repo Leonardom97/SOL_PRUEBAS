@@ -177,7 +177,7 @@ try {
         $ok = ($updatedMain + $updatedTemp) > 0;
         $response = ['success'=>$ok,'action'=>'inactivar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'inactivo','warnings'=>$warnings];
         if (!$ok) {
-            $response['error'] = 'No se encontró el registro con ID: '.$id.' en ninguna base de datos';
+            $response['error'] = 'No se encontró el registro con ID: '.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').' en ninguna base de datos';
         }
         respond($response);
     }
@@ -220,7 +220,7 @@ try {
         $ok = ($updatedMain + $updatedTemp) > 0;
         $response = ['success'=>$ok,'action'=>'activar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'activo','warnings'=>$warnings];
         if (!$ok) {
-            $response['error'] = 'No se encontró el registro con ID: '.$id.' en ninguna base de datos';
+            $response['error'] = 'No se encontró el registro con ID: '.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').' en ninguna base de datos';
         }
         respond($response);
     }
