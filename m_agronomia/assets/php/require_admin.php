@@ -102,18 +102,6 @@ function require_admin_only(): void {
 }
 
 /**
- * Verifica si el usuario tiene un rol específico o contiene un patrón
- */
-function has_role_pattern(string $needle, array $roles): bool {
-  $needle = strtolower($needle);
-  foreach ($roles as $r) {
-    if ($r === $needle) return true;
-    if (strpos($needle, 'aux') !== false && strpos($r, 'aux') !== false) return true;
-  }
-  return false;
-}
-
-/**
  * Verifica si el usuario puede aprobar registros
  */
 function can_approve(): bool {
