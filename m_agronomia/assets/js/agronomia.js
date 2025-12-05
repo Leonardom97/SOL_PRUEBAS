@@ -119,7 +119,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Normaliza nombres a los que ya usan los scripts
       if (raw.includes('admin')) roles.add('administrador');
-      if (raw.includes('aux')) roles.add('aux_agronomico'); // ajusta si tu back devuelve otro nombre
+      
+      // Map all agronomia roles
+      if (raw.includes('agronomico') && !raw.includes('aux') && !raw.includes('asist')) {
+        roles.add('agronomico');
+      }
+      if (raw.includes('aux_agronomico') || raw.includes('aux')) {
+        roles.add('aux_agronomico');
+      }
+      if (raw.includes('sup_logistica1')) {
+        roles.add('sup_logistica1');
+      }
+      if (raw.includes('sup_logistica2')) {
+        roles.add('sup_logistica2');
+      }
+      if (raw.includes('asist_agronomico') || (raw.includes('asist') && raw.includes('agron'))) {
+        roles.add('asist_agronomico');
+      }
 
       // Si tu backend devuelve un array data.roles, puedes añadirlo aquí:
       if (Array.isArray(data.roles)) {
@@ -127,7 +143,21 @@ document.addEventListener("DOMContentLoaded", async () => {
           const s = String(r || '').toLowerCase().trim();
           if (s) roles.add(s);
           if (s.includes('admin')) roles.add('administrador');
-          if (s.includes('aux')) roles.add('aux_agronomico');
+          if (s.includes('agronomico') && !s.includes('aux') && !s.includes('asist')) {
+            roles.add('agronomico');
+          }
+          if (s.includes('aux_agronomico') || s.includes('aux')) {
+            roles.add('aux_agronomico');
+          }
+          if (s.includes('sup_logistica1')) {
+            roles.add('sup_logistica1');
+          }
+          if (s.includes('sup_logistica2')) {
+            roles.add('sup_logistica2');
+          }
+          if (s.includes('asist_agronomico') || (s.includes('asist') && s.includes('agron'))) {
+            roles.add('asist_agronomico');
+          }
         });
       }
 

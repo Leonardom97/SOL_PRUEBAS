@@ -37,11 +37,31 @@ try {
     $action = $_GET['action'] ?? $body['action'] ?? null;
     if (!$action) throw new RuntimeException('action requerido. Valores: conexion, actualizar, inactivar, rechazar, aprobar');
 
-    $action = map_action($action);
-    if (in_array($action,['aprobar','rechazar'],true)) {
-        require_once __DIR__ . '/require_admin.php';
-        require_admin_only();
+    $action = map_action($action);    
+    // Require roles_auth for permission checks
+    require_once __DIR__ . '/roles_auth.php';
+    
+    // Check permissions based on action
+    if ($action==='aprobar' || $action==='rechazar') {
+        require_approve_reject_permission();
     }
+    
+    if ($action==='revertir') {
+        require_revert_permission();
+    }
+    
+    if ($action==='activar') {
+        require_activate_error_registro_permission();
+    }
+    
+    if ($action==='inactivar') {
+        require_inactivate_error_registro_permission();
+    }
+    
+    if ($action==='actualizar') {
+        require_enter_data_permission();
+    }
+
 
     if ($action==='conexion') {
         $pg = getMain();
