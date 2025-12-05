@@ -1,0 +1,25 @@
+[Unit]
+Description=OSM-WEB Application
+After=network.target postgresql.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/osm-WEB
+
+# Ensure .env file exists
+ExecStartPre=/bin/bash -c 'test -f /var/www/osm-WEB/.env || { echo "ERROR: .env file not found!"; exit 1; }'
+
+# Check permissions
+ExecStartPre=/bin/bash -c 'test -r /var/www/osm-WEB/.env || { echo "ERROR: .env file not readable!"; exit 1; }'
+
+# Ensure log directory exists
+ExecStartPre=/bin/mkdir -p /var/www/osm-WEB/logs
+
+# Application is managed by nginx and php-fpm, this service just ensures prerequisites
+ExecStart=/bin/true
+
+[Install]
+WantedBy=multi-user.target
