@@ -24,7 +24,8 @@ function map_action(?string $a): string {
     'inactivar'=>'inactivar','desactivar'=>'inactivar',
     'rechazar'=>'rechazar','reject'=>'rechazar',
     'aprobar'=>'aprobar','approve'=>'aprobar',
-    'activar'=>'activar','reactivar'=>'activar','activar_registro'=>'activar'
+    'activar'=>'activar','reactivar'=>'activar','activar_registro'=>'activar',
+    'revertir'=>'revertir','revert'=>'revertir'
   ];
   return $m[$a] ?? '';
 }
@@ -38,9 +39,30 @@ try {
     $action = map_action($action);
 
     // Aprobar y rechazar requieren admin (mantengo la restricción previa)
-    if (in_array($action, ['aprobar','rechazar'], true)) {
-        require_once __DIR__ . '/require_admin.php';
-        require_admin_only();
+    
+    // Require roles_auth for permission checks
+    require_once __DIR__ . '/roles_auth.php';
+    
+    // Check permissions based on action
+    if ($action==='aprobar' || $action==='rechazar') {
+        require_approve_reject_permission();
+    }
+    
+    if ($action==='revertir') {
+        require_revert_permission();
+    }
+    
+    if ($action==='activar') {
+        require_activate_error_registro_permission();
+    }
+    
+    if ($action==='inactivar') {
+        require_inactivate_error_registro_permission();
+    }
+    
+    if ($action==='actualizar') {
+        require_enter_data_permission();
+    }
     }
 
     // --- CONEXION / LISTAR ---
@@ -417,6 +439,43 @@ try {
             'warnings'=>$warnings
         ]);
     }
+
+    // --- REVERTIR: cambia supervision de 'aprobado' a 'pendiente' ---
+    if ($action === 'revertir') {
+        if($_SERVER['REQUEST_METHOD']!=='POST'){
+            respond(['success'=>false,'error'=>'method_not_allowed','allowed'=>'POST'],405);
+        }
+        $id=isset($body['cosecha_fruta_id'])?trim($body['cosecha_fruta_id']):'';
+        if($id==='') $id = isset($body['id'])?trim($body['id']):'';
+        if($id==='') throw new RuntimeException('cosecha_fruta_id requerido');
+
+        $warnings = [];
+        $updatedMain = 0;
+
+        // Revertir en MAIN: cambiar supervision a 'pendiente'
+        try {
+            $pgMain = getMain();
+            $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $stMain = $pgMain->prepare("UPDATE public.cosecha_fruta SET supervision='pendiente', "check"=0 WHERE cosecha_fruta_id=:id AND supervision='aprobado'");
+            $stMain->execute(['id'=>$id]);
+            $updatedMain = $stMain->rowCount();
+        } catch(Throwable $e){
+            $warnings[] = 'main_error: '.$e->getMessage();
+            $updatedMain = 0;
+        }
+
+        $ok = $updatedMain > 0;
+        respond([
+            'success'=>$ok,
+            'action'=>'revertir',
+            'id'=>$id,
+            'updated_main'=>$updatedMain,
+            'estado'=>'pendiente',
+            'warnings'=>$warnings,
+            'message'=> $ok ? 'Registro revertido a pendiente' : 'No se pudo revertir el registro (puede que no esté aprobado)'
+        ]);
+    }
+
 
     throw new RuntimeException('action no reconocido');
 

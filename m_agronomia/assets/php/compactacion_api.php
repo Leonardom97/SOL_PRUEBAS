@@ -25,7 +25,8 @@ function map_action(?string $a): string {
     'inactivar'=>'inactivar','desactivar'=>'inactivar',
     'rechazar'=>'rechazar','reject'=>'rechazar',
     'aprobar'=>'aprobar','approve'=>'aprobar',
-    'activar'=>'activar','reactivar'=>'activar','activar_registro'=>'activar'
+    'activar'=>'activar','reactivar'=>'activar','activar_registro'=>'activar',
+    'revertir'=>'revertir','revert'=>'revertir'
   ];
   return $m[$a]??'';
 }
@@ -373,6 +374,43 @@ try {
             'warnings'=>$warnings
         ]);
     }
+
+    // --- REVERTIR: cambia supervision de 'aprobado' a 'pendiente' ---
+    if ($action === 'revertir') {
+        if($_SERVER['REQUEST_METHOD']!=='POST'){
+            respond(['success'=>false,'error'=>'method_not_allowed','allowed'=>'POST'],405);
+        }
+        $id=isset($body['compactacion_id'])?trim($body['compactacion_id']):'';
+        if($id==='') $id = isset($body['id'])?trim($body['id']):'';
+        if($id==='') throw new RuntimeException('compactacion_id requerido');
+
+        $warnings = [];
+        $updatedMain = 0;
+
+        // Revertir en MAIN: cambiar supervision a 'pendiente'
+        try {
+            $pgMain = getMain();
+            $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            $stMain = $pgMain->prepare("UPDATE public.compactacion SET supervision='pendiente', "check"=0 WHERE compactacion_id=:id AND supervision='aprobado'");
+            $stMain->execute(['id'=>$id]);
+            $updatedMain = $stMain->rowCount();
+        } catch(Throwable $e){
+            $warnings[] = 'main_error: '.$e->getMessage();
+            $updatedMain = 0;
+        }
+
+        $ok = $updatedMain > 0;
+        respond([
+            'success'=>$ok,
+            'action'=>'revertir',
+            'id'=>$id,
+            'updated_main'=>$updatedMain,
+            'estado'=>'pendiente',
+            'warnings'=>$warnings,
+            'message'=> $ok ? 'Registro revertido a pendiente' : 'No se pudo revertir el registro (puede que no esté aprobado)'
+        ]);
+    }
+
 
     throw new RuntimeException('action no reconocido');
 
