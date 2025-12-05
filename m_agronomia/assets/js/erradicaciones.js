@@ -45,7 +45,7 @@
   const API = 'assets/php/erradicaciones_api.php';
   const ID_KEY = 'erradicaciones_id';
   const DATE_COL = 'fecha';
-  const ACTIONS = { listFallback:['conexion','listar','list'], save:'actualizar', inactivate:'inactivar', reject:'rechazar', approve:'aprobar', activate:'activar' };
+  const ACTIONS = { listFallback:['conexion','listar','list'], save:'actualizar', inactivate:'inactivar', reject:'rechazar', approve:'aprobar', activate:'activar',revert:'revertir' };
 
   // Debounce for filter inputs
   const FILTER_DEBOUNCE_MS = 300;
@@ -174,6 +174,20 @@
   async function toggleErrorRegistro(id, prevWasActive, switchElement){
     const desiredActive = !!switchElement.checked;
     const action = desiredActive ? ACTIONS.activate : ACTIONS.inactivate;
+    
+    // Check permissions
+    const perms = window.AGRONOMIA_PERMISSIONS || {};
+    if (desiredActive && !perms.canActivateError) {
+      alert('No tiene permisos para activar registros. Solo puede inactivar.');
+      switchElement.checked = !!prevWasActive;
+      return;
+    }
+    if (!desiredActive && !perms.canInactivateError) {
+      alert('No tiene permisos para inactivar registros.');
+      switchElement.checked = !!prevWasActive;
+      return;
+    }
+    
     const prompt = desiredActive ? '¿Activar registro?' : '¿Inactivar registro?';
     if(!confirm(prompt)){
       switchElement.checked = !!prevWasActive;
@@ -254,7 +268,8 @@
     const footer = document.querySelector('#modal-editar .modal-footer');
     if(footer){
       footer.querySelectorAll('.icon-repeat-supervision').forEach(x=>x.remove());
-      if((row.supervision==='aprobado' || row.check==1) && readonly){
+      const perms = window.AGRONOMIA_PERMISSIONS || {};
+      if((row.supervision==='aprobado' || row.check==1) && readonly && perms.canRevert){
         const btn=document.createElement('button'); btn.type='button'; btn.className='btn btn-link icon-repeat-supervision';
         btn.title='Revertir aprobación'; btn.innerHTML='<i class="fa-solid fa-repeat" style="font-size:1.6em;color:#198754;"></i>';
         btn.onclick = ()=> revertir(id);
@@ -268,7 +283,7 @@
   async function revertir(id){
     if(!confirm('¿Revertir aprobación?')) return;
     try{
-      const r = await fetch(`${API}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action: ACTIONS.reject, [ID_KEY]: id }) });
+      const r = await fetch(`${API}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action: ACTIONS.revert, [ID_KEY]: id }) });
       const j = await r.json();
       if(!j.success){
         const err = j.error || 'No revertido';

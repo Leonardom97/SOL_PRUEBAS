@@ -39,7 +39,7 @@
   const API='assets/php/mantenimientos_api.php';
   const ID_KEY='mantenimientos_id';
   const DATE_COL='fecha';
-  const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivar',reject:'rechazar', activate:'activar'};
+  const ACTIONS={listFallback:['conexion','listar','list'],save:'upsert',inactivate:'inactivar',reject:'rechazar', activate:'activar',revert:'revertir'};
 
   // Debounce for filter inputs
   const FILTER_DEBOUNCE_MS = 300;
@@ -208,6 +208,20 @@
     // desired new state is based on switchElement.checked
     const desiredActive = !!switchElement.checked;
     const action = desiredActive ? ACTIONS.activate : ACTIONS.inactivate;
+    
+    // Check permissions
+    const perms = window.AGRONOMIA_PERMISSIONS || {};
+    if (desiredActive && !perms.canActivateError) {
+      alert('No tiene permisos para activar registros. Solo puede inactivar.');
+      switchElement.checked = !!prevWasActive;
+      return;
+    }
+    if (!desiredActive && !perms.canInactivateError) {
+      alert('No tiene permisos para inactivar registros.');
+      switchElement.checked = !!prevWasActive;
+      return;
+    }
+    
     const prompt = desiredActive ? '¿Activar registro?' : '¿Inactivar registro?';
     if(!confirm(prompt)){
       // user cancelled; revert switch to previous state
@@ -292,7 +306,9 @@
     const footer = document.querySelector('#modal-editar .modal-footer');
     if(footer){
       footer.querySelectorAll('.icon-repeat-supervision').forEach(x=>x.remove());
-      if((row.supervision==='aprobado' || row.check==1) && readonly){
+      // Show revert button only if approved AND user has permission
+      const perms = window.AGRONOMIA_PERMISSIONS || {};
+      if((row.supervision==='aprobado' || row.check==1) && readonly && perms.canRevert){
         const btn=document.createElement('button'); btn.type='button'; btn.className='btn btn-link icon-repeat-supervision';
         btn.title='Revertir aprobación'; btn.innerHTML='<i class="fa-solid fa-repeat" style="font-size:1.6em;color:#198754;"></i>';
         btn.onclick = ()=>revertir(id); footer.insertBefore(btn, footer.firstChild);
@@ -303,17 +319,19 @@
   }
 
   async function revertir(id){
-    if(!confirm('¿Revertir aprobación?')) return;
+    if(!confirm('¿Revertir aprobación? El registro volverá a estado pendiente.')) return;
     try{
-      const r = await fetch(`${API}?action=${ACTIONS.reject}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({[ID_KEY]:id})});
+      const r = await fetch(`${API}?action=${ACTIONS.revert}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({[ID_KEY]:id})});
       const j = await r.json();
       if(!j.success){
-        const err = j.error || 'No revertido';
+        const err = j.error || j.message || 'No revertido';
         const norm = (err===null||err===undefined)?'':String(err).trim().toLowerCase();
         if(norm==='exception' || norm==='id_required'){ console.warn('[mantenimientos] error suprimido:', err); return; }
         alert(err); return;
       }
-      await load(); openModal(id, false);
+      alert('Registro revertido a pendiente');
+      await load(); 
+      setTimeout(()=>bootstrap.Modal.getInstance(document.getElementById(DOM.modal))?.hide(),150);
     }catch(err){
       const msg = err?.message || 'Error revertir';
       const norm = (msg===null||msg===undefined)?'':String(msg).trim().toLowerCase();
