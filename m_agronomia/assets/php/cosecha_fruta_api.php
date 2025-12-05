@@ -175,7 +175,11 @@ try {
         }
 
         $ok = ($updatedMain + $updatedTemp) > 0;
-        respond(['success'=>$ok,'action'=>'inactivar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'inactivo','warnings'=>$warnings]);
+        $response = ['success'=>$ok,'action'=>'inactivar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'inactivo','warnings'=>$warnings];
+        if (!$ok) {
+            $response['error'] = 'No se encontró el registro con ID: '.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').' en ninguna base de datos';
+        }
+        respond($response);
     }
 
     // --- ACTIVAR: quita flag error_registro en MAIN y TEMP (pone NULL) ---
@@ -214,7 +218,11 @@ try {
         }
 
         $ok = ($updatedMain + $updatedTemp) > 0;
-        respond(['success'=>$ok,'action'=>'activar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'activo','warnings'=>$warnings]);
+        $response = ['success'=>$ok,'action'=>'activar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'activo','warnings'=>$warnings];
+        if (!$ok) {
+            $response['error'] = 'No se encontró el registro con ID: '.htmlspecialchars($id, ENT_QUOTES, 'UTF-8').' en ninguna base de datos';
+        }
+        respond($response);
     }
 
     // --- RECHAZAR (ya implementado) ---
