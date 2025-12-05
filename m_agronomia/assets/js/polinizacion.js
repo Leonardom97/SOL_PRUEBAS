@@ -94,27 +94,10 @@
       const tr = document.createElement('tr');
       tr.innerHTML = `<td><input type="checkbox" class="row-check" data-index="${i}"></td>`;
       COLUMNAS.forEach(col=>{
+        if(col==='error_registro') return; // Skip - will be added after actions
         const td = document.createElement('td');
         if(col==='supervision'){
           td.dataset.estado = est; td.innerHTML = icono(est);
-        }
-        else if(col==='observaciones'){
-          // Do NOT show the "Inactivo" badge in Observaciones.
-          // If observaciones equals 'inactivo' (or is empty) leave cell empty,
-          // otherwise show the actual observaciones text.
-          const obs = (row.observaciones ?? '').toString().trim();
-          const obsNorm = obs.toLowerCase();
-          if(!obs || obsNorm === 'inactivo') {
-            td.innerHTML = ''; // intentionally blank
-          } else {
-            td.textContent = obs;
-          }
-        }
-        else if(col==='error_registro'){
-          // keep the error_registro column responsible for showing Inactivo badge / Inactivar button
-          const inact = (((row.error_registro||'') + '|' + (row.observaciones||'')).toLowerCase()).includes('inactivo');
-          td.innerHTML = inact ? '<span class="badge bg-secondary">Inactivo</span>' :
-            `<button class="md-btn md-btn-icon btn-inactivar" data-id="${row[ID_KEY]}" title="Inactivar"><i class="fas fa-ban"></i></button>`;
         }
         else td.textContent = row[col] ?? '';
         tr.appendChild(td);
@@ -372,7 +355,7 @@
   }
 
   function buildXLSX(rows,name){
-    const cols = COLUMNAS.filter(c=>c!=='supervision');
+    const cols = COLUMNAS.filter(c=>!['error_registro','supervision'].includes(c));
     const head = cols.map(c=>c.toUpperCase());
     const body = rows.map(r=>cols.map(c=>r[c]??''));
     const ws = XLSX.utils.aoa_to_sheet([head, ...body]);
@@ -431,24 +414,40 @@
   // Robust initFilters: map inputs using data-col/name or th.dataset; ignore checkboxes; add debounce + Enter
   function initFilters(){
     const table = document.getElementById(DOM.table);
-    if(!table) { console.warn('[polinizacion] tabla no encontrada:', DOM.table); return; }
+    if(!table) { 
+      console.error('[polinizacion] tabla no encontrada:', DOM.table); 
+      return; 
+    }
     const thead = table.querySelector('thead');
-    if(!thead) { console.warn('[polinizacion] thead no encontrado'); return; }
+    if(!thead) { 
+      console.error('[polinizacion] thead no encontrado'); 
+      return; 
+    }
 
     const inputs = Array.from(thead.querySelectorAll('input, select, textarea'));
-    if(!inputs.length) { console.warn('[polinizacion] no se encontraron inputs en thead'); return; }
+    if(!inputs.length) { 
+      console.warn('[polinizacion] no se encontraron inputs en thead'); 
+      return; 
+    }
+
+    console.log('[polinizacion] inicializando filtros para', inputs.length, 'inputs');
 
     inputs.forEach(inp=>{
       // ignore checkboxes (selection column)
       if(inp.type && inp.type.toLowerCase() === 'checkbox') return;
 
-      // determine column name
-      let col = (inp.dataset && inp.dataset.col) ? inp.dataset.col : (inp.name || '');
-      if(!col){
+      // determine column name - prioritize data-col attribute
+      let col = '';
+      if(inp.dataset && inp.dataset.col) {
+        col = inp.dataset.col;
+      } else if(inp.name) {
+        col = inp.name;
+      } else {
         const th = inp.closest('th');
         if(th){
-          col = (th.dataset && (th.dataset.col || th.dataset.field)) ? (th.dataset.col || th.dataset.field) : '';
-          if(!col){
+          if(th.dataset && (th.dataset.col || th.dataset.field)) {
+            col = th.dataset.col || th.dataset.field;
+          } else {
             // try matching header text -> COLUMNAS
             const headerText = (th.innerText || th.textContent || '').trim();
             const key = headerText.replace(/\s+/g,' ').trim().toLowerCase();
@@ -473,12 +472,19 @@
       const v = (inp.value == null) ? '' : String(inp.value);
       if(v.trim() !== '') filters[col] = v;
 
+      // Remove old listeners if they exist
+      if(inp._filterHandlers){
+        inp.removeEventListener('input', inp._filterHandlers.input);
+        inp.removeEventListener('change', inp._filterHandlers.change);
+        inp.removeEventListener('keydown', inp._filterHandlers.keydown);
+      }
+
       // Debounced handler
       const handlerDeb = debounce(function(evt){
         const val = (evt.target.value == null) ? '' : String(evt.target.value);
         filters[col] = val;
         page = 1;
-        console.debug('[polinizacion] aplicar filtro (debounce):', col, val);
+        console.log('[polinizacion] aplicar filtro:', col, '=', val);
         load();
       }, FILTER_DEBOUNCE_MS);
 
@@ -489,20 +495,27 @@
           const val = (e.target.value == null) ? '' : String(e.target.value);
           filters[col] = val;
           page = 1;
-          console.debug('[polinizacion] aplicar filtro (Enter):', col, val);
+          console.log('[polinizacion] aplicar filtro (Enter):', col, '=', val);
           load();
         }
       }
 
-      inp.removeEventListener('input', handlerDeb);
+      // Store handlers on the input element for later removal
+      inp._filterHandlers = {
+        input: handlerDeb,
+        change: handlerDeb,
+        keydown: handlerKey
+      };
+
+      // Add new listeners
       inp.addEventListener('input', handlerDeb);
-      inp.removeEventListener('change', handlerDeb);
       inp.addEventListener('change', handlerDeb);
-      inp.removeEventListener('keydown', handlerKey);
       inp.addEventListener('keydown', handlerKey);
+
+      console.log('[polinizacion] filtro configurado para columna:', col);
     });
 
-    console.debug('[polinizacion] filtros inicializados. columnas mapeadas:', Object.keys(filters).length ? Object.keys(filters) : 'none');
+    console.log('[polinizacion] filtros inicializados. Total columnas mapeadas:', Object.keys(filters).length);
   }
 
   async function load(){
@@ -533,12 +546,20 @@
   function init(){
     document.getElementById(DOM.form)?.addEventListener('submit', save);
     document.getElementById(DOM.clearBtn)?.addEventListener('click', ()=>{
+      console.log('[polinizacion] limpiando todos los filtros');
       filters={}; page=1;
       const table = document.getElementById(DOM.table);
       if(table){
         const thead = table.querySelector('thead');
-        if(thead) thead.querySelectorAll('input, select, textarea').forEach(i=> i.value = '');
+        if(thead) {
+          thead.querySelectorAll('input, select, textarea').forEach(i=> {
+            if(i.type && i.type.toLowerCase() !== 'checkbox') {
+              i.value = '';
+            }
+          });
+        }
       }
+      console.log('[polinizacion] filtros limpiados, recargando datos...');
       load();
     });
     document.getElementById(DOM.limitSelect)?.addEventListener('change', e=>{ pageSize = parseInt(e.target.value,10) || 25; page = 1; load(); });
