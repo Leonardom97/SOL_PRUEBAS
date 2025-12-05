@@ -63,7 +63,6 @@ try {
     if ($action==='actualizar') {
         require_enter_data_permission();
     }
-    }
 
     // --- CONEXION / LISTAR ---
     if ($action === 'conexion') {
