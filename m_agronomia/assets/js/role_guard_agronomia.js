@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   const isAsistAgronomico = userRoles.includes('asist_agronomico');
   
   window.AGRONOMIA_PERMISSIONS = {
-    // aux_agronomico CANNOT approve/reject
-    canApproveReject: isAdmin || isAgronomico || isSupLogistica1 || isSupLogistica2 || isAsistAgronomico,
+    // aux_agronomico CANNOT approve/reject (explicitly excluded)
+    canApproveReject: !isAuxAgronomico && (isAdmin || isAgronomico || isSupLogistica1 || isSupLogistica2 || isAsistAgronomico),
     
     // Only agronomico and asist_agronomico can revert
     canRevert: isAdmin || isAgronomico || isAsistAgronomico,

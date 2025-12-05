@@ -14,6 +14,9 @@
 
 -- Insertar roles en la tabla adm_roles (estado 0 = activo, 1 = inactivo)
 -- Se usa ON CONFLICT para evitar duplicados si los roles ya existen
+-- NOTA: Requiere que la columna 'nombre' tenga una restricción UNIQUE en la tabla adm_roles
+-- Si su esquema no tiene esta restricción, puede agregarla con:
+-- ALTER TABLE adm_roles ADD CONSTRAINT adm_roles_nombre_unique UNIQUE (nombre);
 
 INSERT INTO adm_roles (nombre, estado) VALUES ('agronomico', 0) 
 ON CONFLICT (nombre) DO NOTHING;
