@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="es-419">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Crear Evaluación - OSM Premium</title>
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+    <link rel="stylesheet" href="../assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="../assets/css/bs-theme-overrides.css">
+    <style>
+        body {
+            background-color: #f8f9fc;
+        }
+
+        .card-question {
+            border-left: 4px solid #4e73df;
+            transition: all 0.3s ease;
+        }
+
+        .card-question:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+        }
+
+        .drag-handle {
+            cursor: move;
+            color: #ccc;
+        }
+
+        .drag-handle:hover {
+            color: #4e73df;
+        }
+
+        .preview-container {
+            border: 2px dashed #d1d3e2;
+            border-radius: 0.35rem;
+            padding: 2rem;
+            text-align: center;
+            background: #fff;
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+        }
+
+        .form-check-input-square {
+            border-radius: 0.25em !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="text-dark fw-bold mb-1">Configurar Evaluación</h2>
+                        <p class="text-muted mb-0">Diseña las preguntas y el contenido multimedia.</p>
+                    </div>
+                    <button type="submit" form="form-builder" class="btn btn-success btn-lg shadow-sm">
+                        <i class="fas fa-save me-2"></i> Guardar Todo
+                    </button>
+                </div>
+
+                <form id="form-builder">
+                    <!-- Configuración General -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 bg-primary text-white">
+                            <h6 class="m-0 fw-bold"><i class="fas fa-cog me-2"></i>Información General</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Título de la Evaluación</label>
+                                <input type="text" class="form-control form-control-lg" id="eval-titulo"
+                                    placeholder="Ej: Evaluación de Seguridad Industrial" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Instrucciones</label>
+                                <textarea class="form-control" id="eval-instrucciones" rows="3"
+                                    placeholder="Instrucciones para el colaborador..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuración Multimedia -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 bg-primary text-white">
+                            <h6 class="m-0 fw-bold"><i class="fas fa-file-import me-2"></i>Contenido Multimedia
+                                (Opcional)</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <p class="small text-muted">Puedes subir un video, imagen o PDF, o usar un video de
+                                    YouTube para que el colaborador lo revise antes de responder (Opcional).</p>
+
+                                <div class="mb-3">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input form-check-input-square" type="radio"
+                                            name="media-source" id="source-upload" value="upload" checked>
+                                        <label class="form-check-label" for="source-upload">Subir Archivo</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input form-check-input-square" type="radio"
+                                            name="media-source" id="source-youtube" value="youtube">
+                                        <label class="form-check-label" for="source-youtube">YouTube</label>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Upload -->
+                                <div id="section-upload" class="mb-3">
+                                    <div class="input-group mb-3">
+                                        <input type="file" class="form-control" id="input-multimedia"
+                                            accept="video/*,image/*,application/pdf">
+                                        <button class="btn btn-primary" type="button" id="btn-upload-multi">
+                                            <i class="fas fa-cloud-upload-alt me-2"></i>Subir
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Section: YouTube -->
+                                <div id="section-youtube" class="mb-3" style="display: none;">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text"><i class="fab fa-youtube text-danger"></i></span>
+                                        <input type="text" class="form-control" id="input-youtube"
+                                            placeholder="Pega el enlace de YouTube aquí...">
+                                        <button class="btn btn-primary" type="button" id="btn-add-youtube">
+                                            <i class="fas fa-check me-2"></i>Usar Video
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" id="hidden-ruta-multi">
+                                <input type="hidden" id="hidden-tipo-multi">
+
+                                <div id="preview-multimedia" class="preview-container mt-3" style="display:none;">
+                                    <!-- Preview content -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Preguntas -->
+                    <div id="preguntas-container">
+                        <!-- Las preguntas se insertarán aquí -->
+                    </div>
+
+                    <!-- Botón Agregar -->
+                    <div class="text-center py-4 border-top border-2 border-dashed mt-4">
+                        <button type="button" class="btn btn-outline-primary btn-lg rounded-pill px-5"
+                            id="btn-add-pregunta">
+                            <i class="fas fa-plus-circle me-2"></i> Agregar Nueva Pregunta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Pregunta -->
+    <template id="template-pregunta">
+        <div class="card shadow mb-4 pregunta-item card-question">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="fw-bold text-gray-800">Pregunta <span class="num-pregunta">1</span>
+                    </h5>
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-remove-pregunta"
+                        title="Eliminar pregunta">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+
+                <div class="mb-3">
+                    <input type="text" class="form-control form-control-lg input-pregunta-texto"
+                        placeholder="Escribe la pregunta aquí..." required>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted text-uppercase fw-bold">Tipo de
+                            Pregunta</label>
+                        <select class="form-select select-tipo-pregunta">
+                            <option value="seleccion">Selección Múltiple</option>
+                            <option value="verdadero_falso">Verdadero / Falso</option>
+                            <option value="texto">Respuesta Abierta (Texto)</option>
+                            <option value="ordenar">Ordenar Items</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted text-uppercase fw-bold label-momento">
+                            <i class="fas fa-clock me-1"></i>Minuto en Video (Opcional)
+                        </label>
+                        <input type="number" class="form-control input-segundo" placeholder="Segundos (ej: 120)"
+                            min="0">
+                        <div class="form-text x-small help-momento">Si hay video, la pregunta
+                            aparecerá
+                            en este segundo. 0 = Al
+                            final.</div>
+                    </div>
+                </div>
+
+                <div class="bg-light p-3 rounded border container-opciones">
+                    <!-- Opciones dinámicas -->
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/js/evaluacion_builder.js"></script>
+</body>
+
+</html>

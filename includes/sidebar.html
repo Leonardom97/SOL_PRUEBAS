@@ -1,0 +1,122 @@
+<nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
+  <div class="container-fluid d-flex flex-column p-0">
+    <a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="/panel.html">
+      <div class="sidebar-brand-icon rotate-n-15">
+      </div>
+      <div class="sidebar-brand-text mx-3">OSM</div>
+    </a>
+    <hr class="sidebar-divider my-0">
+    <ul class="navbar-nav text-light" id="accordionSidebar">
+
+      <!-- ADMINISTRADOR -->
+      <li class="nav-item dropdown" data-role="administrador">
+        <a class="dropdown-toggle nav-link d-inline-block" aria-expanded="false" data-bs-toggle="dropdown"
+          style="padding-top: 16px;padding-right: 8px;">
+          <i class="fas fa-cogs text-center"></i><span class="text-center-custom">Administrador</span>
+        </a>
+        <div class="dropdown-menu text-primary border-0 animated fadeIn dropdown-menu-custom">
+          <a class="dropdown-item nav-link" href="/m_admin/ed_usuario.html">Usuarios Principales</a>
+          <a class="dropdown-item nav-link" href="/m_admin/ed_uscolaboradores.html">Usuarios Colaboradores</a>
+          <a class="dropdown-item nav-link" href="/includes/roles.html">Gestión de Roles</a>
+          <a class="dropdown-item nav-link" href="/sesiones.html">Gestión de Sesiones</a>
+          <a class="dropdown-item nav-link" href="/includes/web_main.html">Configuración Web</a>
+        </div>
+      </li>
+
+      <!-- CAPACITACIONES -->
+      <li class="nav-item dropdown"
+        data-role="administrador,capacitador,Capacitador ADM,Capacitador AGR,Capacitador GH,Capacitador IND,Capacitador MT,Capacitador SIE,Capacitador TI,Aux_Capacitador">
+        <a class="dropdown-toggle nav-link d-inline-block" aria-expanded="false" data-bs-toggle="dropdown"
+          style="padding-top: 16px;padding-right: 8px;">
+          <i class="fas fa-table text-center"></i><span class="text-center-custom">Capacitaciones</span>
+        </a>
+        <div class="dropdown-menu text-primary border-0 animated FadeIn dropdown-menu-custom">
+          <a class="dropdown-item nav-link" href="/m_capacitaciones/formulario.html">Formulario</a>
+          <a class="dropdown-item nav-link" href="/m_capacitaciones/ed_formulario.html">Edición Formulario</a>
+          <a class="dropdown-item nav-link" href="/m_capacitaciones/Consultas_capacitacion.html">Consulta por
+            Capacitación</a>
+          <a class="dropdown-item nav-link" href="/m_capacitaciones/programacion.html">Programación</a>
+          <a class="dropdown-item nav-link" href="/m_capacitaciones/dashboard.html">Dashboard
+            Capacitaciones</a>
+          <a class="dropdown-item nav-link" href="/m_capacitaciones/programacion_evaluaciones.html">Gestión
+            Evaluaciones</a>
+          <a class="dropdown-item nav-link" href="/m_capacitaciones/items_formularios.html">Items
+            formularios</a>
+        </div>
+      </li>
+
+      <!-- AGRONOMÍA -->
+      <li class="nav-item dropdown" data-role="administrador">
+        <a class="dropdown-toggle nav-link d-inline-block" aria-expanded="false" data-bs-toggle="dropdown"
+          style="padding-top: 16px;padding-right: 8px;">
+          <i class="fas fa-leaf text-center"></i><span class="text-center-custom">Agronomía</span>
+        </a>
+        <div class="dropdown-menu text-primary border-0 animated fadeIn dropdown-menu-custom">
+          <a class="dropdown-item nav-link" href="/m_agronomia/tb_agronomia.html">Formulario</a>
+          <a class="dropdown-item nav-link" href="/m_agronomia/f_cortes.html">Fecha Cortes</a>
+        </div>
+      </li>
+
+      <!-- BÁSCULA -->
+      <li class="nav-item dropdown" data-role="administrador">
+        <a class="dropdown-toggle nav-link d-inline-block" aria-expanded="false" data-bs-toggle="dropdown"
+          style="padding-top: 16px;padding-right: 8px;">
+          <i class="fas fa-weight text-center"></i><span class="text-center-custom">Báscula</span>
+        </a>
+        <div class="dropdown-menu text-primary border-0 animated fadeIn dropdown-menu-custom">
+          <a class="dropdown-item nav-link" href="/m_bascula/operacion_pesaje.html">Operación Pesaje</a>
+          <a class="dropdown-item nav-link" href="/m_bascula/reportes_pesaje.html">Reportes Pesaje</a>
+        </div>
+      </li>
+
+      <!-- LABORATORIO -->
+      <li class="nav-item dropdown" data-role="administrador">
+        <a class="dropdown-toggle nav-link d-inline-block" aria-expanded="false" data-bs-toggle="dropdown"
+          style="padding-top: 16px;padding-right: 8px;">
+          <i class="fas fa-flask text-center"></i><span class="text-center-custom">Laboratorio</span>
+        </a>
+        <div class="dropdown-menu text-primary border-0 animated fadeIn dropdown-menu-custom">
+          <a class="dropdown-item nav-link" href="/m_laboratorio/formulario_calidad.html">Formulario
+            Calidad</a>
+          <a class="dropdown-item nav-link" href="/m_laboratorio/datos_tanques.html">Datos de Tanques</a>
+        </div>
+      </li>
+
+      <!-- LOGÍSTICA (Includes Remisión) -->
+      <li class="nav-item dropdown" data-role="administrador,logistica">
+        <a class="dropdown-toggle nav-link d-inline-block" aria-expanded="false" data-bs-toggle="dropdown"
+          style="padding-top: 16px;padding-right: 8px;">
+          <i class="fas fa-truck text-center"></i><span class="text-center-custom">Logística</span>
+        </a>
+        <div class="dropdown-menu text-primary border-0 animated fadeIn dropdown-menu-custom">
+          <a class="dropdown-item nav-link" href="/m_logistica/programacion.html">Programación</a>
+          <a class="dropdown-item nav-link" href="/m_logistica/remision.html">Remisión</a>
+        </div>
+      </li>
+
+      <!-- PORTERÍA -->
+      <li class="nav-item dropdown" data-role="administrador,porteria">
+        <a class="dropdown-toggle nav-link d-inline-block" aria-expanded="false" data-bs-toggle="dropdown"
+          style="padding-top: 16px;padding-right: 8px;">
+          <i class="fas fa-door-open text-center"></i><span class="text-center-custom">Portería</span>
+        </a>
+        <div class="dropdown-menu text-primary border-0 animated fadeIn dropdown-menu-custom">
+          <a class="dropdown-item nav-link" href="/m_porteria/inventario.html">Inventario</a>
+          <a class="dropdown-item nav-link" href="/m_porteria/control_acceso.html">Control Acceso</a>
+        </div>
+      </li>
+
+      <!-- USUARIOS -->
+      <li class="nav-item dropdown">
+        <a class="dropdown-toggle nav-link d-inline-block" aria-expanded="false" data-bs-toggle="dropdown"
+          style="padding-top: 16px;padding-right: 8px;">
+          <i class="fas fa-user-cog text-center"></i><span class="text-center-custom">Usuarios</span>
+        </a>
+        <div class="dropdown-menu text-primary border-0 animated fadeIn dropdown-menu-custom">
+          <a class="dropdown-item nav-link" href="/Usuarios.html">Usuario</a>
+          <a class="dropdown-item nav-link" href="/m_capacitaciones/mis_evaluaciones.html">Mis Evaluaciones</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
