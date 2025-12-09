@@ -20,9 +20,9 @@ $pass = '12345';
 $port = '5432';
 // --------------------------------------------------------------------------------
 
-$dsn = "pgsql:host={$DB_HOST};port={$DB_PORT};dbname={$DB_NAME};";
+$dsn = "pgsql:host={$host};port={$port};dbname={$db};";
 try {
-    $pdo = new PDO($dsn, $DB_USER, $DB_PASS, [
+    $pdo = new PDO($dsn, $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     ]);
