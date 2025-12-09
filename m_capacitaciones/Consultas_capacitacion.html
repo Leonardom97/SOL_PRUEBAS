@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>Consultas de Capacitaciones - OSM</title>
+  <link rel="icon" type="image/png" sizes="697x475" href="../assets/img/Sin%20título-2.png">
+  <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../assets/fonts/fontawesome-all.min.css">
+  <link rel="stylesheet" href="../assets/css/bs-theme-overrides.css">
+  <link rel="stylesheet" href="assets/css/capacitaciones-tabs.css">
+  <style>
+    body {
+      visibility: hidden;
+    }
+  </style>
+</head>
+
+<body id="page-top">
+  <div id="wrapper">
+    <div id="sidebar"></div>
+    <div class="d-flex flex-column" id="content-wrapper">
+      <div id="content">
+        <div id="navbar"></div>
+        <div class="container-fluid">
+          <main class="md-app material-s">
+
+            <nav class="md-tabs-bar">
+              <div class="md-tabs-group" id="tabsGroup"></div>
+              <button class="tab-arrow tab-arrow-left" id="tabArrowLeft" title="Pestañas anteriores">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <button class="tab-arrow tab-arrow-right" id="tabArrowRight" title="Pestañas siguientes">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+              <button class="md-tab-selector-btn" id="openTabSelector" title="Seleccionar pestañas">
+                <i class="fas fa-layer-group"></i>
+              </button>
+              <div class="md-tab-selector-modal" id="tabSelectorModal">
+                <div class="md-tab-selector-content">
+                  <h4>Selecciona las pestañas visibles</h4>
+                  <div id="tabSelectorChecks" class="md-tab-selector-checks"></div>
+                  <button id="closeSelector" class="btn btn-primary mt-3">Cerrar</button>
+                </div>
+              </div>
+            </nav>
+
+            <!-- TAB 1: CONSULTAS DE CAPACITACIONES -->
+            <section id="tab-content-capacitaciones" class="md-table-card" style="display:block;">
+              <div class="md-table-toolbar">
+                <span class="md-table-title"><i class="fas fa-chalkboard-teacher"></i> Consultas de
+                  Capacitaciones</span>
+                <div class="md-table-actions">
+                  <button class="md-btn md-btn-icon" id="clearFiltersBtn1" title="Limpiar filtros"><i
+                      class="fas fa-broom"></i></button>
+                  <button class="md-btn md-btn-icon" id="exportBtnCapacitaciones" title="Exportar a Excel"><i
+                      class="fas fa-file-excel"></i></button>
+                  <label class="md-table-show">
+                    Mostrar
+                    <select id="limitSelect1" class="md-select">
+                      <option value="10" selected>10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+              <div class="md-table-scroll">
+                <table class="md-table" id="tabla-capacitaciones" data-tabla="capacitaciones">
+                  <thead>
+                    <tr>
+                      <th><input type="checkbox" id="selectAll1" class="md-checkbox"></th>
+                      <th>
+                        <div class="md-th-flex"><span>Id</span><input class="md-input" data-col="id"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="id"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Capacitador</span><input class="md-input" data-col="capacitador"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="capacitador"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Cédula</span><input class="md-input" data-col="cedula"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="cedula"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Tema</span><input class="md-input" data-col="tema"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="tema"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Lugar</span><input class="md-input" data-col="lugar"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="lugar"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Actividad</span><input class="md-input" data-col="actividad"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="actividad"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Proceso</span><input class="md-input" data-col="proceso"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="proceso"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Fecha</span><input class="md-input" data-col="fecha"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="fecha"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Asistentes</span><input class="md-input"
+                            data-col="total_asistentes" placeholder="Filtrar"><i class="fas fa-sort icon-sort"
+                            data-col="total_asistentes"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Registrado por</span><input class="md-input"
+                            data-col="registrado_por" placeholder="Filtrar"><i class="fas fa-sort icon-sort"
+                            data-col="registrado_por"></i></div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-capacitaciones"></tbody>
+                </table>
+              </div>
+              <nav id="pagination-capacitaciones" class="md-pagination">
+                <ul class="md-pagination-list"></ul>
+              </nav>
+            </section>
+
+            <!-- TAB 2: CONSULTAS POR PERSONA -->
+            <section id="tab-content-por-persona" class="md-table-card" style="display:none;">
+              <div class="md-table-toolbar">
+                <span class="md-table-title"><i class="fas fa-users"></i> Consultas por Persona</span>
+                <div class="md-table-actions">
+                  <button class="md-btn md-btn-icon" id="clearFiltersBtn2" title="Limpiar filtros"><i
+                      class="fas fa-broom"></i></button>
+                  <button class="md-btn md-btn-icon" id="exportBtnPersona" title="Exportar a Excel"><i
+                      class="fas fa-file-excel"></i></button>
+                  <label class="md-table-show">
+                    Mostrar
+                    <select id="limitSelect2" class="md-select">
+                      <option value="10">10</option>
+                      <option value="25" selected>25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+              <div class="md-table-scroll">
+                <table class="md-table" id="tabla-persona" data-tabla="persona">
+                  <thead>
+                    <tr>
+                      <th><input type="checkbox" id="selectAllPersona" class="md-checkbox"></th>
+                      <th>
+                        <div class="md-th-flex"><span>ID</span><input class="md-input" data-col="id"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="id"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Cédula</span><input class="md-input" data-col="cedula"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="cedula"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Nombres y Apellidos</span><input class="md-input"
+                            data-col="nombres_apellidos" placeholder="Filtrar"><i class="fas fa-sort icon-sort"
+                            data-col="nombres_apellidos"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Cargo</span><input class="md-input" data-col="cargo"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="cargo"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Sub Área</span><input class="md-input" data-col="sub_area"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="sub_area"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Realizadas</span><input class="md-input"
+                            data-col="capacitaciones_realizadas" placeholder="Filtrar"><i class="fas fa-sort icon-sort"
+                            data-col="capacitaciones_realizadas"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Pendientes</span><input class="md-input"
+                            data-col="capacitaciones_pendientes" placeholder="Filtrar"><i class="fas fa-sort icon-sort"
+                            data-col="capacitaciones_pendientes"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Programadas</span><input class="md-input"
+                            data-col="total_esperadas" placeholder="Filtrar"><i class="fas fa-sort icon-sort"
+                            data-col="total_esperadas"></i></div>
+                      </th>
+                      <th>
+                        <div class="md-th-flex"><span>Evaluaciones</span><input class="md-input" data-col="evaluaciones"
+                            placeholder="Filtrar"><i class="fas fa-sort icon-sort" data-col="evaluaciones"></i></div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-persona"></tbody>
+                </table>
+              </div>
+              <nav id="pagination-persona" class="md-pagination">
+                <ul class="md-pagination-list"></ul>
+              </nav>
+            </section>
+
+          </main>
+        </div>
+        <footer class="bg-white sticky-footer" style="margin-top:20px;">
+          <div class="container my-auto">
+            <div class="text-center my-auto copyright"><span>© OSM 2025</span></div>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Load navbar and sidebar dynamically
+    async function includeComponent(file, selector) {
+      try {
+        const res = await fetch(file);
+        const html = await res.text();
+        const el = document.querySelector(selector);
+        if (el) el.innerHTML = html;
+      } catch (err) {
+        console.error(`Error loading ${file}:`, err);
+      }
+    }
+
+    // Initialize navbar functionality after dynamic loading
+    async function initializeNavbar() {
+      try {
+        // Fetch and display user information
+        const res = await fetch('/php/verificar_sesion.php', { cache: 'no-store' });
+        const data = await res.json();
+
+        if (!data.success) {
+          window.location.href = '/index.html';
+          return;
+        }
+
+        // Display user name in navbar
+        const nombreEl = document.getElementById('usuarioNombre');
+        if (nombreEl && data.nombre) {
+          nombreEl.textContent = data.nombre;
+        }
+
+        // Setup notifications
+        setupNotifications();
+
+        // Setup logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', async function (e) {
+            e.preventDefault();
+
+            // Clear notification interval
+            if (window.notificationCheckInterval) {
+              clearInterval(window.notificationCheckInterval);
+            }
+
+            try {
+              const logoutRes = await fetch('/php/logout.php', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'X-Requested-With': 'XMLHttpRequest'
+                },
+                cache: 'no-store'
+              });
+
+              const logoutData = await logoutRes.json();
+
+              if (logoutData.success) {
+                if (window.sessionStorage) {
+                  sessionStorage.clear();
+                }
+                if (window.localStorage) {
+                  const keysToRemove = [];
+                  for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.includes('session') || key.includes('user') || key.includes('token'))) {
+                      keysToRemove.push(key);
+                    }
+                  }
+                  keysToRemove.forEach(key => localStorage.removeItem(key));
+                }
+                window.location.href = '/index.html';
+              } else {
+                console.error('Logout failed:', logoutData.message);
+                alert('Error al cerrar sesión. Por favor, intenta nuevamente.');
+              }
+            } catch (error) {
+              console.error('Error during logout:', error);
+              window.location.href = '/index.html';
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error initializing navbar:', error);
+      }
+    }
+
+    async function setupNotifications() {
+      await loadNotifications();
+      window.notificationCheckInterval = setInterval(loadNotifications, 5 * 60 * 1000);
+
+      const notificationBell = document.getElementById('notificationBell');
+      if (notificationBell) {
+        notificationBell.addEventListener('click', async function (e) {
+          await loadNotifications();
+        });
+      }
+    }
+
+    async function loadNotifications() {
+      try {
+        const res = await fetch('/m_capacitaciones/assets/php/notificaciones_api.php?action=get_my_notifications', {
+          cache: 'no-store'
+        });
+        const data = await res.json();
+
+        if (data.success && data.data) {
+          updateNotificationUI(data.data);
+        }
+      } catch (error) {
+        console.error('Error loading notifications:', error);
+      }
+    }
+
+    function updateNotificationUI(notifications) {
+      const badge = document.getElementById('notificationBadge');
+      const notificationList = document.getElementById('notificationList');
+
+      if (!badge || !notificationList) return;
+
+      const unread = notifications.filter(n => !n.leida);
+
+      if (unread.length > 0) {
+        badge.textContent = unread.length > 99 ? '99+' : unread.length;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+
+      if (notifications.length === 0) {
+        notificationList.innerHTML = `
+      <div class="text-center p-3 text-muted">
+        <i class="fas fa-check-circle fa-2x mb-2"></i>
+        <p class="mb-0">No hay capacitaciones pendientes</p>
+      </div>
+    `;
+        return;
+      }
+
+      notificationList.innerHTML = notifications.slice(0, 5).map(notif => {
+        const bgClass = notif.estado === 'vencida' ? 'bg-danger' :
+          notif.estado === 'proximo_vencer' ? 'bg-warning' : 'bg-info';
+        const icon = notif.estado === 'vencida' ? 'fa-exclamation-triangle' :
+          notif.estado === 'proximo_vencer' ? 'fa-clock' : 'fa-calendar-alt';
+
+        const daysText = notif.dias_para_vencimiento < 0 ?
+          `Vencida hace ${Math.abs(notif.dias_para_vencimiento)} días` :
+          `Faltan ${notif.dias_para_vencimiento} días`;
+
+        return `
+      <a class="dropdown-item d-flex align-items-center ${notif.leida ? 'text-muted' : ''}" 
+         href="/Usuarios.html" 
+         onclick="markAsRead(${notif.id})">
+        <div class="me-3">
+          <div class="${bgClass} icon-circle">
+            <i class="fas ${icon} text-white"></i>
+          </div>
+        </div>
+        <div style="flex: 1;">
+          <div class="small text-gray-500">${notif.tema_nombre}</div>
+          <span class="fw-bold">${daysText}</span>
+        </div>
+      </a>
+    `;
+      }).join('');
+
+      if (notifications.length > 5) {
+        notificationList.innerHTML += `
+      <div class="text-center small text-gray-500 p-2">
+        ... y ${notifications.length - 5} más
+      </div>
+    `;
+      }
+    }
+
+    window.markAsRead = async function (id) {
+      try {
+        await fetch(`/m_capacitaciones/assets/php/notificaciones_api.php?action=mark_as_read&id=${id}`, {
+          method: 'POST'
+        });
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
+    };
+
+    // Load components on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', async function () {
+      await includeComponent('../includes/navbar.html', '#navbar');
+      await includeComponent('../includes/sidebar.html', '#sidebar');
+
+      // Initialize navbar functionality after HTML is loaded
+      await initializeNavbar();
+    });
+  </script>
+  <script src="../assets/js/auth_guard.js"></script>
+  <script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+  <script src="../assets/js/sidebar.js"></script>
+  <script src="../assets/js/navbar.js"></script>
+  <script src="assets/js/xlsx.full.min.js"></script>
+  <script src="assets/js/consultas-tabs.js"></script>
+  <script src="assets/js/consulta-cap.js"></script>
+  <script src="assets/js/consulta-por-persona.js"></script>
+  <script src="../assets/js/web_config.js"></script>
+</body>
+
+</html>
