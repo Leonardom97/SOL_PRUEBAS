@@ -1,0 +1,108 @@
+[2025-12-03 14:09:51] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(29).
+[2025-12-03 14:09:55] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(30).
+[2025-12-03 14:09:55] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(31).
+[2025-12-03 14:09:56] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(32).
+[2025-12-03 14:09:57] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(33).
+[2025-12-03 14:09:57] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(34).
+[2025-12-03 14:09:57] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(35).
+[2025-12-03 14:09:57] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(36).
+[2025-12-03 14:09:58] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(37).
+[2025-12-03 14:09:58] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(38).
+[2025-12-03 14:09:58] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(39).
+[2025-12-03 14:09:58] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(40).
+[2025-12-03 14:09:58] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(41).
+[2025-12-03 14:09:59] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(42).
+[2025-12-03 14:09:59] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(43).
+[2025-12-03 14:10:00] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(44).
+[2025-12-03 14:10:00] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(45).
+[2025-12-03 14:10:01] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(46).
+[2025-12-03 14:10:02] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(47).
+[2025-12-03 14:10:03] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(48).
+[2025-12-03 14:10:03] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(49).
+[2025-12-03 14:10:03] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(50).
+[2025-12-03 14:10:03] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(51).
+[2025-12-03 14:10:05] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(52).
+[2025-12-03 14:10:08] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(53).
+[2025-12-03 14:10:09] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(54).
+[2025-12-03 14:10:09] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(55).
+[2025-12-03 14:10:09] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(56).
+[2025-12-03 14:10:10] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(57).
+[2025-12-03 14:10:10] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(58).
+[2025-12-03 14:10:10] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(59).
+[2025-12-03 14:10:10] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(60).
+[2025-12-03 14:10:11] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(61).
+[2025-12-03 14:10:11] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(62).
+[2025-12-03 14:10:11] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(63).
+[2025-12-03 14:10:11] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(64).
+[2025-12-03 14:10:11] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(65).
+[2025-12-03 14:10:12] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(66).
+[2025-12-03 14:10:12] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(67).
+[2025-12-03 14:10:12] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(68).
+[2025-12-03 14:10:12] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(69).
+[2025-12-03 14:10:12] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(70).
+[2025-12-03 14:10:13] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(71).
+[2025-12-03 14:10:13] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(72).
+[2025-12-03 14:10:14] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(73).
+[2025-12-03 14:10:14] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(74).
+[2025-12-03 14:10:14] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(75).
+[2025-12-03 14:10:14] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(76).
+[2025-12-03 14:10:15] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(77).
+[2025-12-03 14:10:16] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(78).
+[2025-12-03 14:10:16] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(79).
+[2025-12-03 14:10:16] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(80).
+[2025-12-03 14:10:16] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(81).
+[2025-12-03 14:10:17] Database error in proceso_tema_api: SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricción de unicidad «cap_proceso_tema_pkey»
+DETAIL:  Ya existe la llave (id)=(82).
