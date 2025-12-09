@@ -296,7 +296,8 @@
     const footer = document.querySelector('#modal-editar .modal-footer');
     if(footer){
       footer.querySelectorAll('.icon-repeat-supervision').forEach(x=>x.remove());
-      if((row.supervision==='aprobado' || row.check==1) && readonly){
+      const canRevert = window.AgronomiaRolePermissions?.hasPermission('canRevert') ?? false;
+      if((row.supervision==='aprobado' || row.check==1) && readonly && canRevert){
         const btn=document.createElement('button'); btn.type='button'; btn.className='btn btn-success icon-repeat-supervision';
         btn.title='Revertir aprobación'; btn.innerHTML='<i class="fa-solid fa-repeat"></i> Revertir';
         btn.onclick = ()=>revertir(id); footer.insertBefore(btn, footer.firstChild);
