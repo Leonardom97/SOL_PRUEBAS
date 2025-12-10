@@ -182,16 +182,16 @@
   }
 
 
-  // Toggle error_registro state: if switch is checked => activate, else => inactivate
+  // Alternar estado de error_registro: si el switch está marcado => activar, de lo contrario => inactivar
 
 
   async function toggleErrorRegistro(id, prevWasActive, switchElement){
 
 
-    // prevWasActive indicates whether the record WAS active before the change
+    // prevWasActive indica si el registro ESTABA activo antes del cambio
 
 
-    // desired new state is based on switchElement.checked
+    // el nuevo estado deseado se basa en switchElement.checked
 
 
     const desiredActive = !!switchElement.checked;
@@ -236,7 +236,7 @@
         console.log('['+ID_KEY+'] toggle error_registro ok', {id, action, result:j});
 
 
-        // reload data to reflect badge and other UI changes
+        // recargar datos para reflejar el badge y otros cambios de UI
 
 
         await load();
@@ -299,7 +299,7 @@
   async function inactivar(id){
 
 
-    // kept for backwards compatibility but not directly bound now
+    // mantenido por compatibilidad hacia atrás pero ya no vinculado directamente
 
 
     if(!confirm('¿Inactivar registro?')) return;
@@ -362,7 +362,7 @@
   async function activar(id){
 
 
-    // kept for backwards compatibility but not directly bound now
+    // mantenido por compatibilidad hacia atrás pero ya no vinculado directamente
 
 
     if(!confirm('¿Activar registro?')) return;
@@ -450,7 +450,7 @@
   async function save(e){
     e.preventDefault();
     const fd = new FormData(e.target), obj={}; COLUMNAS.forEach(c=>obj[c]=fd.get(c));
-    // Skip if the ID field for this entity is not present or empty (form is for another entity)
+    // Omitir si el campo ID para esta entidad no está presente o está vacío (el formulario es para otra entidad)
     const idValue = obj[ID_KEY];
     if (!idValue || String(idValue).trim() === '') {
       return;
@@ -533,11 +533,11 @@
     initFilters(); load();
   }
 
-  // Check if DOM is already loaded, otherwise wait for DOMContentLoaded
+  // Verificar si el DOM ya está cargado, de lo contrario esperar DOMContentLoaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
-    // DOM is already loaded, call init immediately
+    // DOM ya está cargado, llamar init inmediatamente
     init();
   }
 })();

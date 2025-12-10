@@ -62,7 +62,7 @@ try {
  * 1. Sesión PHP ($_SESSION['role'])
  * 2. Header HTTP X-User-Role (fallback para pruebas)
  * 
- * @return string|null El rol del usuario o null si no se encuentra
+ * @return string|null El rol del usuario o nulo si no se encuentra
  */
 function obtener_rol() {
     // Si usas sessions, activa session_start() y esto leerá $_SESSION['role']
@@ -77,7 +77,7 @@ function obtener_rol() {
  * Valida que una fecha tenga el formato ISO (YYYY-MM-DD).
  * 
  * @param string $f Fecha a validar
- * @return bool True si la fecha tiene el formato correcto
+ * @return bool Verdadero si la fecha tiene el formato correcto
  */
 function validar_fecha_iso($f) {
     return preg_match('/^\d{4}-\d{2}-\d{2}$/', $f);
