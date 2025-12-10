@@ -1,3 +1,16 @@
+/**
+ * aud_perdidas.js
+ * 
+ * Módulo para: Auditoría de pérdidas
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de auditoría de pérdidas con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Control y análisis de pérdidas en procesos agrícolas
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   (function(){

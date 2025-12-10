@@ -1,3 +1,16 @@
+/**
+ * ct_polinizacion_flores.js
+ * 
+ * Módulo para: Control de calidad de polinización de flores
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de control de calidad de polinización con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Evaluación y seguimiento de la calidad del proceso de polinización
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---

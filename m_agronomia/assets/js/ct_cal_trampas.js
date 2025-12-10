@@ -1,3 +1,16 @@
+/**
+ * ct_cal_trampas.js
+ * 
+ * Módulo para: Control de calidad de trampas
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de control de calidad de trampas con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Evaluación y seguimiento de la efectividad de trampas para plagas
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---

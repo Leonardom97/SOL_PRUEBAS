@@ -1,3 +1,16 @@
+/**
+ * aud_fertilizacion.js
+ * 
+ * Módulo para: Auditoría de fertilización
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de auditoría de fertilización con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Auditoría y control de calidad de procesos de fertilización
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   (function(){

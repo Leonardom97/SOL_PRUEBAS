@@ -1,3 +1,16 @@
+/**
+ * aud_mantenimiento.js
+ * 
+ * Módulo para: Auditoría de mantenimiento
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de auditoría de mantenimiento con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Auditoría y control de calidad de actividades de mantenimiento
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   (function(){

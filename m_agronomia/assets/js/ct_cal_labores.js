@@ -1,3 +1,16 @@
+/**
+ * ct_cal_labores.js
+ * 
+ * Módulo para: Control de calidad de labores
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de control de calidad de labores con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Evaluación y seguimiento de la calidad de las labores agrícolas
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---
