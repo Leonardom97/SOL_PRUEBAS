@@ -520,5 +520,11 @@
     initFilters(); load();
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  // Check if DOM is already loaded, otherwise wait for DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    // DOM is already loaded, call init immediately
+    init();
+  }
 })();
