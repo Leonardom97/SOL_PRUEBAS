@@ -154,11 +154,11 @@ try {
         $foundMain = false;
         $foundTemp = false;
 
-        // MAIN - check if exists first, then update
+        // MAIN - verificar si existe primero, luego actualizar
         try {
             $pgMain = getMain();
             $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            // First check if record exists
+            // Primero verificar si el registro existe
             $stCheck = $pgMain->prepare("SELECT 1 FROM cosecha_fruta WHERE cosecha_fruta_id = :id LIMIT 1");
             $stCheck->execute(['id'=>$id]);
             $foundMain = (bool)$stCheck->fetchColumn();
@@ -173,11 +173,11 @@ try {
             $updatedMain = 0;
         }
 
-        // TEMP - check if exists first, then update
+        // TEMP - verificar si existe primero, luego actualizar
         try {
             $pgTemp = getTemporal();
             $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            // First check if record exists
+            // Primero verificar si el registro existe
             $stCheck = $pgTemp->prepare("SELECT 1 FROM cosecha_fruta WHERE cosecha_fruta_id = :id LIMIT 1");
             $stCheck->execute(['id'=>$id]);
             $foundTemp = (bool)$stCheck->fetchColumn();
@@ -193,7 +193,7 @@ try {
             $updatedTemp = 0;
         }
 
-        // Success if record was found in at least one database
+        // Éxito si el registro se encontró en al menos una base de datos
         $ok = ($foundMain || $foundTemp);
         $response = ['success'=>$ok,'action'=>'inactivar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'inactivo','warnings'=>$warnings];
         if (!$ok) {
@@ -214,11 +214,11 @@ try {
         $foundMain = false;
         $foundTemp = false;
 
-        // MAIN - check if exists first, then update
+        // MAIN - verificar si existe primero, luego actualizar
         try {
             $pgMain = getMain();
             $pgMain->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            // First check if record exists
+            // Primero verificar si el registro existe
             $stCheck = $pgMain->prepare("SELECT 1 FROM cosecha_fruta WHERE cosecha_fruta_id = :id LIMIT 1");
             $stCheck->execute(['id'=>$id]);
             $foundMain = (bool)$stCheck->fetchColumn();
@@ -234,11 +234,11 @@ try {
             $updatedMain = 0;
         }
 
-        // TEMP - check if exists first, then update
+        // TEMP - verificar si existe primero, luego actualizar
         try {
             $pgTemp = getTemporal();
             $pgTemp->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            // First check if record exists
+            // Primero verificar si el registro existe
             $stCheck = $pgTemp->prepare("SELECT 1 FROM cosecha_fruta WHERE cosecha_fruta_id = :id LIMIT 1");
             $stCheck->execute(['id'=>$id]);
             $foundTemp = (bool)$stCheck->fetchColumn();
@@ -253,7 +253,7 @@ try {
             $updatedTemp = 0;
         }
 
-        // Success if record was found in at least one database
+        // Éxito si el registro se encontró en al menos una base de datos
         $ok = ($foundMain || $foundTemp);
         $response = ['success'=>$ok,'action'=>'activar','id'=>$id,'updated_main'=>$updatedMain,'updated_temp'=>$updatedTemp,'estado'=>'activo','warnings'=>$warnings];
         if (!$ok) {

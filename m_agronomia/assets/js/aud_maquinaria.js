@@ -59,7 +59,7 @@
   const DATE_COL = 'fecha';
   const ACTIONS = { listFallback:['conexion','listar','list'], save:'actualizar', inactivate:'inactivar', reject:'rechazar', approve:'aprobar', activate:'activar' };
 
-  // Debounce for inputs
+  // Debounce para inputs
   const FILTER_DEBOUNCE_MS = 300;
   function debounce(fn, ms){
     let t;
@@ -129,7 +129,7 @@
       const isAsistAgronomico=/asist_agronómico/i.test(rol);
       let edit = '', lock = '';
       if(inactivo) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>';
-      else if(isAsistAgronomico) { /* No edit button for Asist_Agronómico */ }
+      else if(isAsistAgronomico) { /* Sin botón de editar para Asist_Agronómico */ }
       else if(corte && fecha){
         if(fecha < corte) lock = '<button class="md-btn md-btn-icon" disabled><i class="fa fa-lock"></i></button>';
         else edit = `<button class="md-btn md-btn-icon btn-editar" data-id="${row[ID_KEY]}" title="Editar"><i class="fa fa-pen"></i></button>`;
@@ -183,7 +183,7 @@
     });
   }
 
-  // Toggle error_registro state: if switch is checked => activate, else => inactivate
+  // Alternar estado de error_registro: si el switch está marcado => activar, de lo contrario => inactivar
   async function toggleErrorRegistro(id, prevWasActive, switchElement){
     const desiredActive = !!switchElement.checked;
     const action = desiredActive ? ACTIONS.activate : ACTIONS.inactivate;
@@ -379,7 +379,7 @@
     ul.appendChild(item('»', Math.min(pages, page+1), page===pages, false));
   }
 
-  // Robust filters initialization: map inputs by data-col/name or header text
+  // Inicialización robusta de filtros: mapear inputs por data-col/name o texto del encabezado
   function initFilters(){
     const table = document.getElementById(DOM.table); if(!table) { console.warn('[aud_maquinaria] tabla no encontrada:', DOM.table); return; }
     const thead = table.querySelector('thead'); if(!thead) { console.warn('[aud_maquinaria] thead no encontrado'); return; }
@@ -432,7 +432,7 @@
       const res = await fetchData();
       data = res.datos || []; total = res.total || data.length;
       render();
-      // sync thead inputs with filters
+      // sincronizar inputs del thead con filtros
       const table = document.getElementById(DOM.table);
       if(table){
         const thead = table.querySelector('thead');
@@ -463,11 +463,11 @@
     load();
   }
 
-  // Check if DOM is already loaded, otherwise wait for DOMContentLoaded
+  // Verificar si el DOM ya está cargado, de lo contrario esperar DOMContentLoaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
-    // DOM is already loaded, call init immediately
+    // DOM ya está cargado, llamar init inmediatamente
     init();
   }
 

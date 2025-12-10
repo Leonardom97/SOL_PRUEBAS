@@ -93,7 +93,7 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
-      // New: render error_registro as a switch + badge styled via CSS (.error-reg-badge)
+      // Nuevo: renderizar error_registro como un switch + badge estilizado vía CSS (.error-reg-badge)
 
       const tdError = document.createElement('td');
 
@@ -155,7 +155,7 @@
   t.querySelectorAll('.btn-ver').forEach(b=>b.onclick = ()=>openModal(b.dataset.id, true));
 
 
-  // bind switches
+  // vincular switches
 
 
   t.querySelectorAll('.error-reg-switch').forEach(input=>{
@@ -167,7 +167,7 @@
       const id = input.dataset.id;
 
 
-      const prevState = !input.checked; // previous state (before change)
+      const prevState = !input.checked; // estado anterior (antes del cambio)
 
 
       toggleErrorRegistro(id, prevState, input);
@@ -182,16 +182,16 @@
   }
 
 
-  // Toggle error_registro state: if switch is checked => activate, else => inactivate
+  // Alternar estado de error_registro: si el switch está marcado => activar, de lo contrario => inactivar
 
 
   async function toggleErrorRegistro(id, prevWasActive, switchElement){
 
 
-    // prevWasActive indicates whether the record WAS active before the change
+    // prevWasActive indica si el registro ESTABA activo antes del cambio
 
 
-    // desired new state is based on switchElement.checked
+    // el nuevo estado deseado se basa en switchElement.checked
 
 
     const desiredActive = !!switchElement.checked;
@@ -206,7 +206,7 @@
     if(!confirm(prompt)){
 
 
-      // user cancelled; revert switch to previous state
+      // usuario canceló; revertir switch al estado anterior
 
 
       switchElement.checked = !!prevWasActive;
@@ -236,7 +236,7 @@
         console.log('['+ID_KEY+'] toggle error_registro ok', {id, action, result:j});
 
 
-        // reload data to reflect badge and other UI changes
+        // recargar datos para reflejar el badge y otros cambios de UI
 
 
         await load();
@@ -253,7 +253,7 @@
 
         if(norm==='exception' || norm==='id_required'){ console.warn('['+ID_KEY+'] error suprimido:', err); }
         else { alert(err); }
-        // revert UI on failure
+        // revertir UI en caso de fallo
         switchElement.checked = !!prevWasActive;
       }
     }catch(err){
@@ -261,12 +261,12 @@
       const norm = (msg===null||msg===undefined)?'':String(msg).trim().toLowerCase();
       if(norm==='exception' || norm==='id_required'){ console.warn('['+ID_KEY+'] error suprimido:', msg); }
       else { alert(msg); }
-      // revert UI on error
+      // revertir UI en caso de error
       switchElement.checked = !!prevWasActive;
     }
   }  
   async function inactivar(id){
-    // kept for backwards compatibility but not directly bound now
+    // mantenido por compatibilidad hacia atrás pero ya no vinculado directamente
     if(!confirm('¿Inactivar registro?')) return;
     try{
       const r = await fetch(`${API}?action=${ACTIONS.inactivate}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({[ID_KEY]:id})});
@@ -286,7 +286,7 @@
     }
   }  
   async function activar(id){
-    // kept for backwards compatibility but not directly bound now
+    // mantenido por compatibilidad hacia atrás pero ya no vinculado directamente
     if(!confirm('¿Activar registro?')) return;
     try{
       const r = await fetch(`${API}?action=${ACTIONS.activate}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({[ID_KEY]:id})});
@@ -338,7 +338,7 @@
   async function save(e){
     e.preventDefault();
     const fd = new FormData(e.target), obj={}; COLUMNAS.forEach(c=>obj[c]=fd.get(c));
-    // Skip if the ID field for this entity is not present or empty (form is for another entity)
+    // Omitir si el campo ID para esta entidad no está presente o está vacío (el formulario es para otra entidad)
     const idValue = obj[ID_KEY];
     if (!idValue || String(idValue).trim() === '') {
       return;
@@ -421,11 +421,11 @@
     initFilters(); load();
   }
 
-  // Check if DOM is already loaded, otherwise wait for DOMContentLoaded
+  // Verificar si el DOM ya está cargado, de lo contrario esperar DOMContentLoaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
-    // DOM is already loaded, call init immediately
+    // DOM ya está cargado, llamar init inmediatamente
     init();
   }
 })();
