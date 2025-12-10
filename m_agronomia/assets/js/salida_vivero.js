@@ -1,3 +1,16 @@
+/**
+ * salida_vivero.js
+ * 
+ * Módulo para: Registro de salida de plantas del vivero
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de salida de vivero con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Control de plantas que salen del vivero hacia el campo
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   (function(){

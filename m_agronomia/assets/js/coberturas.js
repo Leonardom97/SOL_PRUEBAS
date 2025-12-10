@@ -1,6 +1,34 @@
+/**
+ * coberturas.js
+ * 
+ * Módulo para: Gestión de coberturas de cultivo
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Activación/inactivación de registros con error_registro
+ * - Exportación de datos a Excel
+ * - Ordenamiento por columnas
+ * - Sistema de notificaciones para registros pendientes
+ * 
+ * Estados de registros:
+ * - Edición: Registro nuevo o modificado, aún no enviado para aprobación
+ * - Pendiente: Registro enviado para aprobación, esperando revisión
+ * - Aprobado: Registro aprobado y movido a la base de datos principal
+ * 
+ * Este archivo sigue el patrón estándar del módulo de agronomía:
+ * - Supresión de alertas específicas (exception, id_required)
+ * - Gestión de paginación y filtros
+ * - Integración con sistema de iconos de verificación
+ * - Soporte para roles y permisos
+ */
+
 (function(){
   'use strict';
-  // --- override alert para suprimir solo 'exception' y 'id_required' ---
+  
+  // --- Supresión de alertas específicas ---
+  // Intercepta window.alert para suprimir solo los mensajes 'exception' y 'id_required'
   (function(){
     const __orig_alert = window.alert && window.alert.bind(window);
     if(__orig_alert){

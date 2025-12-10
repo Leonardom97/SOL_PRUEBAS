@@ -1,3 +1,23 @@
+/**
+ * compactacion.js
+ * 
+ * Módulo para: Registro de compactación del suelo
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de compactación con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Activación/inactivación de registros con error_registro
+ * - Exportación de datos a Excel
+ * - Ordenamiento por columnas
+ * - Sistema de notificaciones para registros pendientes
+ * 
+ * Estados de registros:
+ * - Edición: Registro nuevo o modificado, aún no enviado para aprobación
+ * - Pendiente: Registro enviado para aprobación, esperando revisión
+ * - Aprobado: Registro aprobado y movido a la base de datos principal
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---

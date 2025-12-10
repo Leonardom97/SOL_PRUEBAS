@@ -1,3 +1,16 @@
+/**
+ * mantenimientos.js
+ * 
+ * Módulo para: Gestión de mantenimientos
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de mantenimiento con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Control de mantenimientos preventivos y correctivos
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---
