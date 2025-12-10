@@ -42,7 +42,7 @@ try {
 
     $action = map_action($action);
 
-    // Columnas entregadas + campos de workflow (supervision, check)
+    // Columnas entregadas + campos de flujo de trabajo (supervision, check)
     $cols = [
       'compostaje_id','id','fecha','hora','fecha_actividad','responsable',
       'plantacion','labor','labor_especifica','bache','pila','unidad',

@@ -39,7 +39,7 @@ if (!preg_match('/^[a-zA-Z0-9_]+$/', $entidad)) {
  * 
  * @param PDO $pg - Conexión a la base de datos
  * @param string $table - Nombre de la tabla
- * @return array Array de nombres de columnas en orden
+ * @return array Arreglo de nombres de columnas en orden
  */
 function list_columns(PDO $pg, $table) {
     $st = $pg->prepare("SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name=:t ORDER BY ordinal_position");
