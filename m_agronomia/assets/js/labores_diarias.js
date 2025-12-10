@@ -1,3 +1,16 @@
+/**
+ * labores_diarias.js
+ * 
+ * Módulo para: Registro de labores diarias
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de labores diarias con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Seguimiento de todas las labores realizadas diariamente en el cultivo
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   (function(){

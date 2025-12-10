@@ -1,3 +1,18 @@
+/**
+ * F_cortes.js
+ * 
+ * Módulo para: Gestión de fechas de cortes
+ * 
+ * Funcionalidades principales:
+ * - Visualización de la fecha de corte actual
+ * - Actualización de la fecha de corte (solo para administradores)
+ * - Sincronización con el API de fecha_corte.php
+ * - Almacenamiento en localStorage para acceso rápido
+ * 
+ * Este módulo gestiona la fecha de corte que se utiliza como referencia
+ * en varios procesos del módulo de agronomía.
+ */
+
   (function () {
     const API_URL = '/m_agronomia/assets/php/fecha_corte.php'; // endpoint que actualiza id = 1
     const inputFecha = document.getElementById("fecha");       // <input type="date">

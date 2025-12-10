@@ -1,7 +1,29 @@
+/**
+ * verificacion_icons.js
+ * 
+ * Sistema de iconos de verificación para tablas del módulo de agronomía.
+ * 
+ * Propósito:
+ * - Gestiona los iconos de verificación/supervisión en todas las tablas del módulo.
+ * - Sincroniza el estado de los registros (pendiente/aprobado/sin cambios) con la campana de notificaciones.
+ * - Actualiza automáticamente los iconos cuando hay cambios en las tablas.
+ * 
+ * Funcionalidad:
+ * - Obtiene la lista de IDs pendientes desde el servidor o desde window.PENDING_IDS.
+ * - Pinta iconos de estado en la columna de supervisión de cada tabla.
+ * - Utiliza MutationObserver para detectar cambios en las tablas y actualizar iconos.
+ * - Actualiza iconos cada 5 segundos automáticamente.
+ * 
+ * Iconos:
+ * - Reloj (amarillo): Registro pendiente por aprobar
+ * - Check doble (verde): Registro aprobado
+ * - Lápiz (azul): Sin cambios / en edición
+ */
+
 (function(){
   'use strict';
 
-  // MAPEA todas las tablas y sus columnas de ID y entidad
+  // Mapeo de todas las tablas y sus columnas de ID y entidad correspondiente
   var MAP = {
     'tabla-capacitaciones':         { entidad: 'cosecha_fruta',          idCol: 'cosecha_fruta_id' },
     'tabla-reuniones':              { entidad: 'mantenimientos',         idCol: 'mantenimientos_id' },
@@ -30,10 +52,17 @@
     'tabla-siembra-nueva':          { entidad: 'siembra_nueva',          idCol: 'siembra_nueva_id' }
   };
 
-  var TTL_MS = 5000; // cache para pendientes
+  // Tiempo de vida del caché (5 segundos)
+  var TTL_MS = 5000;
   var CACHE = {};
 
-  // FUNCION PARA PINTAR EL ICONO SEGUN LOGICA DE SUPERVISION
+  /**
+   * Pinta el icono de supervisión en una celda según el estado del registro.
+   * 
+   * @param {HTMLElement} td - Celda de la tabla donde se pintará el icono
+   * @param {string} estado - Estado del registro ('aprobado' u otro)
+   * @param {boolean} isPendienteCampanita - Si el registro está pendiente en la campana
+   */
   function pintarIconoSupervision(td, estado, isPendienteCampanita) {
     let meta;
     if (isPendienteCampanita) {
@@ -55,6 +84,12 @@
     }
   }
 
+  /**
+   * Normaliza una cadena de texto (minúsculas, sin acentos, sin espacios extra).
+   * 
+   * @param {*} s - Cadena a normalizar
+   * @returns {string} Cadena normalizada
+   */
   function norm(s){
     return (s==null?'':String(s))
       .toLowerCase()
@@ -62,6 +97,13 @@
       .trim();
   }
 
+  /**
+   * Encuentra el índice de columna en una tabla por su atributo data-col.
+   * 
+   * @param {HTMLElement} table - Elemento tabla
+   * @param {string} targetCol - Nombre de la columna buscada
+   * @returns {number} Índice de la columna o -1 si no se encuentra
+   */
   function findColIndexByDataCol(table,targetCol){
     var ths=table.querySelectorAll('thead th, thead td');
     if(!ths.length) return -1;
@@ -75,6 +117,13 @@
     }
     return -1;
   }
+  /**
+   * Encuentra el índice de columna por una lista de etiquetas posibles.
+   * 
+   * @param {HTMLElement} table - Elemento tabla
+   * @param {Array<string>} labels - Array de etiquetas posibles
+   * @returns {number} Índice de la columna o -1 si no se encuentra
+   */
   function findIndexByLabels(table, labels){
     var ths=table.querySelectorAll('thead th, thead td');
     var keys=labels.map(norm);
@@ -87,8 +136,21 @@
     }
     return -1;
   }
+  
+  /**
+   * Encuentra el índice de la columna de supervisión.
+   * 
+   * @param {HTMLElement} table - Elemento tabla
+   * @returns {number} Índice de la columna de supervisión
+   */
   function findSupervisionIndex(table){ return findIndexByLabels(table,['supervision']); }
 
+  /**
+   * Obtiene el ID de una celda desde checkbox, data-value o texto.
+   * 
+   * @param {HTMLElement} td - Celda de la tabla
+   * @returns {string} ID del registro
+   */
   function getCellTextId(td){
     if(!td) return '';
     var chk=td.querySelector('input[type="checkbox"][value]');
@@ -98,7 +160,12 @@
     return String(td.textContent||'').trim();
   }
 
-  // OBTIENE EL SET DE IDS PENDIENTES DE LA CAMPANITA
+  /**
+   * Obtiene el set de IDs pendientes desde window.PENDING_IDS (campana de notificaciones).
+   * 
+   * @param {string} entidad - Nombre de la entidad
+   * @returns {Set|null} Set de IDs pendientes o null si no existe
+   */
   function getPendingFromWindow(entidad){
     var map=window.PENDING_IDS||{}; var raw=map[entidad];
     if(raw instanceof Set) return raw;
@@ -106,6 +173,13 @@
     return null;
   }
 
+  /**
+   * Obtiene los IDs pendientes desde el servidor.
+   * 
+   * @param {string} entidad - Nombre de la entidad
+   * @param {string} expectedIdCol - Nombre esperado de la columna ID
+   * @returns {Promise} Promesa que resuelve con {set, idCol, source}
+   */
   function fetchPendientes(entidad, expectedIdCol){
     var url='assets/php/pendientes_operaciones.php?entidad='+encodeURIComponent(entidad)+'&page=1&pageSize=1000';
     return fetch(url,{cache:'no-store'})
@@ -121,6 +195,13 @@
       });
   }
 
+  /**
+   * Obtiene el set de IDs pendientes (desde caché, window o servidor).
+   * 
+   * @param {string} entidad - Nombre de la entidad
+   * @param {string} expectedIdCol - Nombre esperado de la columna ID
+   * @returns {Promise} Promesa que resuelve con {set, idCol, source}
+   */
   function getPendingSet(entidad, expectedIdCol){
     var now=Date.now();
     if(CACHE[entidad] && (now-CACHE[entidad].ts)<TTL_MS){
@@ -143,7 +224,11 @@
       });
   }
 
-  // PINTA ICONO DE SUPERVISION EN TODAS LAS FILAS DE LA TABLA
+  /**
+   * Pinta los iconos de supervisión en todas las filas de una tabla.
+   * 
+   * @param {string} tableId - ID del elemento tabla
+   */
   async function paintTable(tableId){
     var info=MAP[tableId];
     var table=document.getElementById(tableId);
@@ -175,14 +260,31 @@
     });
   }
 
+  /**
+   * Pinta los iconos en todas las tablas mapeadas.
+   */
   async function paintAll(){
     for (const tableId of Object.keys(MAP)) {
       await paintTable(tableId);
     }
   }
 
+  /**
+   * Función de debounce para limitar la frecuencia de ejecución.
+   * 
+   * @param {Function} fn - Función a ejecutar
+   * @param {number} ms - Milisegundos de retraso
+   * @returns {Function} Función con debounce aplicado
+   */
   function debounce(fn,ms){ var to=null; return function(){ clearTimeout(to); var args=arguments, ctx=this; to=setTimeout(function(){ fn.apply(ctx,args); },ms); }; }
+  
   var observers={};
+  
+  /**
+   * Configura un MutationObserver para detectar cambios en una tabla.
+   * 
+   * @param {string} tableId - ID del elemento tabla
+   */
   function ensureObserver(tableId){
     if(observers[tableId]) return;
     var table=document.getElementById(tableId); if(!table) return;
@@ -195,20 +297,32 @@
     observers[tableId]=mo;
   }
 
+  /**
+   * Función pública para actualizar iconos de verificación.
+   * Puede actualizar una tabla específica o todas las tablas.
+   * 
+   * @param {string} [tableId] - ID de tabla específica (opcional)
+   */
   window.updateVerifIcons=function(tableId){
     if(tableId && MAP[tableId]){ paintTable(tableId); ensureObserver(tableId); }
     else { paintAll(); Object.keys(MAP).forEach(ensureObserver); }
   };
 
   var refreshTimer=null;
+  
+  // Inicialización cuando el DOM está listo
   document.addEventListener('DOMContentLoaded', function(){
+    // Pintar iconos inicialmente
     paintAll();
+    // Configurar observadores para todas las tablas
     Object.keys(MAP).forEach(ensureObserver);
+    // Configurar actualización automática cada 5 segundos
     if(!refreshTimer){
       refreshTimer=setInterval(paintAll,5000);
     }
   });
 
+  // Limpiar el timer antes de cerrar la página
   window.addEventListener('beforeunload', function(){
     if(refreshTimer){ clearInterval(refreshTimer); refreshTimer=null; }
   });

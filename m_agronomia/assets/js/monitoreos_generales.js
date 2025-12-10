@@ -1,3 +1,16 @@
+/**
+ * monitoreos_generales.js
+ * 
+ * Módulo para: Monitoreos generales de cultivos
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de monitoreos generales con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Seguimiento general del estado de los cultivos
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---

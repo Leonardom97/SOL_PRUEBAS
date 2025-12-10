@@ -1,3 +1,16 @@
+/**
+ * erradicaciones.js
+ * 
+ * Módulo para: Gestión de erradicaciones de palmas
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de erradicación con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Control de erradicaciones por plagas, enfermedades u otras causas
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---

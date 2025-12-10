@@ -1,3 +1,16 @@
+/**
+ * monitoreo_trampas.js
+ * 
+ * Módulo para: Monitoreo de trampas para plagas
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de monitoreo de trampas con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Seguimiento de capturas en trampas para control de plagas
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---

@@ -1,3 +1,16 @@
+/**
+ * aud_cosecha.js
+ * 
+ * Módulo para: Auditoría de cosecha
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de auditoría de cosecha con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Auditoría y control de calidad de procesos de cosecha
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   (function(){

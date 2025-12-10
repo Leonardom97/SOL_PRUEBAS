@@ -1,3 +1,16 @@
+/**
+ * reporte_lote_monitoreo.js
+ * 
+ * Módulo para: Reporte de lotes y monitoreo
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de reportes de lote y monitoreo con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Generación de reportes consolidados por lote
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---

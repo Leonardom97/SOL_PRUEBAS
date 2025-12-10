@@ -1,3 +1,16 @@
+/**
+ * nivel_freatico.js
+ * 
+ * Módulo para: Registro de nivel freático
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de nivel freático con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Monitoreo del nivel de agua subterránea
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---

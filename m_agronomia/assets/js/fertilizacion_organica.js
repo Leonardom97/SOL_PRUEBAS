@@ -1,3 +1,16 @@
+/**
+ * fertilizacion_organica.js
+ * 
+ * Módulo para: Gestión de fertilización orgánica
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de fertilización orgánica con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Control de aplicaciones de fertilizantes orgánicos
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---

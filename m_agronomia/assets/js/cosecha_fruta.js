@@ -1,3 +1,17 @@
+/**
+ * cosecha_fruta.js
+ * 
+ * Módulo para: Registro de cosecha de fruta
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de cosecha con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Activación/inactivación de registros con error_registro
+ * - Exportación de datos a Excel
+ * - Seguimiento de racimos, kilos y otras métricas de cosecha
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---
