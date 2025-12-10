@@ -1,3 +1,24 @@
+/**
+ * notificaciones_operaciones.js
+ * 
+ * Sistema de notificaciones de operaciones pendientes (campana de notificaciones).
+ * 
+ * Funcionalidades principales:
+ * - Muestra notificaciones de operaciones pendientes por entidad
+ * - Conexión mediante Server-Sent Events (SSE) para actualizaciones en tiempo real
+ * - Modal con listado de pendientes por entidad
+ * - Aprobación y rechazo masivo de registros pendientes
+ * - Badge con contador total de pendientes
+ * - Sincronización con iconos de verificación
+ * 
+ * Permisos:
+ * - Administradores: pueden aprobar y rechazar
+ * - Auxiliares: solo pueden ver (modo lectura)
+ * 
+ * Este módulo es cargado dinámicamente por init_noti_admin.js
+ * solo para usuarios con permisos (administrador o auxiliar).
+ */
+
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---

@@ -1,3 +1,16 @@
+/**
+ * siembra_nueva.js
+ * 
+ * Módulo para: Registro de siembras nuevas
+ * 
+ * Funcionalidades principales:
+ * - Listado paginado de registros de siembras nuevas con filtros dinámicos
+ * - Creación y edición de registros (guardado en BD temporal)
+ * - Aprobación/rechazo de registros (requiere permisos de administrador)
+ * - Control de nuevas siembras con detalle de lotes y parcelas
+ * - Exportación de datos a Excel
+ */
+
 (function(){
   'use strict';
   (function(){
