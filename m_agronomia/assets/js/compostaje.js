@@ -290,13 +290,12 @@
     }
   }
   async function save(e){
+    e.preventDefault();
     const fd = new FormData(e.target), obj = {};
     COLUMNAS.forEach(c => obj[c] = fd.get(c));
     const idValue = obj[ID_KEY];
     // Skip if the ID field for this entity is not present or empty (form is for another entity)
     if (!idValue || String(idValue).trim() === '') return;
-    // Only prevent default if we're actually handling this form submission
-    e.preventDefault();
     const rol = (document.body.getAttribute('data-role') || '').toLowerCase();
     if(!/administrador|aux_agronomico/.test(rol)) obj.supervision = 'pendiente';
     try{
