@@ -66,11 +66,14 @@
     aud_mantenimiento: 'Auditoría Mantenimiento',
     aud_perdidas: 'Auditoría Pérdidas',
     aud_vagones: 'Auditoría Vagones',
+    aud_maquinaria: 'Auditoría Maquinaria',
     labores_diarias: 'Labores Diarias',
     polinizacion: 'Polinización',
     resiembra: 'Resiembra',
     salida_vivero: 'Salida Vivero',
-    siembra_nueva: 'Siembra Nueva'
+    siembra_nueva: 'Siembra Nueva',
+    erradicaciones: 'Erradicaciones',
+    compostaje: 'Compostaje'
   };
   const sectionToEntity = {
     'tab-content-capacitaciones': 'cosecha_fruta',
@@ -93,11 +96,14 @@
     'tab-content-aud-mantenimiento': 'aud_mantenimiento',
     'tab-content-aud-perdidas': 'aud_perdidas',
     'tab-content-aud-vagones': 'aud_vagones',
+    'tab-content-aud-maquinaria': 'aud_maquinaria',
     'tab-content-labores-diarias': 'labores_diarias',
     'tab-content-polinizacion': 'polinizacion',
     'tab-content-resiembra': 'resiembra',
     'tab-content-salida-vivero': 'salida_vivero',
-    'tab-content-siembra-nueva': 'siembra_nueva'
+    'tab-content-siembra-nueva': 'siembra_nueva',
+    'tab-content-erradicaciones': 'erradicaciones',
+    'tab-content-compostaje': 'compostaje'
   };
   // DOM
   const btn = document.getElementById('noti-admin');
@@ -136,11 +142,14 @@
       case 'aud_mantenimiento': return 'aud_mantenimiento_id';
       case 'aud_perdidas': return 'aud_perdidas_id';
       case 'aud_vagones': return 'aud_vagones_id';
+      case 'aud_maquinaria': return 'aud_maquinaria_id';
       case 'labores_diarias': return 'labores_diarias_id';
       case 'polinizacion': return 'polinizacion_id';
       case 'resiembra': return 'resiembra_id';
       case 'salida_vivero': return 'salida_vivero_id';
       case 'siembra_nueva': return 'siembra_nueva_id';
+      case 'erradicaciones': return 'erradicaciones_id';
+      case 'compostaje': return 'compostaje_id';
       default: return (entidad||'') + '_id';
     }
   }

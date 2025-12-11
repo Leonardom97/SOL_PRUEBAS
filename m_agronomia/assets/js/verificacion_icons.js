@@ -43,11 +43,14 @@
     'tabla-aud-mantenimiento':      { entidad: 'aud_mantenimiento',      idCol: 'aud_mantenimiento_id' },
     'tabla-aud-perdidas':           { entidad: 'aud_perdidas',           idCol: 'aud_perdidas_id' },
     'tabla-aud-vagones':            { entidad: 'aud_vagones',            idCol: 'aud_vagones_id' },
+    'tabla-aud-maquinaria':         { entidad: 'aud_maquinaria',         idCol: 'aud_maquinaria_id' },
     'tabla-labores-diarias':        { entidad: 'labores_diarias',        idCol: 'labores_diarias_id' },
     'tabla-polinizacion':           { entidad: 'polinizacion',           idCol: 'polinizacion_id' },
     'tabla-resiembra':              { entidad: 'resiembra',              idCol: 'resiembra_id' },
     'tabla-salida-vivero':          { entidad: 'salida_vivero',          idCol: 'salida_vivero_id' },
-    'tabla-siembra-nueva':          { entidad: 'siembra_nueva',          idCol: 'siembra_nueva_id' }
+    'tabla-siembra-nueva':          { entidad: 'siembra_nueva',          idCol: 'siembra_nueva_id' },
+    'tabla-erradicaciones':         { entidad: 'erradicaciones',         idCol: 'erradicaciones_id' },
+    'tabla-compostaje':             { entidad: 'compostaje',             idCol: 'compostaje_id' }
   };
   // Tiempo de vida del caché (5 segundos)
   var TTL_MS = 5000;
