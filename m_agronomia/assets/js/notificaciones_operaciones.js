@@ -96,11 +96,14 @@
     'tab-content-aud-mantenimiento': 'aud_mantenimiento',
     'tab-content-aud-perdidas': 'aud_perdidas',
     'tab-content-aud-vagones': 'aud_vagones',
+    'tab-content-aud-maquinaria': 'aud_maquinaria',
     'tab-content-labores-diarias': 'labores_diarias',
     'tab-content-polinizacion': 'polinizacion',
     'tab-content-resiembra': 'resiembra',
     'tab-content-salida-vivero': 'salida_vivero',
-    'tab-content-siembra-nueva': 'siembra_nueva'
+    'tab-content-siembra-nueva': 'siembra_nueva',
+    'tab-content-erradicaciones': 'erradicaciones',
+    'tab-content-compostaje': 'compostaje'
   };
   // DOM
   const btn = document.getElementById('noti-admin');
