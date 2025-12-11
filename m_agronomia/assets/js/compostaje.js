@@ -212,7 +212,7 @@
   async function inactivar(id){
     if(!confirm('¿Inactivar registro?')) return;
     try{
-      const r = await fetch(`${API}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action: ACTIONS.inactivate, [ID_KEY]: id }) });
+      const r = await fetch(`${API}?action=${ACTIONS.inactivate}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ [ID_KEY]: id }) });
       const j = await r.json();
       if(j.success){ load(); }
       else {
