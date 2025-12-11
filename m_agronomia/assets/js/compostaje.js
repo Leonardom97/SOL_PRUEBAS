@@ -212,7 +212,7 @@
   async function inactivar(id){
     if(!confirm('¿Inactivar registro?')) return;
     try{
-      const r = await fetch(`${API}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action: ACTIONS.inactivate, [ID_KEY]: id }) });
+      const r = await fetch(`${API}?action=${ACTIONS.inactivate}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ [ID_KEY]: id }) });
       const j = await r.json();
       if(j.success){ load(); }
       else {
@@ -273,7 +273,7 @@
   async function revertir(id){
     if(!confirm('¿Está seguro que quiere revertir la información aprobada, esta acción devolverá el dato aprobado a edición?')) return;
     try{
-      const r = await fetch(`${API}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action: ACTIONS.reject, [ID_KEY]: id }) });
+      const r = await fetch(`${API}?action=${ACTIONS.reject}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ [ID_KEY]: id }) });
       const j = await r.json();
       if(!j.success){
         const err = j.error || 'No revertido';
@@ -298,7 +298,7 @@
     const rol = (document.body.getAttribute('data-role') || '').toLowerCase();
     if(!/administrador|aux_agronomico/.test(rol)) obj.supervision = 'pendiente';
     try{
-      const r = await fetch(`${API}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(Object.assign({ action: ACTIONS.save }, obj)) });
+      const r = await fetch(`${API}?action=${ACTIONS.save}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj) });
       const j = await r.json();
       if(j.success){ alert('Guardado'); load(); setTimeout(()=>bootstrap.Modal.getInstance(document.getElementById(DOM.modal))?.hide(),150); }
       else {
