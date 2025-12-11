@@ -45,11 +45,11 @@
     modal: 'modal-editar'
   };
   const COLUMNAS = [
-    'erradicaciones_id','fecha','fecha_actividad','hora','colaborador','plantacion',
+    'erradicaciones_id','fecha','hora','colaborador','plantacion',
     'finca','siembra','lote','parcela','linea','palma',
     'mesamate_l','alisin_l','cal_agricola_kg','unidad_2','cantidad_unidades','estado',
     'herramienta','labor','observacion','camtidad_2','unidad_medida_2',
-    'dl_50_producto_2','ingrediente_activo_2','concantracion_ingrediente_2','supervision'
+    'dl_50_producto_2','ingrediente_activo_2','concantracion_ingrediente_2','supervision','error_registro'
   ];
   const API = 'assets/php/erradicaciones_api.php';
   const ID_KEY = 'erradicaciones_id';

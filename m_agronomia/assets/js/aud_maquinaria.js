@@ -35,10 +35,10 @@
   };
 
   const COLUMNAS = [
-    'aud_maquinaria_id','fecha','hora','id','responsable','labor_especifica',
-    'fecha_actividad','plantacion','siembra','finca','lote','parcela',
+    'aud_maquinaria_id','fecha','hora','responsable','labor_especifica',
+    'plantacion','siembra','finca','lote','parcela',
     'tipo_labor','linea_entrada','linea_salida','calificacion','observacion',
-    'tipo_auditoria','supervision'
+    'tipo_auditoria','supervision','error_registro'
   ];
 
   const API = 'assets/php/aud_maquinaria_api.php';
