@@ -306,7 +306,7 @@
     }
   }
   function buildXLSX(rows,name){
-    const cols = COLUMNAS.filter(c => !['supervision'].includes(c));
+    const cols = COLUMNAS.filter(c => !['error_registro','supervision'].includes(c));
     const head = cols.map(c => c.toUpperCase());
     const body = rows.map(r => cols.map(c => r[c] ?? ''));
     const ws = XLSX.utils.aoa_to_sheet([head, ...body]);
