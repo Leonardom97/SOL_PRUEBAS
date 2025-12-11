@@ -109,6 +109,7 @@
       const tr = document.createElement('tr');
       tr.innerHTML = `<td><input type="checkbox" class="row-check" data-index="${i}"></td>`;
       COLUMNAS.forEach(col=>{
+        if(col==='error_registro') return; // Skip - will be added after actions
         const td = document.createElement('td');
         if(col === 'supervision'){ td.dataset.estado = est; td.innerHTML = icono(est); } else td.textContent = row[col] ?? '';
         tr.appendChild(td);
