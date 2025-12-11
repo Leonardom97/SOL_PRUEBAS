@@ -53,11 +53,11 @@
   };
   // Columnas según tu lista (añadimos 'supervision' visual y 'check' interno para workflow como en otras tablas)
   const COLUMNAS = [
-    'compostaje_id','id','fecha','hora','fecha_actividad','responsable',
+    'compostaje_id','fecha','hora','responsable',
     'plantacion','labor','labor_especifica','bache','pila','unidad',
     'cantidad','hora_inicio','hora_fin','operario','empresa','maquina',
     'horometro_inicial','horometro_final','ubicacion','observaciones',
-    'supervision'
+    'supervision','error_registro'
   ];
   const API = 'assets/php/compostaje_api.php';
   const ID_KEY = 'compostaje_id';
