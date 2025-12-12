@@ -19,11 +19,11 @@
  */
 // --- DEFINICIÓN DE TABS (con roles permitidos) ---
 const TABS = [
-  { key: "capacitaciones", label: "Recoleccion Fruta", icon: "chalkboard-teacher", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "sup_logistica1", "asist_agronomico"] },
-  { key: "reuniones", label: "Mantenimientos", icon: "users", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "sup_logistica1", "asist_agronomico"] },
-  { key: "asistencias", label: "Oficios Varios Palmas", icon: "clipboard-check", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "sup_logistica1", "asist_agronomico"] },
+  { key: "cosecha-fruta", label: "Recoleccion Fruta", icon: "chalkboard-teacher", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "sup_logistica1", "asist_agronomico"] },
+  { key: "mantenimientos", label: "Mantenimientos", icon: "users", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "sup_logistica1", "asist_agronomico"] },
+  { key: "oficios-varios-palma", label: "Oficios Varios Palmas", icon: "clipboard-check", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "sup_logistica1", "asist_agronomico"] },
   { key: "ct-cal-labores", label: "Calidad Labores", icon: "tasks", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "sup_logistica1", "asist_agronomico"] },
-  { key: "inventarios", label: "Fertilizacion Organica", icon: "warehouse", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "asist_agronomico"] },
+  { key: "fertilizacion-organica", label: "Fertilizacion Organica", icon: "warehouse", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "asist_agronomico"] },
   { key: "monitoreos-generales", label: "Monitoreos Generales", icon: "table", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "asist_agronomico"] },
   { key: "ct-cal-sanidad", label: "Calidad Sanidad", icon: "leaf", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "asist_agronomico"] },
   { key: "nivel-freatico", label: "Nivel Freático", icon: "water", roles: ["administrador", "supervisor_agronomico", "aux_agronomico", "asist_agronomico"] },

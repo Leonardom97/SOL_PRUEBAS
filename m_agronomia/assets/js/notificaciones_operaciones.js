@@ -76,10 +76,10 @@
     compostaje: 'Compostaje'
   };
   const sectionToEntity = {
-    'tab-content-capacitaciones': 'cosecha_fruta',
-    'tab-content-reuniones': 'mantenimientos',
-    'tab-content-asistencias': 'oficios_varios_palma',
-    'tab-content-inventarios': 'fertilizacion_organica',
+    'tab-content-cosecha-fruta': 'cosecha_fruta',
+    'tab-content-mantenimientos': 'mantenimientos',
+    'tab-content-oficios-varios-palma': 'oficios_varios_palma',
+    'tab-content-fertilizacion-organica': 'fertilizacion_organica',
     'tab-content-monitoreos-generales': 'monitoreos_generales',
     'tab-content-ct-cal-sanidad': 'ct_cal_sanidad',
     'tab-content-monitoreo-trampas': 'monitoreo_trampas',
