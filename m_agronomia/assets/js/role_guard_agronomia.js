@@ -54,10 +54,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(badge) badge.remove();
   // Lista de secciones a ocultar para usuarios sin permisos
   const sections=[
-    'tab-content-capacitaciones',
-    'tab-content-reuniones',
-    'tab-content-asistencias',
-    'tab-content-inventarios',
+    'tab-content-cosecha-fruta',
+    'tab-content-mantenimientos',
+    'tab-content-oficios-varios-palma',
+    'tab-content-fertilizacion-organica',
     'tab-content-monitoreos-generales'
   ];
   // Remover cada sección del DOM
