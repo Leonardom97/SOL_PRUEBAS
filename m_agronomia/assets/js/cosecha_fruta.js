@@ -38,8 +38,8 @@
 
   const DOM={
     tbody:'tbody-cosecha-fruta',
-    table:'tabla-capacitaciones',
-    pagination:'pagination-capacitaciones',
+    table:'tabla-cosecha-fruta',
+    pagination:'pagination-cosecha-fruta',
     exportBtn:'exportBtnCosecha',
     clearBtn:'clearFiltersBtn1',
     limitSelect:'limitSelect1',

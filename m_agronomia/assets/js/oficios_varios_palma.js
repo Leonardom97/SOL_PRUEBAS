@@ -35,8 +35,8 @@
   // ---------------------------------------------------------------
     const DOM={
     tbody:'tbody-oficios-varios-palma',
-    table:'tabla-asistencias',
-    pagination:'pagination-asistencias',
+    table:'tabla-oficios-varios-palma',
+    pagination:'pagination-oficios-varios-palma',
     exportBtn:'exportBtnOficios',
     clearBtn:'clearFiltersBtn3',
     limitSelect:'limitSelect3',
