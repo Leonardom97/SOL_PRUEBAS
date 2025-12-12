@@ -23,10 +23,10 @@
   'use strict';
   // Mapeo de todas las tablas y sus columnas de ID y entidad correspondiente
   var MAP = {
-    'tabla-capacitaciones':         { entidad: 'cosecha_fruta',          idCol: 'cosecha_fruta_id' },
-    'tabla-reuniones':              { entidad: 'mantenimientos',         idCol: 'mantenimientos_id' },
-    'tabla-asistencias':            { entidad: 'oficios_varios_palma',   idCol: 'oficios_varios_palma_id' },
-    'tabla-inventarios':            { entidad: 'fertilizacion_organica', idCol: 'fertilizacion_organica_id' },
+    'tabla-cosecha-fruta':          { entidad: 'cosecha_fruta',          idCol: 'cosecha_fruta_id' },
+    'tabla-mantenimientos':         { entidad: 'mantenimientos',         idCol: 'mantenimientos_id' },
+    'tabla-oficios-varios-palma':   { entidad: 'oficios_varios_palma',   idCol: 'oficios_varios_palma_id' },
+    'tabla-fertilizacion-organica': { entidad: 'fertilizacion_organica', idCol: 'fertilizacion_organica_id' },
     'tabla-monitoreos-generales':   { entidad: 'monitoreos_generales',   idCol: 'monitoreos_generales_id' },
     'tabla-ct-cal-sanidad':         { entidad: 'ct_cal_sanidad',         idCol: 'ct_cal_sanidad_id' },
     'tabla-monitoreo-trampas':      { entidad: 'monitoreo_trampas',      idCol: 'monitoreo_trampas_id' },

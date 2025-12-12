@@ -35,8 +35,8 @@
   // ---------------------------------------------------------------
   const DOM={
     tbody:'tbody-mantenimientos',
-    table:'tabla-reuniones',
-    pagination:'pagination-reuniones',
+    table:'tabla-mantenimientos',
+    pagination:'pagination-mantenimientos',
     exportBtn:'exportBtnMantenimientos',
     clearBtn:'clearFiltersBtn2',
     limitSelect:'limitSelect2',

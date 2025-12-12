@@ -35,8 +35,8 @@
   // ---------------------------------------------------------------
     const DOM={
     tbody:'tbody-fertilizacion-organica',
-    table:'tabla-inventarios',
-    pagination:'pagination-inventarios',
+    table:'tabla-fertilizacion-organica',
+    pagination:'pagination-fertilizacion-organica',
     exportBtn:'exportBtnFertilizacion',
     clearBtn:'clearFiltersBtn4',
     limitSelect:'limitSelect4',
