@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="es-419">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Portería - Inventario</title>
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="../assets/css/bs-theme-overrides.css">
+    <style>
+        .card-item {
+            border-left: 4px solid #1cc88a;
+            margin-bottom: 10px;
+            transition: transform 0.2s;
+        }
+
+        .card-item:active {
+            transform: scale(0.98);
+        }
+
+        .card-item.expired {
+            border-left-color: #e74a3b;
+        }
+
+        .card-item.warning {
+            border-left-color: #f6c23e;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: #4e73df;
+            box-shadow: 0 2px 5px rgba(78, 115, 223, 0.4);
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body id="page-top">
+    <script src="../assets/js/auth_guard.js"></script>
+    <div id="wrapper">
+        <div id="sidebar"></div>
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div id="navbar"></div>
+
+                <div class="container-fluid">
+                    <h3 class="text-dark mb-4">Inventario Portería</h3>
+
+                    <ul class="nav nav-pills mb-4 nav-fill bg-white p-2 rounded shadow-sm" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active rounded-pill" id="vehiculos-tab" data-bs-toggle="tab"
+                                data-bs-target="#vehiculos" type="button">
+                                <i class="fas fa-truck"></i> Vehículos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill" id="conductores-tab" data-bs-toggle="tab"
+                                data-bs-target="#conductores" type="button">
+                                <i class="fas fa-user-tie"></i> Conductores
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="myTabContent">
+                        <!-- Vehiculos Tab -->
+                        <div class="tab-pane fade show active" id="vehiculos" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <input type="text" class="form-control rounded-pill border-0 shadow-sm"
+                                    placeholder="Buscar placa..." style="max-width: 70%;">
+                            </div>
+                            <!-- Mobile List View -->
+                            <div id="list-vehiculos" class="d-md-none">
+                                <!-- JS populated cards -->
+                            </div>
+                            <!-- Desktop Table View -->
+                            <div class="card shadow d-none d-md-block">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="tabla-vehiculos" width="100%"
+                                            cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Placa</th>
+                                                    <th>Tipo</th>
+                                                    <th>Empresa</th>
+                                                    <th>Estado</th>
+                                                    <th>Venc. SOAT</th>
+                                                    <th>Venc. Tecno</th>
+                                                    <th>Venc. Póliza</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- JS populated -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Conductores Tab -->
+                        <div class="tab-pane fade" id="conductores" role="tabpanel">
+                            <!-- Similar structure for drivers -->
+                            <div class="card shadow">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="tabla-conductores" width="100%"
+                                            cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Cédula</th>
+                                                    <th>Nombre</th>
+                                                    <th>Empresa</th>
+                                                    <th>Licencia</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- JS populated -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="bg-white sticky-footer">
+                <div class="container my-auto">
+                    <div class="text-center my-auto copyright"><span>© OSM 2025</span></div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="btn btn-success floating-btn" onclick="openActiveModal()">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Modals (Same as before but styled) -->
+    <!-- Modal Vehiculo -->
+    <div class="modal fade" id="modalVehiculo" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Nuevo Vehículo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formVehiculo">
+                        <input type="hidden" id="v_id" name="id">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Placa</label>
+                                <input type="text" class="form-control" name="placa" required
+                                    style="text-transform: uppercase;">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tipo</label>
+                                <select class="form-select" name="tipo_vehiculo">
+                                    <option value="pequeno">Pequeño</option>
+                                    <option value="camioneta">Camioneta</option>
+                                    <option value="camion">Camión</option>
+                                    <option value="tractomula">Tractomula</option>
+                                </select>
+                            </div>
+                            <!-- ... other fields ... -->
+                            <div class="col-md-6">
+                                <label class="form-label">Empresa</label>
+                                <input type="text" class="form-control" name="empresa">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Propiedad</label>
+                                <select class="form-select" name="propio_externo">
+                                    <option value="propio">Propio</option>
+                                    <option value="externo">Externo</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <h6 class="text-primary mt-2">Vencimientos</h6>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">SOAT</label>
+                                <input type="date" class="form-control" name="soat_fecha_vencimiento">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Tecnomecánica</label>
+                                <input type="date" class="form-control" name="tecnomecanica_fecha_vencimiento">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Póliza 3ros</label>
+                                <input type="date" class="form-control" name="poliza_terceros_fecha_vencimiento">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Área</label>
+                                <select class="form-select" name="area_perteneciente">
+                                    <option value="logistica">Logística</option>
+                                    <option value="administrativa">Administrativa</option>
+                                    <option value="operativa">Operativa</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" name="estado_vehiculo">
+                                    <option value="activo">Activo</option>
+                                    <option value="inactivo">Inactivo</option>
+                                    <option value="mantenimiento">Mantenimiento</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveVehiculo()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Conductor -->
+    <div class="modal fade" id="modalConductor" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Nuevo Conductor</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formConductor">
+                        <input type="hidden" id="c_id" name="id">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Cédula</label>
+                                <input type="text" class="form-control" name="cedula" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nombres</label>
+                                <input type="text" class="form-control" name="nombres" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Apellidos</label>
+                                <input type="text" class="form-control" name="apellidos" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Empresa</label>
+                                <input type="text" class="form-control" name="empresa">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Licencia Cat.</label>
+                                <input type="text" class="form-control" name="licencia_categoria">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Venc. Licencia</label>
+                                <input type="date" class="form-control" name="licencia_fecha_vencimiento">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Venc. Parafiscales</label>
+                                <input type="date" class="form-control" name="parafiscales_fecha_vencimiento">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Contacto</label>
+                                <input type="text" class="form-control" name="contacto">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success" onclick="saveConductor()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script src="../assets/js/navbar.js"></script>
+    <script src="../assets/js/bs-init.js"></script>
+    <script src="../assets/js/component_loader.js"></script>
+    <script src="../assets/js/web_config.js"></script>
+    <script src="assets/js/inventario.js"></script>
+    <script>
+        function openActiveModal() {
+            const activeTab = document.querySelector('.nav-link.active').id;
+            if (activeTab === 'vehiculos-tab') openVehiculoModal();
+            else openConductorModal();
+        }
+
+        // Override loadVehiculos to also populate mobile list
+        const originalLoadVehiculos = loadVehiculos;
+        loadVehiculos = function () {
+            fetch(`${API_URL}?action=get_vehiculos`)
+                .then(response => response.json())
+                .then(data => {
+                    // Populate Table (Desktop)
+                    const tbody = document.querySelector('#tabla-vehiculos tbody');
+                    tbody.innerHTML = '';
+
+                    // Populate List (Mobile)
+                    const list = document.getElementById('list-vehiculos');
+                    list.innerHTML = '';
+
+                    data.data.forEach(v => {
+                        // Table Row
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${v.placa}</td>
+                            <td>${v.tipo_vehiculo}</td>
+                            <td>${v.empresa || '-'}</td>
+                            <td>${v.estado_vehiculo}</td>
+                            <td class="${checkExpiration(v.soat_fecha_vencimiento)}">${formatDate(v.soat_fecha_vencimiento)}</td>
+                            <td class="${checkExpiration(v.tecnomecanica_fecha_vencimiento)}">${formatDate(v.tecnomecanica_fecha_vencimiento)}</td>
+                            <td class="${checkExpiration(v.poliza_terceros_fecha_vencimiento)}">${formatDate(v.poliza_terceros_fecha_vencimiento)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick='editVehiculo(${JSON.stringify(v)})'><i class="fas fa-edit"></i></button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+
+                        // Mobile Card
+                        const card = document.createElement('div');
+                        const statusClass = checkExpiration(v.soat_fecha_vencimiento);
+                        card.className = `card shadow-sm card-item bg-white p-3 ${statusClass}`;
+                        card.innerHTML = `
+                            <div class="d-flex justify-content-between">
+                                <h5 class="fw-bold text-dark">${v.placa}</h5>
+                                <span class="badge bg-secondary">${v.tipo_vehiculo}</span>
+                            </div>
+                            <div class="small text-muted mb-2">${v.empresa || 'Sin Empresa'}</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="${statusClass === 'expired' ? 'text-danger fw-bold' : ''}">
+                                    <i class="fas fa-calendar-alt"></i> SOAT: ${formatDate(v.soat_fecha_vencimiento)}
+                                </span>
+                                <button class="btn btn-sm btn-light text-primary" onclick='editVehiculo(${JSON.stringify(v)})'>
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        `;
+                        list.appendChild(card);
+                    });
+                });
+        }
+    </script>
+</body>
+
+</html>
