@@ -39,7 +39,7 @@ Resumen en español de los métodos y piezas clave de **PHP** y **JavaScript** d
 ### Páginas de auditoría/operación (patrón común)
 Archivos: `aud_cosecha.js`, `aud_fertilizacion.js`, `aud_mantenimiento.js`, `aud_maquinaria.js`, `aud_perdidas.js`, `aud_vagones.js`, `coberturas.js`, `compactacion.js`, `compostaje.js`, `cosecha_fruta.js`, `ct_cal_labores.js`, `ct_cal_sanidad.js`, `ct_cal_trampas.js`, `ct_polinizacion_flores.js`, `erradicaciones.js`, `fertilizacion_organica.js`, `labores_diarias.js`, `mantenimientos.js`, `monitoreo_trampas.js`, `monitoreos_generales.js`, `nivel_freatico.js`, `oficios_varios_palma.js`, `plagas.js`, `polinizacion.js`, `reporte_lote_monitoreo.js`, `resiembra.js`, `salida_vivero.js`, `siembra_nueva.js`.
 
-Todos comparten la misma columna de responsabilidades:
+Todos comparten la misma gama de responsabilidades:
 - Constantes de DOM, columnas, `API` y clave primaria (`ID_KEY`).
 - `fetchData()`: arma querystring con filtros, orden, paginación; prueba alias de acción (`conexion`, `listar`, `list`) y parsea respuesta del endpoint PHP.
 - `render()`: dibuja la tabla, iconos de estado (`supervision`/`error_registro`), y botones (editar, ver, aprobar, rechazar, activar/inactivar). Respeta la `fecha_corte` de `localStorage` para bloquear ediciones.
@@ -87,7 +87,7 @@ Estructura clave (varía solo la lista de columnas y la tabla):
   - `normalize_supervision($v, $isAdmin)`: normaliza valor (`pendiente`/`aprobado`/`rechazado`).
 - **fecha_corte.php**: expone y actualiza la fecha de corte (GET/PUT) consumida por `F_cortes.js`.
 - **eventos_pendientes_operaciones.php**, **pendientes_operaciones.php**, **operaciones_aprobacion.php**: listan/actualizan pendientes de operaciones para notificaciones y aprobación.
-- **require_admin.php**, **roles_auth.php** son usados por los APIs para proteger `aprobar/rechazar`.
+- Estos helpers se invocan desde los APIs cuando se ejecutan acciones sensibles como `aprobar` o `rechazar`.
 
 ---
 
@@ -96,4 +96,3 @@ Estructura clave (varía solo la lista de columnas y la tabla):
 - Para agregar nuevas columnas en tablas: ajusta la constante `COLUMNAS` y la lista de columnas/valores en el API correspondiente.
 - Para habilitar acciones por rol: revisa `role_permissions.js` y los checks en cada página (botones de aprobar/rechazar/activar usan esos permisos).
 - Exportar a Excel: todos los listados usan `xlsx.full.min.js`; la función de exportación arma arrays con las filas renderizadas.
-
