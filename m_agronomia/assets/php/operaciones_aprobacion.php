@@ -1,3 +1,4 @@
+<?php
   /**
    * operaciones_aprobacion.php
    * Utilidades comunes para aprobar, rechazar o mover registros entre tablas temporal y base.
