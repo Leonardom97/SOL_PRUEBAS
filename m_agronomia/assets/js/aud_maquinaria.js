@@ -1,3 +1,8 @@
+/**
+ * aud_maquinaria.js
+ * Gestión y auditoría de labores con maquinaria en el módulo de agronomía.
+ * Resume el flujo de listados, filtros, edición, aprobación y exportación.
+ */
 (function(){
   'use strict';
   // --- override alert para suprimir solo 'exception' y 'id_required' ---

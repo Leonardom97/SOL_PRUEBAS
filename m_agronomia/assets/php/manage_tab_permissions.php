@@ -1,4 +1,5 @@
 <?php
+// manage_tab_permissions.php - Controla los permisos de pestañas del módulo de agronomía.
 ob_start(); // Start output buffering immediately to catch any stray output/warnings
 
 /**

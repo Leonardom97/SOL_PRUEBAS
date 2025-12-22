@@ -1,3 +1,8 @@
+  /**
+   * operaciones_aprobacion.php
+   * Utilidades comunes para aprobar, rechazar o mover registros entre tablas temporal y base.
+   * Se usa como helper compartido por los endpoints del módulo de agronomía.
+   */
   $idCol = detect_id_column($pg,$schema,$baseTable,$entity);
 
   // Verifica si está en temp

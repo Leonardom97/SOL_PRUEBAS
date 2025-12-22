@@ -1,4 +1,5 @@
 <?php
+// fecha_corte.php - API de fecha de corte para el módulo de agronomía.
 ob_start(); // Start output buffering immediately
 
 /**
