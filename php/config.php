@@ -82,7 +82,7 @@ function env($key, $default = null) {
 // Configuration constants
 define('DB_PG_HOST', env('DB_PG_HOST', 'localhost'));
 define('DB_PG_PORT', env('DB_PG_PORT', '5432'));
-define('DB_PG_NAME', env('DB_PG_NAME', 'osm2'));
+define('DB_PG_NAME', env('DB_PG_NAME', 'web_osm'));
 define('DB_PG_USER', env('DB_PG_USER', 'postgres'));
 define('DB_PG_PASSWORD', env('DB_PG_PASSWORD', ''));
 

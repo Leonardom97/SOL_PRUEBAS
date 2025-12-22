@@ -6,11 +6,11 @@ if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
 // Load configuration
 require_once __DIR__ . '/config.php';
 
-$host = 'localhost';
-$db   = 'web_osm';
-$user = 'postgres';
-$pass = '12345';
-$port = '5432';
+$host = DB_PG_HOST;
+$db   = DB_PG_NAME;
+$user = DB_PG_USER;
+$pass = DB_PG_PASSWORD;
+$port = DB_PG_PORT;
 
 try {
     $dsn = "pgsql:host=$host;port=$port;dbname=$db";

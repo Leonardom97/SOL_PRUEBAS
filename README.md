@@ -12,12 +12,18 @@ Aplicación web en español para la operación de Oleaginosas San Marcos (OSM). 
   - `m_admin/`: administración de usuarios y colaboradores.
   - `m_agronomia/`, `m_logistica/`, `m_bascula/`, `m_laboratorio/`, `m_porteria/`: vistas específicas por área.
   - `m_capacitaciones/`: creación y programación de evaluaciones, formularios e informes.
-- Otros directorios: `excel/` (exportaciones), `logs/` (salida de errores/actividad), `deployment/` (plantillas para nginx y systemd), `sesiones.html` (gestión y monitoreo de sesiones).
+- Otros directorios:
+  - `excel/`: exportaciones.
+  - `logs/`: salida de errores/actividad.
+  - `deployment/`: plantillas para nginx y systemd.
+  - `sesiones.html`: gestión y monitoreo de sesiones.
 
 ## Requisitos
-- PHP 8.1+ con extensiones `pdo_pgsql` (principal) y opcionalmente `sqlsrv`.
+- PHP 8.1+ con:
+  - Extensiones: `pdo_pgsql` (principal), `json`, `session` habilitadas y `fileinfo` para validación de archivos.
+  - Extensión opcional: `sqlsrv` si se usa SQL Server.
 - Servidor web (nginx recomendado) o servidor embebido de PHP para desarrollo.
-- Base de datos PostgreSQL (valores por defecto en `php/db_postgres.php`) y, si aplica, SQL Server para sincronizaciones.
+- Base de datos PostgreSQL (valores por defecto definidos en `php/config.php`) y, si aplica, SQL Server para sincronizaciones.
 
 ## Configuración
 1. Cree un archivo `.env` en la raíz con las variables necesarias (se cargan en `php/config.php`):
@@ -26,17 +32,21 @@ Aplicación web en español para la operación de Oleaginosas San Marcos (OSM). 
    DB_PG_PORT=5432
    DB_PG_NAME=web_osm
    DB_PG_USER=postgres
-   DB_PG_PASSWORD=********
+   DB_PG_PASSWORD=YOUR_DB_PASSWORD
    SESSION_TIMEOUT=3600
    UPLOAD_MAX_SIZE=5242880
    ENABLE_DEBUG=false
    ```
-2. Ajuste `php/db_postgres.php` y `php/db_sqlserver.php` si sus credenciales o puertos difieren de los valores por defecto.
-3. Asegure permisos de escritura para el directorio `logs/` si se usa en producción.
+2. Configure sus credenciales en `.env`; `php/config.php` las carga y son usadas por `php/db_postgres.php` y `php/db_sqlserver.php`. Modifique esos archivos solo si requiere lógica adicional.
+3. Defina en su `.env` el nombre de la base (`web_osm` por defecto según `php/config.php`) acorde a su entorno.
+   - En producción, haga una copia de seguridad de los archivos de configuración antes de modificarlos.
+4. Asegúrese de otorgar permisos de escritura al directorio `logs/` si se usa en producción.
+   - Ejemplo: `chmod 750 logs`
+   - Propietario sugerido: usuario del servidor web (p. ej. `www-data`).
 
 ## Ejecución local rápida
 ```bash
-cd /home/runner/work/SOL_PRUEBAS/SOL_PRUEBAS
+cd /path/to/osm-portal
 php -S 0.0.0.0:8000
 ```
 Abra `http://localhost:8000` para acceder al login. Los recursos PHP requieren sesiones habilitadas y las extensiones indicadas.
