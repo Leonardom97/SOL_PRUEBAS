@@ -1,7 +1,7 @@
 /**
  * reco_fruta.js
  * 
- * Módulo para: Registro de cosecha de fruta
+ * Módulo para: Registro de recolección de fruta (tabla reco_fruta)
  * 
  * Funcionalidades principales:
  * - Listado paginado de registros de cosecha con filtros dinámicos
@@ -37,13 +37,13 @@
   // ---------------------------------------------------------------
 
   const DOM = {
-    tbody: 'tbody-cosecha-fruta',
-    table: 'tabla-cosecha-fruta',
-    pagination: 'pagination-cosecha-fruta',
-    exportBtn: 'exportBtnCosecha',
-    clearBtn: 'clearFiltersBtn1',
-    limitSelect: 'limitSelect1',
-    selectAll: 'selectAll1',
+    tbody: 'tbody-reco-fruta',
+    table: 'tabla-reco-fruta',
+    pagination: 'pagination-reco-fruta',
+    exportBtn: 'exportBtnRecoFruta',
+    clearBtn: 'clearFiltersBtnRecoFruta',
+    limitSelect: 'limitSelectRecoFruta',
+    selectAll: 'selectAllRecoFruta',
     form: 'form-editar',
     modal: 'modal-editar'
   };
