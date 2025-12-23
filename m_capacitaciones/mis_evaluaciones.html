@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="es-419">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Mis Evaluaciones - OSM</title>
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/css/google-fonts.css">
+    <link rel="stylesheet" href="../assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="../assets/css/bs-theme-overrides.css">
+
+</head>
+
+<body id="page-top">
+    <!-- Logger debe cargarse primero -->
+    <script src="../assets/js/logger.js"></script>
+    <script src="../assets/js/auth_guard.js"></script>
+
+    <div id="wrapper">
+        <!-- Sidebar dinámico -->
+        <div id="sidebar" style="display: none;"></div>
+
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <!-- Navbar dinámico -->
+                <div id="navbar"></div>
+
+                <div class="container-fluid">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="text-dark mb-0">Mis Evaluaciones</h3>
+                        <button class="btn btn-danger btn-sm" id="btn-export-history">
+                            <i class="fas fa-file-pdf me-2"></i>Exportar Historial
+                        </button>
+                    </div>
+
+                    <!-- Pendientes -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 bg-white border-bottom-0">
+                            <h6 class="text-warning m-0 fw-bold"><i class="fas fa-clock me-2"></i>Pendientes</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm" id="tabla-mis-evaluaciones">
+                                    <thead>
+                                        <tr>
+                                            <th>Tema</th>
+                                            <th>Fecha Capacitación</th>
+                                            <th>Evaluación</th>
+                                            <th>Vence</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-mis-evaluaciones"></tbody>
+                                </table>
+                            </div>
+                            <div id="no-data-message" class="text-center py-4 text-muted" style="display: none;">
+                                <i class="fas fa-check-circle fa-2x mb-2 text-success opacity-50"></i>
+                                <p class="mb-0 small">No tienes evaluaciones pendientes.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Realizadas -->
+                    <div class="card shadow">
+                        <div class="card-header py-3 bg-white border-bottom-0">
+                            <h6 class="text-success m-0 fw-bold"><i class="fas fa-check-double me-2"></i>Realizadas</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm" id="tabla-historial">
+                                    <thead>
+                                        <tr>
+                                            <th>Tema</th>
+                                            <th>Fecha Capacitación</th>
+                                            <th>Evaluación</th>
+                                            <th>Fecha Realización</th>
+                                            <th>Puntaje</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-historial"></tbody>
+                                </table>
+                            </div>
+                            <div id="no-history-message" class="text-center py-4 text-muted" style="display: none;">
+                                <p class="mb-0 small">No hay historial de evaluaciones.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="bg-white sticky-footer">
+                <div class="container my-auto">
+                    <div class="text-center my-auto copyright"><span>© OSM 2025</span></div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../assets/js/main.js?v=5"></script>
+    <script src="../assets/js/sidebar.js?v=5"></script>
+    <script src="../assets/js/navbar.js?v=5"></script>
+    <script src="../assets/js/web_config.js"></script>
+    <script src="assets/js/mis_evaluaciones.js"></script>
+</body>
+
+</html>
