@@ -13,6 +13,7 @@ $pg = $pg_temporal;
 // Lista blanca de tablas (entidades) para evitar SQL Injection y errores
 $tables = [
     'cosecha_fruta',
+    'reco_fruta',
     'mantenimientos',
     'oficios_varios_palma',
     'fertilizacion_organica',

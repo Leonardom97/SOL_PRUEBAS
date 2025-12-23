@@ -56,7 +56,7 @@ function sse_send(string $event, $data): void
  */
 function contar(PDO $pg, ?string $entidad): array
 {
-  $base = ['mantenimientos', 'monitoreos_generales', 'oficios_varios_palma', 'cosecha_fruta', 'fertilizacion_organica', 'aud_maquinaria', 'erradicaciones', 'compostaje'];
+  $base = ['mantenimientos', 'monitoreos_generales', 'oficios_varios_palma', 'cosecha_fruta', 'reco_fruta', 'fertilizacion_organica', 'aud_maquinaria', 'erradicaciones', 'compostaje'];
   $targets = ($entidad && in_array($entidad, $base, true)) ? [$entidad] : $base;
   $names = array_merge($targets, array_map(fn($e) => $e . '_temp', $targets));
   $low = array_map('strtolower', $names);

@@ -150,7 +150,7 @@
     siembra_nueva: 'Siembra Nueva',
     erradicaciones: 'Erradicaciones',
     compostaje: 'Compostaje',
-    reco_futa: 'reco_fruta'
+    reco_fruta: 'Recolección Fruta'
   };
 
   const sectionToEntity = {
@@ -182,7 +182,7 @@
     'tab-content-siembra-nueva': 'siembra_nueva',
     'tab-content-erradicaciones': 'erradicaciones',
     'tab-content-compostaje': 'compostaje',
-    'tab-content-reco_fruta': 'reco_fruta'
+    'tab-content-reco-fruta': 'reco_fruta'
   };
 
   // Estado global
