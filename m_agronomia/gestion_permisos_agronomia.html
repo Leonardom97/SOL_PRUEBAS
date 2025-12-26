@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Permisos - Agronomía</title>
+    <!-- CSS Dependencies -->
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="../assets/css/bs-theme-overrides.css">
+    <!-- Inline fix for linting since sidebar.js expects specific markers -->
+    <!-- The sidebar loader likely uses specific ID selectors found in this logical structure -->
+</head>
+
+<body id="page-top">
+
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <div id="sidebar"></div>
+
+        <!-- Content Wrapper -->
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <!-- Navbar -->
+                <div id="navbar"></div>
+
+                <!-- Page Content -->
+                <div class="container-fluid">
+                    <div class="d-sm-flex justify-content-between align-items-center mb-4">
+                        <h2 class="text-primary mb-0">Gestión de Permisos por Pestaña</h2>
+                    </div>
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary"></h6>
+                            <div>
+                                <button class="btn btn-sm btn-secondary me-2 shadow-sm" onclick="loadPermissions()"><i
+                                        class="fas fa-sync"></i> Recargar</button>
+                                <button class="btn btn-sm btn-primary shadow-sm" onclick="savePermissions()"><i
+                                        class="fas fa-save"></i> Guardar Cambios</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+
+
+                            <div class="table-responsive permission-table-container">
+                                <table class="table table-bordered table-hover table-permissions align-middle"
+                                    width="100%" cellspacing="0">
+                                    <thead class="bg-primary text-white">
+                                        <tr>
+                                            <th class="text-center col-w-50">Icono</th>
+                                            <th class="col-w-250">Pestaña (Tabla)</th>
+                                            <th>Roles Permitidos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="permissionsTableBody">
+                                        <!-- Loaded dynamically -->
+                                        <tr>
+                                            <td colspan="3" class="text-center py-4">
+                                                <i class="fas fa-spinner fa-spin"></i> Cargando configuración...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN CONFIGURACIÓN NOTIFICACIONES -->
+                    <div class="d-sm-flex justify-content-between align-items-center mb-4 mt-5">
+                        <h2 class="text-primary mb-0">Configuración de Notificaciones</h2>
+                    </div>
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Permisos de Visualización (Campana, Alertas,
+                                etc.)</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive permission-table-container">
+                                <table class="table table-bordered table-hover table-permissions align-middle"
+                                    width="100%" cellspacing="0">
+                                    <thead class="bg-info text-white">
+                                        <tr>
+                                            <th class="text-center col-w-50">Icono</th>
+                                            <th class="col-w-250">Elemento</th>
+                                            <th>Roles Permitidos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="notificationsTableBody">
+                                        <!-- Loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Page Content -->
+
+            </div>
+
+            <!-- Footer -->
+            <footer class="bg-white sticky-footer">
+                <div class="container my-auto">
+                    <div class="text-center my-auto copyright"><span>© OSM 2025</span></div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JS Dependencies -->
+    <script src="../assets/js/auth_guard.js"></script>
+    <script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../assets/js/main.js?v=5"></script>
+    <script src="../assets/js/sidebar.js?v=5"></script>
+    <script src="../assets/js/navbar.js?v=5"></script>
+    <script src="../assets/js/web_config.js"></script>
+
+    <!-- Page Logic -->
+    <script src="assets/js/gestion.js"></script>
+</body>
+
+</html>

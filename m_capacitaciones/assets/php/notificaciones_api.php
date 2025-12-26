@@ -1,0 +1,272 @@
+<?php
+
+/**
+ * notificaciones_api.php
+ *
+ * API para el sistema de notificaciones de capacitaciones.
+ *
+ * Funcionalidad:
+ *  - get_my_notifications: Notificaciones para el colaborador actual.
+ *  - get_unread_count: Conteo de no leídas para la campana de alertas.
+ *  - mark_as_read / mark_all_as_read: Gestión de estado de lectura.
+ *  - get_by_role: Notificaciones agrupadas para roles de gestión (Admin, Capacitador).
+ *  - get_trainer_alerts: Alertas tempranas para capacitadores (30 días antes).
+ *  - get_statistics: KPIs generales de notificaciones.
+ *
+ * Integraciones:
+ *  - AuditLogger.
+ */
+
+session_start();
+require '../../../php/db_postgres.php';
+
+header('Content-Type: application/json');
+
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+/**
+ * Envía respuesta JSON y termina ejecución.
+ * @param mixed $data
+ */
+function jsonResponse($data)
+{
+    echo json_encode($data);
+    exit();
+}
+
+// Verify user is logged in
+if (!isset($_SESSION['usuario_id']) && !isset($_SESSION['colaborador_id'])) {
+    jsonResponse(['success' => false, 'error' => 'No autorizado']);
+}
+
+require_once __DIR__ . '/../../../php/audit_logger.php';
+$logger = new AuditLogger();
+
+try {
+    switch ($action) {
+        case 'get_my_notifications':
+            // Get notifications for current user (collaborator)
+            $cedula = $_SESSION['cedula'] ?? null;
+
+            if (!$cedula) {
+                jsonResponse(['success' => false, 'error' => 'Cédula no encontrada']);
+            }
+
+            // Get collaborator ID
+            $stmt = $pg->prepare("SELECT ac_id FROM adm_colaboradores WHERE ac_cedula = ? LIMIT 1");
+            $stmt->execute([$cedula]);
+            $colaborador_id = $stmt->fetchColumn();
+
+            if (!$colaborador_id) {
+                jsonResponse(['success' => false, 'error' => 'Colaborador no encontrado']);
+            }
+
+            $stmt = $pg->prepare("
+                SELECT 
+                    n.*,
+                    t.nombre AS tema_nombre,
+                    c.cargo AS cargo_nombre,
+                    r.nombre AS rol_capacitador
+                FROM cap_notificaciones n
+                INNER JOIN cap_programacion p ON n.id_programacion = p.id
+                INNER JOIN cap_tema t ON p.id_tema = t.id
+                INNER JOIN adm_cargos c ON p.id_cargo = c.id_cargo
+                INNER JOIN adm_roles r ON p.id_rol_capacitador = r.id
+                WHERE n.id_colaborador = ?
+                AND n.estado IN ('pendiente', 'proximo_vencer', 'vencida')
+                ORDER BY n.fecha_proxima ASC
+            ");
+            $stmt->execute([$colaborador_id]);
+            $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            jsonResponse(['success' => true, 'data' => $notifications]);
+            break;
+
+        case 'get_unread_count':
+            // Get count of unread notifications
+            $cedula = $_SESSION['cedula'] ?? null;
+
+            if (!$cedula) {
+                jsonResponse(['success' => false, 'count' => 0]);
+            }
+
+            $stmt = $pg->prepare("
+                SELECT COUNT(*) 
+                FROM cap_notificaciones n
+                INNER JOIN adm_colaboradores c ON n.id_colaborador = c.ac_id
+                WHERE c.ac_cedula = ?
+                AND n.leida = false
+                AND n.estado IN ('pendiente', 'proximo_vencer', 'vencida')
+            ");
+            $stmt->execute([$cedula]);
+            $count = $stmt->fetchColumn();
+
+            jsonResponse(['success' => true, 'count' => $count]);
+            break;
+
+        case 'mark_as_read':
+            // Mark notification as read
+            $id = $_GET['id'] ?? $_POST['id'] ?? 0;
+
+            if (!$id) {
+                jsonResponse(['success' => false, 'error' => 'ID requerido']);
+            }
+
+            $stmt = $pg->prepare("UPDATE cap_notificaciones SET leida = true WHERE id = ?");
+            $stmt->execute([$id]);
+
+            $logger->log($_SESSION['usuario_id'] ?? null, $_SESSION['tipo_usuario'] ?? 'colaborador', 'MARK_NOTIFICATION_READ', 'Notificación marcada como leída', ['id' => $id]);
+
+            jsonResponse(['success' => true, 'message' => 'Notificación marcada como leída']);
+            break;
+
+        case 'mark_all_as_read':
+            // Mark all notifications as read for current user
+            $cedula = $_SESSION['cedula'] ?? null;
+
+            if (!$cedula) {
+                jsonResponse(['success' => false, 'error' => 'Cédula no encontrada']);
+            }
+
+            $stmt = $pg->prepare("
+                UPDATE cap_notificaciones n
+                SET leida = true
+                FROM adm_colaboradores c
+                WHERE n.id_colaborador = c.ac_id
+                AND c.ac_cedula = ?
+            ");
+            $stmt->execute([$cedula]);
+
+            jsonResponse(['success' => true, 'message' => 'Todas las notificaciones marcadas como leídas']);
+            break;
+
+        case 'get_by_role':
+            // Get notifications for trainings assigned to user's role
+            $usuario_id = $_SESSION['usuario_id'] ?? null;
+
+            if (!$usuario_id) {
+                jsonResponse(['success' => false, 'error' => 'Usuario no encontrado']);
+            }
+
+            // Get user roles
+            $stmt = $pg->prepare("
+                SELECT rol_id 
+                FROM adm_usuario_roles 
+                WHERE usuario_id = ?
+            ");
+            $stmt->execute([$usuario_id]);
+            $roles = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            if (empty($roles)) {
+                jsonResponse(['success' => true, 'data' => []]);
+            }
+
+            // Get notifications for trainings assigned to these roles
+            $placeholders = implode(',', array_fill(0, count($roles), '?'));
+            $stmt = $pg->prepare("
+                SELECT 
+                    n.*,
+                    t.nombre AS tema_nombre,
+                    c.cargo AS cargo_nombre,
+                    col.ac_nombre1 || ' ' || COALESCE(col.ac_apellido1, '') AS colaborador_nombre,
+                    col.ac_cedula AS colaborador_cedula
+                FROM cap_notificaciones n
+                INNER JOIN cap_programacion p ON n.id_programacion = p.id
+                INNER JOIN cap_tema t ON p.id_tema = t.id
+                INNER JOIN adm_cargos c ON p.id_cargo = c.id_cargo
+                INNER JOIN adm_colaboradores col ON n.id_colaborador = col.ac_id
+                WHERE p.id_rol_capacitador IN ($placeholders)
+                AND n.estado IN ('pendiente', 'proximo_vencer', 'vencida')
+                ORDER BY n.fecha_proxima ASC, col.ac_nombre1 ASC
+            ");
+            $stmt->execute($roles);
+            $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            jsonResponse(['success' => true, 'data' => $notifications]);
+            break;
+
+        case 'get_trainer_alerts':
+            // Get 30-day alerts for trainers - trainings that need attention
+            $usuario_id = $_SESSION['usuario_id'] ?? null;
+
+            if (!$usuario_id) {
+                jsonResponse(['success' => false, 'error' => 'Usuario no encontrado']);
+            }
+
+            // Get user roles
+            $stmt = $pg->prepare("
+                SELECT rol_id 
+                FROM adm_usuario_roles 
+                WHERE usuario_id = ?
+            ");
+            $stmt->execute([$usuario_id]);
+            $roles = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            if (empty($roles)) {
+                jsonResponse(['success' => true, 'data' => []]);
+            }
+
+            // Get trainings that need attention:
+            // - Show alerts starting from fecha_notificacion_previa (1 month before)
+            // - Keep showing alerts up to 30 days after the training was due
+            //   (this gives trainers time to schedule the training even if overdue)
+            $placeholders = implode(',', array_fill(0, count($roles), '?'));
+            $stmt = $pg->prepare("
+                SELECT 
+                    p.id as id_programacion,
+                    p.id_tema,
+                    t.nombre AS tema_nombre,
+                    c.cargo AS cargo_nombre,
+                    p.sub_area,
+                    a.sub_area AS sub_area_nombre,
+                    r.nombre AS rol_capacitador_nombre,
+                    p.fecha_ultima_capacitacion,
+                    p.fecha_proxima_capacitacion,
+                    p.fecha_notificacion_previa,
+                    (p.fecha_proxima_capacitacion - CURRENT_DATE)::int AS dias_para_proxima,
+                    (
+                        SELECT COUNT(DISTINCT n.id_colaborador)
+                        FROM cap_notificaciones n
+                        WHERE n.id_programacion = p.id
+                        AND n.estado IN ('pendiente', 'proximo_vencer', 'vencida')
+                    ) AS colaboradores_pendientes
+                FROM cap_programacion p
+                INNER JOIN cap_tema t ON p.id_tema = t.id
+                INNER JOIN adm_cargos c ON p.id_cargo = c.id_cargo
+                INNER JOIN adm_roles r ON p.id_rol_capacitador = r.id
+                LEFT JOIN adm_área a ON p.sub_area = a.id_area
+                WHERE p.id_rol_capacitador IN ($placeholders)
+                AND p.activo = true
+                AND p.fecha_notificacion_previa IS NOT NULL
+                AND p.fecha_notificacion_previa <= CURRENT_DATE
+                AND (p.fecha_proxima_capacitacion >= CURRENT_DATE - INTERVAL '30 days')
+                ORDER BY p.fecha_proxima_capacitacion ASC
+            ");
+            $stmt->execute($roles);
+            $alerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            jsonResponse(['success' => true, 'data' => $alerts]);
+            break;
+
+        case 'get_statistics':
+            // Get notification statistics
+            $stmt = $pg->query("
+                SELECT 
+                    COUNT(*) AS total,
+                    SUM(CASE WHEN estado = 'pendiente' THEN 1 ELSE 0 END) AS pendientes,
+                    SUM(CASE WHEN estado = 'proximo_vencer' THEN 1 ELSE 0 END) AS proximo_vencer,
+                    SUM(CASE WHEN estado = 'vencida' THEN 1 ELSE 0 END) AS vencidas,
+                    SUM(CASE WHEN leida = false THEN 1 ELSE 0 END) AS no_leidas
+                FROM cap_notificaciones
+            ");
+            $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            jsonResponse(['success' => true, 'data' => $stats]);
+            break;
+
+        default:
+            jsonResponse(['success' => false, 'error' => 'Acción no válida']);
+    }
+} catch (Exception $e) {
+    jsonResponse(['success' => false, 'error' => $e->getMessage()]);
+}
