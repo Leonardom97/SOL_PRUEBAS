@@ -2,6 +2,8 @@
 
 ![OSM Logo](assets/img/Sin%20título-2.png)
 
+Repositorio oficial: **SOL_PRUEBAS** (https://github.com/Leonardom97/SOL_PRUEBAS) que aloja OSM en su versión PHP/HTML clásica y la SPA moderna en `react-app/` (Vite + React + TypeScript).
+
 ## 📋 Tabla de Contenidos
 - [Funcionamiento General](#funcionamiento-general)
 - [Motivo de Desarrollo y Propósito](#motivo-de-desarrollo-y-propósito)
@@ -11,6 +13,7 @@
 - [Base de Datos](#base-de-datos)
 - [Instalación](#instalación)
 - [Tecnologías Utilizadas](#tecnologías-utilizadas)
+- [SPA React (react-app)](#spa-react-carpeta-react-app)
 
 ------------------------------------------------------------------------------
 
@@ -334,7 +337,7 @@ Este es el módulo más extenso del sistema con 98 archivos entre HTML, PHP y Ja
 
 ### Estructura de Archivos
 
-```------------------------------------------------------------------------------
+```
 OSM/
 ├── index.html                 # Página de login
 ├── panel.html                 # Dashboard principal
@@ -405,7 +408,7 @@ OSM/
 ├── m_agronomia/              # Módulo agronómico (98 archivos)
 │   ├── tb_agronomia.html
 │   ├── f_cortes.html
-    ├── gestion_permisos_agronomia.html
+│   ├── gestion_permisos_agronomia.html
 │   └── assets/
 │       ├── php/             # 50+ APIs especializadas
 │       └── js/              # Scripts del frontend
@@ -508,13 +511,13 @@ OSM/
 │  Redirige a panel.html          │
 │  con datos de usuario en sesión │
 └─────────────────────────────────┘
-`````````````````````````````````````````````````````````````
+```
 
 ### 2. Flujo del Sistema de Capacitaciones
 
 #### 2.1 Registro de Nueva Capacitación
 
-`````````````````````````````````````````````````````````````
+```
 ┌──────────────────────┐
 │  Usuario accede a    │
 │  formulario.html     │
@@ -659,11 +662,11 @@ OSM/
 │  Muestra mensaje de éxito       │
 │  y redirige a consultas         │
 └─────────────────────────────────┘
-`````````````````````````````````````````````````````````````
+```
 
 #### 2.2 Programación de Capacitaciones
 
-`````````````````````````````````````````````````````````````
+```
 ┌──────────────────────┐
 │  Usuario accede a    │
 │  programacion.html   │
@@ -751,11 +754,11 @@ OSM/
 │  con contador de colaboradores  │
 │  afectados                      │
 └─────────────────────────────────┘
-`````````````````````````````````````````````````````````````
+```
 
 #### 2.3 Sistema de Notificaciones Automáticas
 
-`````````````````````````````````````````````````````````````
+```
 ┌─────────────────────────────────┐
 │  Función PostgreSQL:            │
 │  actualizar_notificaciones_     │
@@ -824,13 +827,13 @@ OSM/
 │  para consulta vía              │
 │  notificaciones_api.php         │
 └─────────────────────────────────┘
-`````````````````````````````````````````````````````````````
+```
 
 ### 3. Flujo del Módulo Agronómico
 
 #### 3.1 Registro de Fecha de Corte
 
-`````````````````````````````````````````````````````````````
+```
 ┌──────────────────────┐
 │  Usuario accede a    │
 │  f_cortes.html       │
@@ -860,11 +863,11 @@ OSM/
 │  Actualiza dashboard con nueva  │
 │  fecha programada               │
 └─────────────────────────────────┘
-`````````````````````````````````````````````````````````````
+```
 
 #### 3.2 Monitoreo de Plagas
 
-`````````````````````````````````````````````````````````````
+```
 ┌──────────────────────┐
 │  Usuario en campo    │
 │  accede a módulo     │
@@ -902,11 +905,11 @@ OSM/
 │  operaciones.php notifica       │
 │  a supervisor                   │
 └─────────────────────────────────┘
-`````````````````````````````````````````````````````````````
+```
 
 ### 4. Flujo de Gestión de Sesiones
 
-`````````````````````````````````````````````````````````````
+```
 ┌─────────────────────────────────┐
 │  Usuario activo en el sistema   │
 └──────────┬──────────────────────┘
@@ -978,7 +981,7 @@ OSM/
 ┌─────────────────────────────────┐
 │  Redirige a index.html          │
 └─────────────────────────────────┘
-`````````````````````````````````````````````````````````````
+```
 
 ---------------------------------------------------------------------------------
 
@@ -986,7 +989,7 @@ OSM/
 
 ### Diagrama de Relaciones Principales
 
-`````````````````````````````````````````````````````````````
+```
                     ┌─────────────────────┐
                     │   adm_roles         │
                     │   (Roles)           │
@@ -1022,7 +1025,7 @@ OSM/
          │  cap_formulario_asistente   │
          │  (Asistentes)               │
          └─────────────────────────────┘
-`````````````````````````````````````````````````````````````
+```
 
 ### Descripción de Tablas Principales
 
@@ -1252,10 +1255,10 @@ El sistema es **95% compatible con PostgreSQL 9.x** con modificaciones menores:
 ### Pasos de Instalación
 
 1. **Clonar el repositorio**
-```bash
-git clone https://github.com/Leonardom97/OSM.git
-cd OSM
-```
+   ```bash
+   git clone https://github.com/Leonardom97/SOL_PRUEBAS.git
+   cd SOL_PRUEBAS
+   ```
 
 2. **Configurar Base de Datos PostgreSQL**
 ```bash
@@ -1358,7 +1361,7 @@ php php/sync_colaboradores.php
 - **XLSX.js**: Procesamiento de archivos Excel
 
 ### Backend
-- **PHP 7.4+**: Lenguaje del servidor
+- **PHP 8.1+**: Lenguaje del servidor
 - **PostgreSQL 9.x/17.x**: Base de datos principal
 - **SQL Server**: Sincronización de datos externos (opcional)
 
@@ -1373,6 +1376,17 @@ php php/sync_colaboradores.php
 - **Navicat**: Gestión de base de datos
 - **Visual Studio Code**: Editor de código
 - **Chrome DevTools**: Depuración
+
+### SPA React (carpeta `react-app/`)
+- Vite + React + TypeScript.
+- Requisitos: Node 18+.
+- Comandos:
+  ```bash
+  cd react-app
+  npm ci            # instalación reproducible (usa npm install para trabajo local)
+  npm run dev       # entorno de desarrollo
+  npm run build     # build de producción en /react-app/dist
+  ```
 
 ---------------------------------------------------------------------------------
 
@@ -1427,7 +1441,7 @@ El sistema soporta el cumplimiento de:
 
 ## 🔄 Changelog
 
-### Versión 1.0.0 (2025-10-25)
+### Versión 1.0.0 (2025-01-25)
 - ✅ Implementación inicial del sistema
 - ✅ Módulo de Administración completo
 - ✅ Módulo de Capacitaciones con notificaciones
