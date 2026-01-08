@@ -112,6 +112,7 @@
         if (col === 'supervision' || col === 'error_registro') return; // Omitir - se agregarán después de las acciones
         const td = document.createElement('td');
         td.textContent = row[col] ?? '';
+        tr.appendChild(td);
       });
       const fecha = row[DATE_COL] || '', inactivo = (row.error_registro || '').toLowerCase() === 'inactivo';
       const rol = (document.body.getAttribute('data-role') || '').toLowerCase();

@@ -106,8 +106,6 @@
         if (col === 'supervision' || col === 'error_registro') return; // Omitir - se agregarán después de las acciones
         const td = document.createElement('td');
         td.textContent = row[col] ?? '';
-        }
-        else td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
       // bloqueo/edición: considerar inactivo si cualquiera de los campos indica 'inactivo'
