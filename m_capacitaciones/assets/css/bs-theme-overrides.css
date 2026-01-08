@@ -1,0 +1,361 @@
+/* Premium Theme Overrides */
+@font-face {
+    font-family: 'Great Vibes';
+    src: url('../fonts/GreatVibes-Regular.woff2') format('woff2');
+    font-display: swap;
+}
+
+:root {
+    /* 1. Global Bootstrap Overrides (The Single Source of Truth) */
+    --bs-primary: #772e22;
+    --bs-primary-rgb: 119, 46, 34;
+    --bs-link-color: #772e22;
+    --bs-link-hover-color: #5a2018;
+
+    /* 2. Custom Theme Variables (Linked to Bootstrap) */
+    --primary-color: var(--bs-primary);
+    --primary-dark: #5a2018;
+    --secondary-color: #858796;
+    --success-color: #1cc88a;
+    --dark-bg: #1a1c23;
+    --light-bg: #f3f4f6;
+
+    /* Gradients & Glass */
+    --primary-gradient: linear-gradient(135deg, var(--bs-primary) 0%, #a03e30 100%);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --surface-glass: rgba(255, 255, 255, 0.9);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.2);
+
+    /* Shadows */
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+    --shadow-strong: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Force Bootstrap Utilities to use new vars immediately */
+.text-primary {
+    color: var(--bs-primary) !important;
+}
+
+/* .bg-primary override removed to allow bg-opacity-* utilities to work */
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-outline-primary {
+    color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+/* --- Components --- */
+
+.btn-primary {
+    background: var(--primary-gradient) !important;
+    /* Force gradient */
+    border: none !important;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-strong);
+    background: var(--primary-dark) !important;
+}
+
+.card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-soft);
+}
+
+.modal-content {
+    border: none;
+    border-radius: 1.5rem;
+    overflow: hidden;
+}
+
+.form-control {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e3e6f0;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(119, 46, 34, 0.25);
+    border-color: #e0a899;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* --- Evaluation Specific Styles --- */
+
+/* Mobile Split Layout (Sticky Media) */
+@media (max-width: 991.98px) {
+    #immersive-wrapper {
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    #media-column {
+        height: 35vh !important;
+        /* Fixed height for media */
+        flex: 0 0 auto !important;
+        z-index: 20;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    #questions-column {
+        height: 65vh !important;
+        /* Remaining height for questions */
+        overflow-y: auto;
+        background: #f8f9fc;
+    }
+
+    /* Adjust controls for small height */
+    .media-controls {
+        padding: 10px;
+    }
+
+    .media-controls button {
+        padding: 0.25rem !important;
+    }
+}
+
+/* Welcome Overlay */
+#welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s ease;
+}
+
+.welcome-card {
+    background: white;
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Question Cards */
+.pregunta-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    display: none;
+    /* Hidden by default */
+}
+
+.pregunta-card.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.pregunta-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Media Panel */
+#media-panel {
+    background: #000;
+    border-radius: 0;
+    /* Remove radius on mobile for cleaner look */
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    min-height: 100%;
+    /* Fill container */
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 992px) {
+    #media-panel {
+        border-radius: 15px;
+        min-height: 400px;
+    }
+}
+
+#media-content {
+    flex-grow: 1;
+    position: relative;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.media-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0));
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    z-index: 100;
+    transition: opacity 0.3s;
+}
+
+#media-panel:hover .media-controls {
+    opacity: 1;
+}
+
+/* Pulse Animation */
+.pulse-button {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(119, 46, 34, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(119, 46, 34, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(119, 46, 34, 0);
+    }
+}
+
+/* Confetti */
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    z-index: 10000;
+    animation: fall linear forwards;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh) rotate(720deg);
+    }
+}
+
+/* --- Mobile Table Card View --- */
+@media (max-width: 768px) {
+
+    #tabla-mis-evaluaciones,
+    #tabla-mis-evaluaciones tbody,
+    #tabla-mis-evaluaciones tr,
+    #tabla-mis-evaluaciones td {
+        display: block;
+        width: 100%;
+    }
+
+    #tabla-mis-evaluaciones thead {
+        display: none;
+        /* Hide headers */
+    }
+
+    #tabla-mis-evaluaciones tr {
+        margin-bottom: 1rem;
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: var(--shadow-soft);
+        padding: 1rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    #tabla-mis-evaluaciones td {
+        text-align: right;
+        padding: 0.5rem 0;
+        border: none;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #tabla-mis-evaluaciones td:last-child {
+        border-bottom: none;
+        justify-content: center;
+        padding-top: 1rem;
+    }
+
+    /* Add labels via CSS */
+    #tabla-mis-evaluaciones td:nth-of-type(1)::before {
+        content: "Tema:";
+        font-weight: bold;
+        color: var(--secondary-color);
+    }
+
+    #tabla-mis-evaluaciones td:nth-of-type(2)::before {
+        content: "Fecha:";
+        font-weight: bold;
+        color: var(--secondary-color);
+    }
+
+    #tabla-mis-evaluaciones td:nth-of-type(3)::before {
+        content: "Evaluación:";
+        font-weight: bold;
+        color: var(--secondary-color);
+    }
+
+    #tabla-mis-evaluaciones td:nth-of-type(4)::before {
+        content: "Vence:";
+        font-weight: bold;
+        color: var(--secondary-color);
+    }
+
+    /* Full width button */
+    #tabla-mis-evaluaciones .btn {
+        width: 100%;
+        border-radius: 50rem;
+        padding: 0.75rem;
+        font-weight: bold;
+    }
+}

@@ -1,0 +1,208 @@
+[
+    {
+        "key": "capacitaciones",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "sup_logistica1",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "reuniones",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "sup_logistica1",
+            "asist_agronomico",
+            "aux_agronomico"
+        ]
+    },
+    {
+        "key": "asistencias",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "sup_logistica1",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "ct-cal-labores",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "sup_logistica1",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "inventarios",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "monitoreos-generales",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "ct-cal-sanidad",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "nivel-freatico",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "monitoreo-trampas",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "compactacion",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "plagas",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "ct-cal-trampas",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "reporte-lote-monitoreo",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "coberturas",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "ct-polinizacion-flores",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "aud-cosecha",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "aud-fertilizacion",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "aud-mantenimiento",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "aud-perdidas",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "aud-vagones",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "labores-diarias",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "polinizacion",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "aux_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "resiembra",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "salida-vivero",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    },
+    {
+        "key": "siembra-nueva",
+        "roles": [
+            "administrador",
+            "supervisor_agronomico",
+            "asist_agronomico"
+        ]
+    }
+]

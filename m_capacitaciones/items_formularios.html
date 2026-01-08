@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="es-419">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+  <title>Edición Formularios — Capacitaciones</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../assets/fonts/fontawesome-all.min.css">
+  <link rel="stylesheet" href="../assets/css/bs-theme-overrides.css?v=5">
+  <link rel="stylesheet" href="assets/css/items_formularios.css">
+</head>
+
+<body id="page-top">
+  <script src="../assets/js/auth_guard.js?v=2"></script>
+
+  <!-- Contenedor principal -->
+  <div id="wrapper">
+    <!-- SIDEBAR: cargado dinámicamente -->
+    <div id="sidebar"></div>
+
+    <!-- Contenido principal -->
+    <div class="d-flex flex-column" id="content-wrapper">
+      <div id="content">
+        <!-- NAVBAR: cargado dinámicamente -->
+        <div id="navbar"></div>
+
+        <div class="container-fluid">
+          <h3 class="text-dark mb-4">Edición Formularios - Capacitaciones</h3>
+
+          <!-- Pestañas principales: Tema, Proceso, Lugar, Tipo Actividad -->
+          <ul class="nav nav-tabs mb-3" id="sessionTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active"
+                type="button" role="tab" aria-controls="active" aria-selected="true">
+                <i class="fa-solid fa-layer-group me-1"></i> Tema
+              </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="attempts-tab" data-bs-toggle="tab" data-bs-target="#attempts" type="button"
+                role="tab" aria-controls="attempts" aria-selected="false">
+                <i class="fa-solid fa-sitemap me-1"></i> Proceso
+              </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button"
+                role="tab" aria-controls="history" aria-selected="false">
+                <i class="fa-solid fa-map-marker-alt me-1"></i> Lugar
+              </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="t_actividad-tab" data-bs-toggle="tab" data-bs-target="#t_actividad"
+                type="button" role="tab" aria-controls="t_actividad" aria-selected="false">
+                <i class="fa-solid fa-briefcase me-1"></i> Tipo Actividad
+              </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="proceso_tema-tab" data-bs-toggle="tab" data-bs-target="#proceso_tema"
+                type="button" role="tab" aria-controls="proceso_tema" aria-selected="false">
+                <i class="fa-solid fa-link me-1"></i> Relación Proceso Tema
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="sessionTabContent">
+            <!-- PESTAÑA TEMA -->
+            <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="active-tab">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                  <h6 class="m-0 fw-bold text-primary">Temas nuevos</h6>
+                  <div class="input-group input-group-sm" style="width: 250px;">
+                    <span class="input-group-text bg-transparent border-end-0">
+                      <i class="fa-solid fa-search text-gray-500"></i>
+                    </span>
+                    <input type="text" id="filtroTemaInput" class="form-control border-start-0 ps-0"
+                      placeholder="Buscar...">
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <!-- Formulario para agregar nuevo tema -->
+                  <div class="mb-3 row g-2 align-items-end">
+                    <div class="col">
+                      <label class="form-label small text-muted mb-1">Nuevo tema</label>
+                      <input id="newTemaInput" class="form-control" type="text" placeholder="Escriba nuevo tema" />
+                    </div>
+                    <div class="col-auto">
+                      <button id="refreshActiveBtn" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Agregar tema
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Lista de temas: tabla dinámica poblada por JS -->
+                  <div class="card mt-2" style="border-radius:6px;">
+                    <div class="card-header py-2 card-header-transparent">
+                      <p class="text-primary m-0 fw-bold text-center">Lista Temas (<span id="temasCount">0</span>)</p>
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="table-responsive table-scroll-container">
+                        <table class="table table-hover mb-0" id="temasTable">
+                          <thead>
+                            <tr class="bg-primary-subtle">
+                              <th class="w-80px">Id</th>
+                              <th>Nombre</th>
+                              <th class="w-120px">Opciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <!-- Filas dinámicas -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PESTAÑA PROCESO -->
+            <div class="tab-pane fade" id="attempts" role="tabpanel" aria-labelledby="attempts-tab">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                  <h6 class="m-0 fw-bold text-primary">Proceso</h6>
+                  <div class="input-group input-group-sm" style="width: 250px;">
+                    <span class="input-group-text bg-transparent border-end-0">
+                      <i class="fa-solid fa-search text-gray-500"></i>
+                    </span>
+                    <input type="text" id="filtroProcesoInput" class="form-control border-start-0 ps-0"
+                      placeholder="Buscar...">
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <!-- Agregar nuevo proceso -->
+                  <div class="mb-3 row g-2 align-items-end">
+                    <div class="col">
+                      <label class="form-label small text-muted mb-1">Nuevo proceso</label>
+                      <input id="newProcesoInput" class="form-control" type="text"
+                        placeholder="Escriba nuevo proceso" />
+                    </div>
+                    <div class="col-auto">
+                      <button id="refreshAttemptsBtnAdd" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Agregar Proceso
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Tabla procesos (poblada por JS) -->
+                  <div class="card mt-2" style="border-radius:6px;">
+                    <div class="card-header py-2 card-header-transparent">
+                      <p class="text-primary m-0 fw-bold text-center">Lista Proceso (<span id="procesoCount">0</span>)
+                      </p>
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="table-responsive table-scroll-container">
+                        <table class="table table-hover mb-0" id="procesoTable">
+                          <thead>
+                            <tr class="bg-primary-subtle">
+                              <th class="w-80px">Id</th>
+                              <th>Nombre</th>
+                              <th class="w-120px">Opciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <!-- Filas dinámicas -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PESTAÑA LUGAR -->
+            <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                  <h6 class="m-0 fw-bold text-primary">Lugar</h6>
+                  <div class="input-group input-group-sm" style="width: 250px;">
+                    <span class="input-group-text bg-transparent border-end-0">
+                      <i class="fa-solid fa-search text-gray-500"></i>
+                    </span>
+                    <input type="text" id="filtroLugarInput" class="form-control border-start-0 ps-0"
+                      placeholder="Buscar...">
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <!-- Agregar nuevo lugar -->
+                  <div class="mb-3 row g-2 align-items-end">
+                    <div class="col">
+                      <label class="form-label small text-muted mb-1">Nuevo lugar</label>
+                      <input id="newLugarInput" class="form-control" type="text" placeholder="Escriba nuevo lugar" />
+                    </div>
+                    <div class="col-auto">
+                      <button id="refreshHistoryBtnAdd" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Agregar Lugar
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Tabla lugares -->
+                  <div class="card mt-2" style="border-radius:6px;">
+                    <div class="card-header py-2 card-header-transparent">
+                      <p class="text-primary m-0 fw-bold text-center">Lista Lugar (<span id="lugarCount">0</span>)</p>
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="table-responsive table-scroll-container">
+                        <table class="table table-hover mb-0" id="lugarTable">
+                          <thead>
+                            <tr class="bg-primary-subtle">
+                              <th class="w-80px">Id</th>
+                              <th>Nombre</th>
+                              <th class="w-120px">Opciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <!-- Filas dinámicas -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PESTAÑA TIPO ACTIVIDAD -->
+            <div class="tab-pane fade" id="t_actividad" role="tabpanel" aria-labelledby="t_actividad-tab">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                  <h6 class="m-0 fw-bold text-primary">Tipo Actividad</h6>
+                  <div class="input-group input-group-sm" style="width: 250px;">
+                    <span class="input-group-text bg-transparent border-end-0">
+                      <i class="fa-solid fa-search text-gray-500"></i>
+                    </span>
+                    <input type="text" id="filtroTActividadInput" class="form-control border-start-0 ps-0"
+                      placeholder="Buscar...">
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <!-- Agregar nuevo tipo de actividad -->
+                  <div class="mb-3 row g-2 align-items-end">
+                    <div class="col">
+                      <label class="form-label small text-muted mb-1">Nuevo tipo actividad</label>
+                      <input id="newTActividadInput" class="form-control" type="text"
+                        placeholder="Escriba nuevo tipo actividad" />
+                    </div>
+                    <div class="col-auto">
+                      <button id="refreshTActividadBtnAdd" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Agregar Tipo actividad
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Tabla tipos de actividad -->
+                  <div class="card mt-2" style="border-radius:6px;">
+                    <div class="card-header py-2 card-header-transparent">
+                      <p class="text-primary m-0 fw-bold text-center">Lista Tipo Actividad (<span
+                          id="tactividadCount">0</span>)</p>
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="table-responsive table-scroll-container">
+                        <table class="table table-hover mb-0" id="tactividadTable">
+                          <thead>
+                            <tr class="bg-primary-subtle">
+                              <th class="w-80px">Id</th>
+                              <th>Nombre</th>
+                              <th class="w-120px">Opciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <!-- Filas dinámicas -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PESTAÑA RELACIÓN PROCESO TEMA -->
+            <div class="tab-pane fade" id="proceso_tema" role="tabpanel" aria-labelledby="proceso_tema-tab">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                  <h6 class="m-0 fw-bold text-primary">Relación Proceso - Tema</h6>
+                  <div class="input-group input-group-sm" style="width: 250px;">
+                    <span class="input-group-text bg-transparent border-end-0">
+                      <i class="fa-solid fa-search text-gray-500"></i>
+                    </span>
+                    <input type="text" id="filtroProcesoTemaInput" class="form-control border-start-0 ps-0"
+                      placeholder="Buscar...">
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <!-- Agregar nueva relación -->
+                  <div class="mb-3 row g-2 align-items-end">
+                    <div class="col">
+                      <label class="form-label small text-muted mb-1">Proceso</label>
+                      <select id="newRelacionProceso" class="form-select">
+                        <option value="">Seleccione proceso...</option>
+                      </select>
+                    </div>
+                    <div class="col">
+                      <label class="form-label small text-muted mb-1">Tema</label>
+                      <select id="newRelacionTema" class="form-select">
+                        <option value="">Seleccione tema...</option>
+                      </select>
+                    </div>
+                    <div class="col-auto">
+                      <button id="addProcesoTemaBtn" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Agregar Relación
+                      </button>
+                    </div>
+                    <!-- Tabla de relaciones proceso-tema -->
+                    <div class="card mt-2" style="border-radius:6px;">
+                      <div class="card-header py-2" style="background: transparent; border-bottom: none;">
+                        <p class="text-primary m-0 fw-bold text-center">Lista de Relaciones (<span
+                            id="procesoTemaCount">0</span>)</p>
+                      </div>
+                      <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height:400px; overflow:auto;">
+                          <table class="table table-hover mb-0" id="procesoTemaTable">
+                            <thead>
+                              <tr style="background: var(--bs-primary-bg-subtle);">
+                                <th style="width:80px">Id</th>
+                                <th>Proceso</th>
+                                <th>Tema</th>
+                                <th style="width:100px">Estado</th>
+                                <th style="width:120px">Opciones</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <!-- Filas dinámicas -->
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> <!-- .tab-content -->
+
+          </div> <!-- .container -->
+          <footer class="bg-white sticky-footer mt-4">
+            <div class="container my-auto">
+              <div class="text-center my-auto copyright"><span>© OSM 2025</span></div>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de desconexión (compatibilidad con tu código existente) -->
+    <!-- Comentario: modal para confirmar que un administrador desconecte a un usuario -->
+    <div class="modal fade" id="disconnectModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirmar Desconexión</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <p>¿Está seguro que desea desconectar al usuario <strong id="disconnectUserName"></strong>?
+            </p>
+            <p class="text-muted">El usuario será notificado que su sesión fue cerrada por un
+              administrador.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="confirmDisconnect">Desconectar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast container (feedback) -->
+    <!-- Comentario: pequeño toast usado para mensajes de retroalimentación -->
+    <div class="toast-container-top">
+      <div id="notificationToast" class="toast align-items-center text-bg-dark border-0" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body" id="notificationToastBody">Mensaje</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+            aria-label="Cerrar"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts (al final para rendimiento) -->
+    <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/assets/js/main.js?v=5"></script>
+    <script src="/assets/js/sidebar.js?v=5"></script>
+    <script src="/assets/js/navbar.js?v=5"></script>
+    <!-- Archivo JS principal que gestiona la lógica de esta página -->
+    <script src="/m_capacitaciones/assets/js/items_formularios.js"></script>
+    <script src="/assets/js/web_config.js"></script>
+</body>
+
+</html>
