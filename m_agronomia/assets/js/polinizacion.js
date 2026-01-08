@@ -103,12 +103,9 @@
       const tr = document.createElement('tr');
       tr.innerHTML = `<td><input type="checkbox" class="row-check" data-index="${i}"></td>`;
       COLUMNAS.forEach(col => {
-        if (col === 'error_registro') return; // Omitir - se agregará después de las acciones
+        if (col === 'supervision' || col === 'error_registro') return; // Omitir - se agregarán después de las acciones
         const td = document.createElement('td');
-        if (col === 'supervision') {
-          td.dataset.estado = est; td.innerHTML = icono(est);
-        }
-        else td.textContent = row[col] ?? '';
+        td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
       // bloqueo/edición: considerar inactivo si cualquiera de los campos indica 'inactivo'
@@ -125,6 +122,11 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display = 'inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
+      // Nuevo: renderizar supervision como icono de estado
+      const tdSupervision = document.createElement('td');
+      tdSupervision.dataset.estado = est;
+      tdSupervision.innerHTML = icono(est);
+      tr.appendChild(tdSupervision);
       // Nuevo: renderizar error_registro como switch + badge estilizado vía CSS (.error-reg-badge)
       const tdError = document.createElement('td');
       const inactLower = (row.error_registro || '').toLowerCase();
