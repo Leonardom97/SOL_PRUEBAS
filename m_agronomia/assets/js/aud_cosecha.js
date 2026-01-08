@@ -83,10 +83,9 @@
       const tr = document.createElement('tr');
       tr.innerHTML = `<td><input type="checkbox" class="row-check" data-index="${i}"></td>`;
       COLUMNAS.forEach(col=>{
-        if(col==='error_registro') return; // Skip - will be added after actions
+        if(col==='supervision'||col==='error_registro') return; // Omitir - se agregarán después de las acciones
         const td = document.createElement('td');
-        if(col==='supervision'){ td.dataset.estado = est; td.innerHTML = icono(est); }
-        else td.textContent = row[col] ?? '';
+        td.textContent = row[col] ?? '';
         tr.appendChild(td);
       });
       const fecha=row[DATE_COL]||'', inactivo=(row.error_registro||'').toLowerCase()==='inactivo';
@@ -97,6 +96,10 @@
       const tdAcc = document.createElement('td'); tdAcc.style.display='inline-flex';
       tdAcc.innerHTML = edit + `<button class="md-btn md-btn-icon btn-ver" data-id="${row[ID_KEY]}" title="Ver"><i class="fa fa-eye"></i></button>` + lock;
       tr.appendChild(tdAcc);
+      const tdSupervision = document.createElement('td');
+      tdSupervision.dataset.estado = est;
+      tdSupervision.innerHTML = icono(est);
+      tr.appendChild(tdSupervision);
       // Nuevo: renderizar error_registro como un switch + badge estilizado vía CSS (.error-reg-badge)
 
       const tdError = document.createElement('td');
